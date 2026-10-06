@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+
+<head th:replace="~{template :: head}"></head>
+
+<body>
+	<div>HELLO WORLD!</div>
+	<div>prueba</div>
+	<div th:text="${DatoDos}"></div>
+	<div th:text="${DatoGato}"></div>
+
+	<table class="table table-striped-columns">
+  <thead>
+    <tr>
+      <th scope="col"># ID GATO</th>
+      <th scope="col">NOMBRE</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr th:each="gato : ${gatos}">
+      <td th:text="${gato.idGato}"></td>
+      <td th:text="${gato.nombre}"></td>
+    </tr>
+  </tbody>
+</table>
+
+</body>
+
+</html>
