@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{template :: head('Portal académico | Instituto Tecnológico de Toluca')}"></head>
+<body class="login-page">
+    <main class="container min-vh-100 d-flex align-items-center py-4 py-lg-5">
+        <div class="row login-layout w-100 align-items-center justify-content-center mx-auto">
+            <section class="col-12 col-md-6">
+                <div class="login-intro">
+                    <div class="institution-lockup">
+                        <span class="institution-seal"><i class="bi bi-mortarboard-fill"></i></span>
+                        <span>INSTITUTO TECNOLÓGICO DE TOLUCA<small>Tecnológico Nacional de México</small></span>
+                    </div>
+                    <p class="eyebrow mb-3">PLATAFORMA DE SERVICIOS ESCOLARES</p>
+                    <h1 class="mb-3">Tu vida académica, en un solo lugar.</h1>
+                    <p>Consulta de forma segura tu información, horario e historial académico desde el portal institucional.</p>
+                    <div class="login-highlights">
+                        <span><i class="bi bi-shield-check"></i>Acceso institucional protegido</span>
+                        <span><i class="bi bi-calendar3"></i>Horario del periodo vigente</span>
+                        <span><i class="bi bi-journal-text"></i>Historial académico actualizado</span>
+                    </div>
+                </div>
+            </section>
+            <section class="col-12 col-md-6 col-lg-5">
+                <div class="login-card">
+                    <div class="brand-mark mb-4"><i class="bi bi-person-lock"></i></div>
+                    <p class="eyebrow mb-2">BIENVENIDO/A</p>
+                    <h2 class="h3 fw-bold mb-2">Inicia sesión</h2>
+                    <p class="text-secondary mb-4">Ingresa con los datos de tu cuenta institucional.</p>
+
+                    <div class="alert alert-danger" role="alert" th:if="${param.error}">
+                        Número de control o contraseña incorrectos, o cuenta inactiva.
+                    </div>
+                    <div class="alert alert-success" role="status" th:if="${param.logout}">
+                        Tu sesión se cerró correctamente.
+                    </div>
+
+                    <form th:action="@{/login}" method="post">
+                        <div class="mb-3">
+                            <label for="numeroControl" class="form-label">Número de control</label>
+                            <input id="numeroControl" name="numeroControl" class="form-control form-control-lg"
+                                   type="text" autocomplete="username" maxlength="50" required autofocus>
+                        </div>
+                        <div class="mb-4">
+                            <label for="password" class="form-label">Contraseña institucional</label>
+                            <input id="password" name="password" class="form-control form-control-lg"
+                                   type="password" autocomplete="current-password" required>
+                        </div>
+                        <button class="btn btn-orange btn-lg w-100" type="submit">
+                            Iniciar sesión <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                    </form>
+                    <div class="small text-secondary mt-4 d-flex gap-2">
+                        <i class="bi bi-info-circle mt-1"></i>
+                        <span>Utiliza tu número de control y la contraseña vinculada a tu cuenta institucional.</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    <div class="login-copyright text-center text-white-50 small pb-3">
+        Instituto Tecnológico de Toluca · Tecnológico Nacional de México
+    </div>
+</body>
+</html>

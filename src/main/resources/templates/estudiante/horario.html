@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{template :: head('Mi horario | Portal académico')}"></head>
+<body>
+    <div th:replace="~{template :: navbar('horario')}"></div>
+    <main class="container page-shell py-4 py-lg-5">
+        <div class="page-heading">
+            <div>
+                <p class="eyebrow mb-1">ESPACIO DEL ESTUDIANTE</p>
+                <h1 class="h2 fw-bold mb-1">Mi horario</h1>
+                <p class="mb-0">Materias inscritas en el periodo escolar vigente.</p>
+            </div>
+            <a class="btn btn-outline-navy" th:href="@{/estudiante/kardex}">
+                <i class="bi bi-journal-check me-1"></i>Ir al kárdex
+            </a>
+        </div>
+        <section class="content-card table-card">
+            <div th:if="${#lists.isEmpty(materias)}" class="empty-state">
+                <i class="bi bi-calendar2-x"></i>
+                No hay materias inscritas en un periodo vigente.
+            </div>
+            <div class="table-responsive" th:unless="${#lists.isEmpty(materias)}">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr><th>Materia</th><th>Grupo</th><th>Horario</th><th>Salón</th><th>Docente</th><th>Periodo</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="materia : ${materias}">
+                            <td><strong th:text="${materia.materia}">Materia</strong><small class="d-block text-secondary" th:text="${materia.clave}">Clave</small></td>
+                            <td th:text="${materia.grupo}">Grupo</td>
+                            <td th:text="${materia.horario}">Horario</td>
+                            <td th:text="${materia.salon}">Salón</td>
+                            <td th:text="${materia.profesor}">Docente</td>
+                            <td th:text="${materia.periodo}">Periodo</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <a class="btn btn-link link-navy ps-0 mt-3" th:href="@{/estudiante}">
+            <i class="bi bi-arrow-left me-1"></i>Volver al inicio
+        </a>
+    </main>
+    <div th:replace="~{template :: footer}"></div>
+</body>
+</html>
