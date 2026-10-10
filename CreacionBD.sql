@@ -113,9 +113,11 @@ INSERT INTO roles (nombre_rol) VALUES ('ESTUDIANTE');
 INSERT INTO carreras (clave, nombre)
 VALUES ('ISC', 'Ingeniería en Sistemas Computacionales');
 
-COMMIT;
+-- Insertar usuario administrador inicial para pruebas
+INSERT INTO usuarios (username, password_hash, rol_id, activo, debe_cambiar_pass)
+VALUES ('admin', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 1, 0);
 
--- Para una base existente creada con el esquema anterior:
--- ALTER TABLE cargas_alumnos ADD oportunidad VARCHAR2(20) DEFAULT 'PRIMERA' NOT NULL;
--- ALTER TABLE cargas_alumnos ADD CONSTRAINT ck_cargas_oportunidad
---     CHECK (oportunidad IN ('PRIMERA', 'SEGUNDA', 'REPETICION', 'ESPECIAL'));
+INSERT INTO administrativos (numero_control, usuario_id, nombre, apellido_paterno, apellido_materno, correo)
+VALUES ('ADM001', 1, 'Administrador', 'Principal', 'Sistema', 'admin@escuela.edu.mx');
+
+COMMIT;
