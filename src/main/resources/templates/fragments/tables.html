@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <body>
+        <!-- =========================================================
+         TABLA: HORARIO
+         Uso:
+         <div th:replace="~{fragments/tables :: tablaHorario(${materias})}"></div>
+         ========================================================= -->
+        <div
+            th:fragment="tablaHorario(materias)"
+            class="table-responsive"
+            th:unless="${#lists.isEmpty(materias)}"
+        >
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th scope="col">Materia</th>
+                        <th scope="col">Grupo</th>
+                        <th scope="col">Horario</th>
+                        <th scope="col">Salón</th>
+                        <th scope="col">Docente</th>
+                        <th scope="col">Periodo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="m : ${materias}">
+                        <td th:attr="data-label='Materia'">
+                            <strong th:text="${m.materia}">Materia</strong>
+                            <small
+                                class="d-block text-secondary"
+                                th:text="${m.clave}"
+                                >Clave</small
+                            >
+                        </td>
+                        <td th:attr="data-label='Grupo'" th:text="${m.grupo}">
+                            Grupo
+                        </td>
+                        <td
+                            th:attr="data-label='Horario'"
+                            th:text="${m.horario}"
+                        >
+                            Horario
+                        </td>
+                        <td th:attr="data-label='Salón'" th:text="${m.salon}">
+                            Salón
+                        </td>
+                        <td
+                            th:attr="data-label='Docente'"
+                            th:text="${m.profesor}"
+                        >
+                            Docente
+                        </td>
+                        <td
+                            th:attr="data-label='Periodo'"
+                            th:text="${m.periodo}"
+                        >
+                            Periodo
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- =========================================================
+         TABLA: KÁRDEX
+         Uso:
+         <div th:replace="~{fragments/tables :: tablaKardex(${materias})}"></div>
+         ========================================================= -->
+        <div
+            th:fragment="tablaKardex(materias)"
+            class="table-responsive"
+            th:unless="${#lists.isEmpty(materias)}"
+        >
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th scope="col">Materia</th>
+                        <th scope="col">Periodo</th>
+                        <th scope="col">Calificación</th>
+                        <th scope="col">Estatus</th>
+                        <th scope="col">Oportunidad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="m : ${materias}">
+                        <td th:attr="data-label='Materia'">
+                            <strong th:text="${m.materia}">Materia</strong>
+                            <small
+                                class="d-block text-secondary"
+                                th:text="${m.clave}"
+                                >Clave</small
+                            >
+                        </td>
+                        <td
+                            th:attr="data-label='Periodo'"
+                            th:text="${m.periodo}"
+                        >
+                            Periodo
+                        </td>
+                        <td
+                            th:attr="data-label='Calificación'"
+                            th:replace="~{fragments/components :: calificacion(${m.calificacion})}"
+                        >
+                            —
+                        </td>
+                        <td th:attr="data-label='Estatus'">
+                            <span
+                                class="badge rounded-pill text-bg-light status-badge"
+                                th:text="${m.estatus}"
+                                >Estatus</span
+                            >
+                        </td>
+                        <td
+                            th:attr="data-label='Oportunidad'"
+                            th:replace="~{fragments/components :: opportunityBadge(${m.oportunidad})}"
+                        >
+                            Primera oportunidad
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </body>
+</html>

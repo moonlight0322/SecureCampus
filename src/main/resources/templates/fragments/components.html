@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <body>
+        <!-- =========================================================
+         PAGE HEADING con botón de acción
+         Uso:
+         <div th:replace="~{fragments/components
+             :: pageHeadingWithAction(
+                 'ESPACIO DEL ESTUDIANTE',
+                 'Mi horario',
+                 'Materias inscritas en el periodo vigente.',
+                 '/estudiante/kardex',
+                 'Ir al kárdex',
+                 'journal-check'
+             )}"></div>
+         ========================================================= -->
+        <div
+            th:fragment="pageHeadingWithAction(eyebrow, titulo, descripcion, actionHref, actionTexto, actionIcono)"
+            class="page-heading"
+        >
+            <div>
+                <p class="eyebrow mb-1" th:text="${eyebrow}">SECCIÓN</p>
+                <h1 class="h2 fw-bold mb-1" th:text="${titulo}">Título</h1>
+                <p class="mb-0" th:text="${descripcion}">Descripción</p>
+            </div>
+            <a class="btn btn-outline-navy" th:href="@{${actionHref}}">
+                <i class="bi me-1" th:classappend="'bi-' + ${actionIcono}"></i>
+                <span th:text="${actionTexto}">Acción</span>
+            </a>
+        </div>
+
+        <!-- =========================================================
+         PAGE HEADING simple (sin botón)
+         ========================================================= -->
+        <div
+            th:fragment="pageHeading(eyebrow, titulo, descripcion)"
+            class="page-heading"
+        >
+            <div>
+                <p class="eyebrow mb-1" th:text="${eyebrow}">SECCIÓN</p>
+                <h1 class="h2 fw-bold mb-1" th:text="${titulo}">Título</h1>
+                <p class="mb-0" th:text="${descripcion}">Descripción</p>
+            </div>
+        </div>
+
+        <!-- =========================================================
+         EMPTY STATE
+         Uso:
+         <div th:if="${#lists.isEmpty(materias)}"
+              th:replace="~{fragments/components
+                 :: emptyState('calendar2-x', 'No hay materias inscritas.')}"></div>
+         ========================================================= -->
+        <div
+            th:fragment="emptyState(icono, mensaje)"
+            class="empty-state"
+            role="status"
+        >
+            <i class="bi" th:classappend="'bi-' + ${icono}"></i>
+            <span th:text="${mensaje}">Sin datos</span>
+        </div>
+
+        <!-- =========================================================
+         ALERT (para login, errores, éxito)
+         Uso:
+         <div th:replace="~{fragments/components
+             :: alert('danger', 'Usuario o contraseña incorrectos.')}"></div>
+         ========================================================= -->
+        <div
+            th:fragment="alert(tipo, mensaje)"
+            class="alert"
+            th:classappend="'alert-' + ${tipo}"
+            role="alert"
+            aria-live="polite"
+        >
+            <span th:text="${mensaje}">Mensaje</span>
+        </div>
+
+        <!-- =========================================================
+         PROFILE BANNER (inicio del estudiante)
+         ========================================================= -->
+        <section
+            th:fragment="profileBanner(nombreCompleto, numeroControl, carrera, promedio)"
+            class="profile-banner mb-4"
+            aria-label="Perfil del estudiante"
+        >
+            <div class="d-flex align-items-center gap-3">
+                <div class="avatar" aria-hidden="true">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <div>
+                    <p class="small text-white-50 mb-1">
+                        PERFIL DEL ESTUDIANTE
+                    </p>
+                    <h2 class="h4 mb-1 fw-bold" th:text="${nombreCompleto}">
+                        Nombre del estudiante
+                    </h2>
+                    <p class="mb-1 text-white-50" th:text="${numeroControl}">
+                        Número de control
+                    </p>
+                    <span
+                        class="badge rounded-pill text-bg-light"
+                        th:text="${carrera}"
+                        >Carrera</span
+                    >
+                </div>
+            </div>
+            <div class="average-score mt-4 mt-md-0">
+                <span class="small text-white-50 d-block"
+                    >PROMEDIO GENERAL</span
+                >
+                <strong th:text="${#numbers.formatDecimal(promedio, 1, 2)}"
+                    >0.00</strong
+                >
+                <span class="small text-white-50 d-block">de 100 puntos</span>
+            </div>
+        </section>
+
+        <!-- =========================================================
+         BADGE DE OPORTUNIDAD (kárdex)
+         Uso:
+         <span th:replace="~{fragments/components
+             :: opportunityBadge(${m.oportunidad})}"></span>
+         ========================================================= -->
+        <span
+            th:fragment="opportunityBadge(oportunidad)"
+            class="badge opportunity-badge"
+            th:classappend="${oportunidad == 'ESPECIAL'} ? ' opportunity-special' : ''"
+            th:text="${oportunidad == 'PRIMERA'    ? 'Primera oportunidad' :
+                    oportunidad == 'SEGUNDA'    ? 'Segunda oportunidad' :
+                    oportunidad == 'REPETICION' ? 'Curso de repetición' :
+                                                  'Curso especial'}"
+        >
+            Primera oportunidad
+        </span>
+
+        <!-- =========================================================
+         CALIFICACIÓN con formato o guion
+         Uso:
+         <span th:replace="~{fragments/components
+             :: calificacion(${m.calificacion})}"></span>
+         ========================================================= -->
+        <span
+            th:fragment="calificacion(valor)"
+            th:text="${valor == null ? '—' : #numbers.formatDecimal(valor, 1, 2)}"
+            >—</span
+        >
+    </body>
+</html>
