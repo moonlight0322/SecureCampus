@@ -9,6 +9,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +23,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "grupos")
+@Table(name = "grupos", uniqueConstraints = @UniqueConstraint(
+        name = "uk_codigo_periodo_grupo", columnNames = {"codigo_grupo", "periodo_id"}))
 public class Grupo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,12 +43,9 @@ public class Grupo {
     @JoinColumn(name = "periodo_id", nullable = false)
     private Periodo periodo;
 
-    @Column(name = "nombre_grupo", nullable = false, length = 20)
-    private String nombreGrupo;
+    @Column(name = "codigo_grupo", nullable = false, length = 20)
+    private String codigoGrupo;
 
-    @Column(nullable = false, length = 20)
-    private String salon;
-
-    @Column(nullable = false, length = 100)
-    private String horario;
+    @OneToMany(mappedBy = "grupo")
+    private List<HorarioClase> horarios = new ArrayList<>();
 }

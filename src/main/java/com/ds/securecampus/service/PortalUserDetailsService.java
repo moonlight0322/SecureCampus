@@ -19,10 +19,10 @@ public class PortalUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String numeroControl) throws UsernameNotFoundException {
-        Usuario usuario = usuarioRepository.findByUsername(numeroControl)
+        Usuario usuario = usuarioRepository.findByNumeroControl(numeroControl)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-        return User.withUsername(usuario.getUsername())
+        return User.withUsername(usuario.getNumeroControl())
                 .password(usuario.getPasswordHash())
                 .authorities("ROLE_" + usuario.getRol().getNombreRol())
                 .disabled(usuario.getActivo() == null || usuario.getActivo() != 1)

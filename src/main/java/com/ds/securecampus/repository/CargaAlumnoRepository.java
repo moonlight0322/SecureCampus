@@ -10,21 +10,34 @@ import org.springframework.stereotype.Repository;
 
 import com.ds.securecampus.model.CargaAlumno;
 import com.ds.securecampus.model.MateriaHorario;
-import com.ds.securecampus.model.MateriaKardex;
 
 @Repository
 public interface CargaAlumnoRepository extends JpaRepository<CargaAlumno, Long> {
     @Query("""
             SELECT new com.ds.securecampus.model.MateriaHorario(
-                m.nombre, m.clave, g.nombreGrupo, g.salon, g.horario,
+                m.nombre, m.clave, g.codigoGrupo,
+                CASE WHEN a IS NULL THEN 'Salón por asignar' ELSE a.nombreAula END,
+                CASE WHEN h IS NULL THEN 'Horario pendiente'
+                     ELSE CONCAT(CONCAT(CASE h.diaSemana
+                            WHEN 1 THEN 'Lunes'
+                            WHEN 2 THEN 'Martes'
+                            WHEN 3 THEN 'Miércoles'
+                            WHEN 4 THEN 'Jueves'
+                            WHEN 5 THEN 'Viernes'
+                            WHEN 6 THEN 'Sábado'
+                            ELSE 'Día no definido'
+                        END, ' '), CONCAT(CONCAT(h.horaInicio, ' - '), h.horaFin)) END,
                 CASE WHEN p IS NULL THEN 'Por asignar'
-                     ELSE CONCAT(CONCAT(p.nombre, ' '), p.apellidoPaterno) END,
+                     ELSE CONCAT(CONCAT(perfilProfesor.nombre, ' '), perfilProfesor.apellidoPaterno) END,
                 pe.nombre)
             FROM CargaAlumno ca
             JOIN ca.grupo g
             JOIN g.materia m
             JOIN g.periodo pe
             LEFT JOIN g.profesor p
+            LEFT JOIN p.usuario perfilProfesor
+            LEFT JOIN g.horarios h
+            LEFT JOIN h.aula a
             WHERE ca.estudiante.numeroControl = :numeroControl
               AND :fechaActual BETWEEN pe.fechaInicio AND pe.fechaFin
             ORDER BY m.nombre
@@ -32,16 +45,4 @@ public interface CargaAlumnoRepository extends JpaRepository<CargaAlumno, Long> 
     List<MateriaHorario> buscarHorarioActual(
             @Param("numeroControl") String numeroControl,
             @Param("fechaActual") LocalDate fechaActual);
-
-    @Query("""
-            SELECT new com.ds.securecampus.model.MateriaKardex(
-                m.nombre, m.clave, pe.nombre, ca.calificacion, ca.estatus, ca.oportunidad)
-            FROM CargaAlumno ca
-            JOIN ca.grupo g
-            JOIN g.materia m
-            JOIN g.periodo pe
-            WHERE ca.estudiante.numeroControl = :numeroControl
-            ORDER BY pe.fechaInicio DESC, m.nombre
-            """)
-    List<MateriaKardex> buscarKardex(@Param("numeroControl") String numeroControl);
 }

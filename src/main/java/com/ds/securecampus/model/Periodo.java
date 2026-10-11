@@ -25,6 +25,9 @@ public class Periodo {
     @Column(name = "periodo_id")
     private Long periodoId;
 
+    @Column(name = "clave_periodo", nullable = false, unique = true, length = 10)
+    private String clavePeriodo;
+
     @Column(nullable = false, length = 50)
     private String nombre;
 
@@ -36,4 +39,7 @@ public class Periodo {
 
     @Column(name = "limite_captura_calificaciones", nullable = false)
     private LocalDate limiteCapturaCalificaciones;
+
+    @Column(name = "captura_activa", nullable = false, length = 1)
+    private String capturaActiva = "N";
 }

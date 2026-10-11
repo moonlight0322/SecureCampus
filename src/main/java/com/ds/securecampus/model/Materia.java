@@ -26,13 +26,16 @@ public class Materia {
     @Column(name = "materia_id")
     private Long materiaId;
 
-    @Column(nullable = false, unique = true, length = 20)
+    @Column(name = "clave_materia", nullable = false, unique = true, length = 20)
     private String clave;
 
-    @Column(nullable = false, length = 100)
+    @Column(name = "nombre_materia", nullable = false, length = 100)
     private String nombre;
 
+    @Column(nullable = false, precision = 2)
+    private Integer creditos;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "carrera_id", nullable = false)
+    @JoinColumn(name = "id_carrera", nullable = false)
     private Carrera carrera;
 }

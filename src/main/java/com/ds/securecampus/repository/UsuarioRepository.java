@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import com.ds.securecampus.model.Usuario;
 
 @Repository
-public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+public interface UsuarioRepository extends JpaRepository<Usuario, String> {
     @EntityGraph(attributePaths = "rol")
-    Optional<Usuario> findByUsername(String username);
+    Optional<Usuario> findByNumeroControl(String numeroControl);
 }

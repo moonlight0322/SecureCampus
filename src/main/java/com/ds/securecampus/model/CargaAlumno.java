@@ -22,7 +22,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "cargas_alumnos", uniqueConstraints = @UniqueConstraint(
+@Table(name = "cargas_academicas", uniqueConstraints = @UniqueConstraint(
         name = "uk_estudiante_grupo", columnNames = {"numero_control_estudiante", "grupo_id"}))
 public class CargaAlumno {
     @Id
@@ -38,12 +38,18 @@ public class CargaAlumno {
     @JoinColumn(name = "grupo_id", nullable = false)
     private Grupo grupo;
 
-    @Column(precision = 5, scale = 2)
-    private BigDecimal calificacion;
+    @Column(name = "calificacion_parcial1", precision = 4, scale = 2)
+    private BigDecimal calificacionParcial1;
 
-    @Column(length = 20)
-    private String estatus;
+    @Column(name = "calificacion_parcial2", precision = 4, scale = 2)
+    private BigDecimal calificacionParcial2;
 
-    @Column(length = 20)
-    private String oportunidad;
+    @Column(name = "calificacion_final", precision = 5, scale = 2)
+    private BigDecimal calificacionFinal;
+
+    @Column(nullable = false, length = 20)
+    private String estatus = "CURSANDO";
+
+    @Column(nullable = false, length = 20)
+    private String oportunidad = "PRIMERA";
 }

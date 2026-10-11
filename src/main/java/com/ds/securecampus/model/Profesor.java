@@ -6,6 +6,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,22 +25,18 @@ public class Profesor {
     @Column(name = "numero_control", length = 20)
     private String numeroControl;
 
+    @MapsId
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id", unique = true)
+    @JoinColumn(name = "numero_control")
     private Usuario usuario;
 
-    @Column(nullable = false, length = 50)
-    private String nombre;
-
-    @Column(name = "apellido_paterno", nullable = false, length = 50)
-    private String apellidoPaterno;
-
-    @Column(name = "apellido_materno", length = 50)
-    private String apellidoMaterno;
-
-    @Column(nullable = false, unique = true, length = 100)
-    private String correo;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_carrera_adscripcion", nullable = false)
+    private Carrera carreraAdscripcion;
 
     @Column(name = "tipo_contratacion", nullable = false, length = 20)
     private String tipoContratacion;
+
+    @Column(length = 20)
+    private String cubiculo;
 }

@@ -11,17 +11,21 @@ import com.ds.securecampus.model.MateriaKardex;
 import com.ds.securecampus.model.PerfilEstudiante;
 import com.ds.securecampus.repository.CargaAlumnoRepository;
 import com.ds.securecampus.repository.EstudianteRepository;
+import com.ds.securecampus.repository.KardexRepository;
 
 @Service
 public class EstudianteService {
     private final EstudianteRepository estudianteRepository;
     private final CargaAlumnoRepository cargaAlumnoRepository;
+    private final KardexRepository kardexRepository;
 
     public EstudianteService(
             EstudianteRepository estudianteRepository,
-            CargaAlumnoRepository cargaAlumnoRepository) {
+            CargaAlumnoRepository cargaAlumnoRepository,
+            KardexRepository kardexRepository) {
         this.estudianteRepository = estudianteRepository;
         this.cargaAlumnoRepository = cargaAlumnoRepository;
+        this.kardexRepository = kardexRepository;
     }
 
     @Transactional(readOnly = true)
@@ -38,6 +42,6 @@ public class EstudianteService {
 
     @Transactional(readOnly = true)
     public List<MateriaKardex> obtenerKardex(String numeroControl) {
-        return cargaAlumnoRepository.buscarKardex(numeroControl);
+        return kardexRepository.buscarKardex(numeroControl);
     }
 }

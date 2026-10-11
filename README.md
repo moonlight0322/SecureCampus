@@ -19,11 +19,9 @@ export DB_USERNAME='PRUEBA'
 export DB_PASSWORD='contraseña-de-la-base'
 ```
 
-Si ya existe el esquema de las tablas proporcionadas, ejecuta también los dos `ALTER TABLE` comentados al final del script para añadir `cargas_alumnos.oportunidad`, requerida para conservar la diferencia entre segunda oportunidad, repetición y especial.
+Las cuentas se validan contra `perfiles_base.numero_control`, `perfiles_base.password_hash` y el rol asociado en `roles`. El script crea los roles y un administrador inicial (número de control `00280691`); su contraseña inicial es `PW_22280691`. La contraseña se guarda como hash BCrypt y el usuario tiene habilitado `debe_cambiar_pass` para indicar que debe cambiarla.
 
-Las cuentas se validan contra `usuarios.username`, `usuarios.password_hash` y su rol asociado. `password_hash` debe contener un hash BCrypt válido de la contraseña institucional; los hashes de ejemplo de la solicitud son marcadores y no son credenciales utilizables. Asocia el número de control del usuario con su fila correspondiente en `estudiantes`, `profesores` o `administrativos`. Las cuentas inactivas no pueden iniciar sesión.
-
-Los modelos persistentes usan entidades JPA con Lombok; los repositorios extienden `JpaRepository` y las clases `MateriaHorario`, `MateriaKardex` y `PerfilEstudiante` son proyecciones para las vistas. El formulario y los recursos visuales pueden cargarse aunque Oracle esté apagado, pero la autenticación y las consultas requieren que la base esté disponible.
+El formulario envía `POST /login`; Spring Security procesa la autenticación, valida BCrypt, carga los roles y rechaza las cuentas inactivas. No se requiere un `@PostMapping` adicional: el filtro de formulario de Spring Security es el punto de entrada del login. Las tablas específicas (`estudiantes`, `profesores` y `administrativos`) se relacionan con `perfiles_base` por número de control.
 
 ## Ejecutar
 
@@ -31,4 +29,4 @@ Los modelos persistentes usan entidades JPA con Lombok; los repositorios extiend
 ./mvnw spring-boot:run
 ```
 
-Abre <http://localhost:8080>. El portal implementa las páginas del estudiante: resumen académico, horario del periodo vigente y kárdex. Las cuentas administrativas y de maestro se autentican según su rol, pero muestran una pantalla informativa porque esos módulos no están dentro del alcance actual.
+Abre <http://localhost:8080>. El portal implementa las páginas del estudiante: resumen académico, horario del periodo vigente y kárdex. Las cuentas administrativas y de profesor pueden autenticarse, pero muestran una pantalla informativa porque esos módulos no están dentro del alcance actual.

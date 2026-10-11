@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,26 +27,21 @@ public class Estudiante {
     @Column(name = "numero_control", length = 20)
     private String numeroControl;
 
+    @MapsId
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id", unique = true)
+    @JoinColumn(name = "numero_control")
     private Usuario usuario;
 
-    @Column(nullable = false, length = 50)
-    private String nombre;
-
-    @Column(name = "apellido_paterno", nullable = false, length = 50)
-    private String apellidoPaterno;
-
-    @Column(name = "apellido_materno", length = 50)
-    private String apellidoMaterno;
-
-    @Column(nullable = false, unique = true, length = 100)
-    private String correo;
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "carrera_id", nullable = false)
+    @JoinColumn(name = "id_carrera", nullable = false)
     private Carrera carrera;
 
     @Column(precision = 4, scale = 2)
     private BigDecimal promedio;
+
+    @Column(name = "pago_reinscripcion", nullable = false, length = 1)
+    private String pagoReinscripcion = "N";
+
+    @Column(name = "tiene_adeudos", nullable = false, length = 1)
+    private String tieneAdeudos = "N";
 }
