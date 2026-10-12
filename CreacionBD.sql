@@ -34,8 +34,6 @@ CREATE TABLE perfiles_base (
     numero_control VARCHAR2(20) PRIMARY KEY,
     password_hash VARCHAR2(255) NOT NULL,
     rol_id NUMBER NOT NULL REFERENCES roles(rol_id),
-
-    -- Datos personales y de contacto
     nombre VARCHAR2(50) NOT NULL,
     apellido_paterno VARCHAR2(50) NOT NULL,
     apellido_materno VARCHAR2(50),
@@ -43,12 +41,9 @@ CREATE TABLE perfiles_base (
     domicilio VARCHAR2(200),
     telefono VARCHAR2(15),
     correo_institucional VARCHAR2(100) NOT NULL UNIQUE,
-
-    -- Control de acceso y seguridad semestral
     activo NUMBER(1) DEFAULT 1 CHECK (activo IN (0, 1)),
     debe_cambiar_pass NUMBER(1) DEFAULT 1 CHECK (debe_cambiar_pass IN (0, 1)), -- 1: Debe cambiar contraseña por inicio de semestre
     fecha_creacion DATE DEFAULT SYSDATE,
-
     CONSTRAINT chk_num_control_num CHECK (REGEXP_LIKE(numero_control, '^[0-9]+$'))
 );
 
@@ -178,4 +173,3 @@ CREATE TABLE vouchers_servicios (
     estatus VARCHAR2(20) DEFAULT 'PENDIENTE'
         CHECK (estatus IN ('PENDIENTE', 'PAGADO', 'CANCELADO'))
 );
-

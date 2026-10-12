@@ -14,19 +14,11 @@
                  'journal-check'
              )}"></div>
          ========================================================= -->
-        <div
-            th:fragment="pageHeadingWithAction(eyebrow, titulo, descripcion, actionHref, actionTexto, actionIcono)"
-            class="page-heading"
-        >
+        <!-- Definición del fragmento sin eyebrow (ahora recibe 5 parámetros: titulo, descripcion, actionHref, actionTexto, actionIcono) -->
+        <div th:fragment="pageTitle(titulo)" class="page-heading">
             <div>
-                <p class="eyebrow mb-1" th:text="${eyebrow}">SECCIÓN</p>
-                <h1 class="h2 fw-bold mb-1" th:text="${titulo}">Título</h1>
-                <p class="mb-0" th:text="${descripcion}">Descripción</p>
+                <h3 class="h3 mb-0" th:text="${titulo}"></h3>
             </div>
-            <a class="btn btn-outline-navy" th:href="@{${actionHref}}">
-                <i class="bi me-1" th:classappend="'bi-' + ${actionIcono}"></i>
-                <span th:text="${actionTexto}">Acción</span>
-            </a>
         </div>
 
         <!-- =========================================================
@@ -81,16 +73,17 @@
         <section
             th:fragment="profileBanner(nombreCompleto, numeroControl, carrera, promedio)"
             class="profile-banner mb-4"
-            aria-label="Perfil del estudiante"
+            th:attr="aria-label=#{profile.banner.aria}"
         >
             <div class="d-flex align-items-center gap-3">
                 <div class="avatar" aria-hidden="true">
                     <i class="bi bi-person-fill"></i>
                 </div>
                 <div>
-                    <p class="small text-white-50 mb-1">
-                        PERFIL DEL ESTUDIANTE
-                    </p>
+                    <p
+                        class="small text-white-50 mb-1"
+                        th:text="#{profile.banner.title}"
+                    ></p>
                     <h2 class="h4 mb-1 fw-bold" th:text="${nombreCompleto}">
                         Nombre del estudiante
                     </h2>
@@ -105,13 +98,19 @@
                 </div>
             </div>
             <div class="average-score mt-4 mt-md-0">
-                <span class="small text-white-50 d-block"
+                <span
+                    class="small text-white-50 d-block"
+                    th:text="#{profile.average.label}"
                     >PROMEDIO GENERAL</span
                 >
                 <strong th:text="${#numbers.formatDecimal(promedio, 1, 2)}"
                     >0.00</strong
                 >
-                <span class="small text-white-50 d-block">de 100 puntos</span>
+                <span
+                    class="small text-white-50 d-block"
+                    th:text="#{profile.average.suffix}"
+                    >de 100 puntos</span
+                >
             </div>
         </section>
 
@@ -125,13 +124,9 @@
             th:fragment="opportunityBadge(oportunidad)"
             class="badge opportunity-badge"
             th:classappend="${oportunidad == 'ESPECIAL'} ? ' opportunity-special' : ''"
-            th:text="${oportunidad == 'PRIMERA'    ? 'Primera oportunidad' :
-                    oportunidad == 'SEGUNDA'    ? 'Segunda oportunidad' :
-                    oportunidad == 'REPETICION' ? 'Curso de repetición' :
-                                                  'Curso especial'}"
+            th:text="${oportunidad == 'PRIMERA' ? #{opportunity.first} : oportunidad == 'SEGUNDA' ? #{opportunity.second} : oportunidad == 'REPETICION' ? #{opportunity.repeat} : #{opportunity.special}"
+            >Primera oportunidad</span
         >
-            Primera oportunidad
-        </span>
 
         <!-- =========================================================
          CALIFICACIÓN con formato o guion
@@ -144,5 +139,93 @@
             th:text="${valor == null ? '—' : #numbers.formatDecimal(valor, 1, 2)}"
             >—</span
         >
+
+        <!--
+         Carpeta
+        -->
+        <div
+            th:fragment="binderLayout(seccion, estudiante)"
+            class="container-fluid px-4 page-shell my-auto"
+        >
+            <div class="binder-wrapper">
+                <!-- LADO IZQUIERDO: Portada del Folder / Separadores -->
+                <div class="binder-sidebar">
+                    <!-- Separadores laterales (Tabs) -->
+                    <div class="binder-tabs">
+                        <a
+                            th:href="@{/estudiante}"
+                            class="binder-tab tab-yellow"
+                            th:classappend="${seccion == 'inicio'} ? ' active'"
+                            th:attr="title=#{binder.tab.profile}"
+                        >
+                            <i class="bi bi-person-badge-fill"></i>
+                            <span
+                                class="tab-label"
+                                th:text="#{binder.tab.profile}"
+                                >Perfil</span
+                            >
+                        </a>
+                        <a
+                            th:href="@{/estudiante/horario}"
+                            class="binder-tab tab-orange"
+                            th:classappend="${seccion == 'horario'} ? ' active'"
+                            th:attr="title=#{binder.tab.schedule}"
+                        >
+                            <i class="bi bi-calendar-week-fill"></i>
+                            <span
+                                class="tab-label"
+                                th:text="#{binder.tab.schedule}"
+                                >Horario</span
+                            >
+                        </a>
+                        <a
+                            th:href="@{/estudiante/kardex}"
+                            class="binder-tab tab-teal"
+                            th:classappend="${seccion == 'kardex'} ? ' active'"
+                            th:attr="title=#{binder.tab.kardex}"
+                        >
+                            <i class="bi bi-journal-bookmark-fill"></i>
+                            <span
+                                class="tab-label"
+                                th:text="#{binder.tab.kardex}"
+                                >Cárdex</span
+                            >
+                        </a>
+                    </div>
+
+                    <!-- Tapa / Hoja del Folder con información del alumno -->
+                    <div class="folder-cover">
+                        <div class="folder-content d-flex flex-column h-100">
+                            <div class="student-avatar-box mb-3">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <h3
+                                class="student-name mb-1"
+                                th:text="${estudiante.nombreCompleto}"
+                            >
+                                Nombre del alumno
+                            </h3>
+                            <p class="student-control text-muted mb-2">
+                                <i class="bi bi-card-heading me-1"></i>
+                                <span th:text="${estudiante.numeroControl}"
+                                    >No.Control</span
+                                >
+                            </p>
+                            <span
+                                class="badge rounded-pill bg-navy-subtle text-navy px-3 py-2 w-100 text-truncate mb-3"
+                                th:text="${estudiante.carrera}"
+                            >
+                                Carrera
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LADO DERECHO: Hoja de Trabajo en Blanco para Renderizar Opciones -->
+                <div class="binder-content-sheet">
+                    <!-- Aquí se inyecta el contenido dinámico de cada vista -->
+                </div>
+            </div>
+        </div>
     </body>
 </html>

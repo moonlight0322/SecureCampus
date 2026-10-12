@@ -1,8 +1,12 @@
 <!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-    <head
-        th:replace="~{template :: head('Acceso | Instituto Tecnológico de Toluca')}"
-    ></head>
+    <head th:replace="~{template :: head(#{meta.title.access})}">
+        <link
+            rel="icon"
+            type="image/svg+xml"
+            th:href="@{/images/favicon.svg}"
+        />
+    </head>
     <body>
         <main
             class="container min-vh-100 d-flex align-items-center justify-content-center"
@@ -11,16 +15,15 @@
                 <div class="brand-mark mx-auto mb-4">
                     <i class="bi bi-person-lock"></i>
                 </div>
-                <p class="eyebrow">INSTITUTO TECNOLÓGICO DE TOLUCA</p>
-                <h1 class="h3 fw-bold">Módulo no disponible</h1>
-                <p class="text-secondary">
-                    Tu cuenta fue autenticada, pero este portal solo incluye el
-                    espacio del estudiante.
-                </p>
+                <p class="eyebrow" th:text="#{institution.name}"></p>
+                <h1 class="h3 fw-bold" th:text="#{error.role.title}"></h1>
+                <p class="text-secondary" th:text="#{error.role.desc}"></p>
                 <form th:action="@{/logout}" method="post">
-                    <button class="btn btn-orange" type="submit">
-                        Cerrar sesión
-                    </button>
+                    <button
+                        class="btn btn-orange"
+                        type="submit"
+                        th:text="#{btn.logout}"
+                    ></button>
                 </form>
             </section>
         </main>
