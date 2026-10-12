@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,14 +20,15 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "materias")
+@Table(name = "materias", uniqueConstraints = @UniqueConstraint(
+        name = "uk_materia_carrera_clave", columnNames = {"id_carrera", "clave_materia"}))
 public class Materia {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "materia_id")
     private Long materiaId;
 
-    @Column(name = "clave_materia", nullable = false, unique = true, length = 20)
+    @Column(name = "clave_materia", nullable = false, length = 20)
     private String clave;
 
     @Column(name = "nombre_materia", nullable = false, length = 100)

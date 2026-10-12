@@ -1,6 +1,7 @@
 package com.ds.securecampus.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -36,7 +37,10 @@ public class Estudiante {
     @JoinColumn(name = "id_carrera", nullable = false)
     private Carrera carrera;
 
-    @Column(precision = 4, scale = 2)
+    @Column(name = "fecha_ingreso", nullable = false)
+    private LocalDate fechaIngreso;
+
+    @Column(precision = 5, scale = 2)
     private BigDecimal promedio;
 
     @Column(name = "pago_reinscripcion", nullable = false, length = 1)
