@@ -44,4 +44,10 @@ public class EstudianteService {
     public List<MateriaKardex> obtenerKardex(String numeroControl) {
         return kardexRepository.buscarKardex(numeroControl);
     }
+
+    @Transactional(readOnly = true)
+    public com.ds.securecampus.model.Estudiante obtenerEntidad(String numeroControl) {
+        return estudianteRepository.findById(numeroControl)
+                .orElseThrow(() -> new IllegalStateException("Estudiante no encontrado"));
+    }
 }
