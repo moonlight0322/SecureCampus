@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import org.hibernate.annotations.ColumnDefault;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -48,8 +49,10 @@ public class CargaAlumno {
     private BigDecimal calificacionFinal;
 
     @Column(nullable = false, length = 20)
+    @ColumnDefault("'CURSANDO'")
     private String estatus = "CURSANDO";
 
     @Column(nullable = false, length = 20)
+    @ColumnDefault("'PRIMERA'")
     private String oportunidad = "PRIMERA";
 }

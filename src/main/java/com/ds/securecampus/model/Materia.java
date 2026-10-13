@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,8 +21,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "materias", uniqueConstraints = @UniqueConstraint(
-        name = "uk_materia_carrera_clave", columnNames = {"id_carrera", "clave_materia"}))
+@Table(name = "materias", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_materia_carrera_clave", columnNames = {"id_carrera", "clave_materia"}),
+        @UniqueConstraint(name = "uk_materia_id_carrera", columnNames = {"materia_id", "id_carrera"})
+})
 public class Materia {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,8 +37,8 @@ public class Materia {
     @Column(name = "nombre_materia", nullable = false, length = 100)
     private String nombre;
 
-    @Column(nullable = false, precision = 2)
-    private Integer creditos;
+    @Column(nullable = false, precision = 2, scale = 0)
+    private BigDecimal creditos;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_carrera", nullable = false)

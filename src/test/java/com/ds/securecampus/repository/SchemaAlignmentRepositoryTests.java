@@ -24,6 +24,7 @@ import com.ds.securecampus.model.Aula;
 import com.ds.securecampus.model.CargaAlumno;
 import com.ds.securecampus.model.Carrera;
 import com.ds.securecampus.model.Estudiante;
+import com.ds.securecampus.model.Edificio;
 import com.ds.securecampus.model.Grupo;
 import com.ds.securecampus.model.HorarioClase;
 import com.ds.securecampus.model.Kardex;
@@ -70,8 +71,8 @@ class SchemaAlignmentRepositoryTests {
         assertThat(passwordEncoder.matches("PW_22280691", passwordHash)).isTrue();
         usuario.setPasswordHash(passwordHash);
         usuario.setRol(rol);
-        usuario.setActivo(1);
-        usuario.setDebeCambiarPass(1);
+        usuario.setActivo((byte) 1);
+        usuario.setDebeCambiarPass((byte) 1);
         usuario.setNombre("Carlos");
         usuario.setApellidoPaterno("Pérez");
         usuario.setApellidoMaterno("Gómez");
@@ -105,8 +106,8 @@ class SchemaAlignmentRepositoryTests {
         usuario.setNumeroControl("12345678");
         usuario.setPasswordHash("encoded-password");
         usuario.setRol(rol);
-        usuario.setActivo(1);
-        usuario.setDebeCambiarPass(0);
+        usuario.setActivo((byte) 1);
+        usuario.setDebeCambiarPass((byte) 0);
         usuario.setNombre("Alicia");
         usuario.setApellidoPaterno("Núñez");
         usuario.setApellidoMaterno("López");
@@ -140,7 +141,7 @@ class SchemaAlignmentRepositoryTests {
         Materia materia = new Materia();
         materia.setClave("ISC-101");
         materia.setNombre("Programación");
-        materia.setCreditos(5);
+        materia.setCreditos(new BigDecimal("5"));
         materia.setCarrera(carrera);
         entityManager.persist(materia);
 
@@ -151,16 +152,20 @@ class SchemaAlignmentRepositoryTests {
         entityManager.persist(grupo);
 
         Aula aula = new Aula();
-        aula.setEdificioId(1L);
+        Edificio edificio = new Edificio();
+        edificio.setClave("ED01");
+        edificio.setNombre("Edificio principal");
+        entityManager.persist(edificio);
+        aula.setEdificio(edificio);
         aula.setNombreAula("A-101");
-        aula.setCapacidad(30);
+        aula.setCapacidad(new BigDecimal("30"));
         aula.setTipoAula("TEORICA");
         entityManager.persist(aula);
 
         HorarioClase horario = new HorarioClase();
         horario.setGrupo(grupo);
         horario.setAula(aula);
-        horario.setDiaSemana(1);
+        horario.setDiaSemana((byte) 1);
         horario.setHoraInicio("08:00");
         horario.setHoraFin("10:00");
         entityManager.persist(horario);
@@ -179,7 +184,7 @@ class SchemaAlignmentRepositoryTests {
         kardex.setCalificacionFinal(new BigDecimal("95.00"));
         kardex.setTipoAcreditacion("ORDINARIO");
         kardex.setEstatus("APROBADA");
-        kardex.setCreditosObtenidos(5);
+        kardex.setCreditosObtenidos(new BigDecimal("5"));
         entityManager.persist(kardex);
 
         entityManager.flush();

@@ -9,6 +9,8 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,8 +28,9 @@ public class Profesor {
     private String numeroControl;
 
     @MapsId
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "numero_control")
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "numero_control", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Usuario usuario;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
