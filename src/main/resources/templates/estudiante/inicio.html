@@ -1,159 +1,78 @@
 <!doctype html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org" class="h-100">
-    <head th:replace="~{template :: head(#{meta.title.inicio})}"></head>
-    <body class="d-flex flex-column min-vh-100">
-        <nav th:replace="~{template :: navbar}"></nav>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <head th:replace="~{template :: head('Inicio - Portal de Alumnos')}"></head>
+</head>
+<body class="portal-body">
+    <!-- Navbar global -->
+    <nav th:replace="~{template :: navbar}"></nav>
+    
+    <main>
+        <div class="badge-wrapper">
 
-        <main class="flex-grow-1 py-4 d-flex align-items-center">
-            <div class="container-fluid px-4 page-shell my-auto">
-                <div class="binder-wrapper">
-                    <!-- LADO IZQUIERDO: Portada del Binder con datos del estudiante -->
-                    <div class="binder-sidebar">
-                        <div class="binder-tabs">
-                            <a
-                                th:href="@{/estudiante}"
-                                class="binder-tab tab-yellow active"
-                                th:attr="title=#{binder.tab.profile}"
-                            >
-                                <i class="bi bi-person-badge-fill"></i>
-                                <span
-                                    class="tab-label"
-                                    th:text="#{binder.tab.profile}"
-                                    >Perfil</span
-                                >
-                            </a>
-                            <a
-                                th:href="@{/estudiante/horario}"
-                                class="binder-tab tab-orange"
-                                th:attr="title=#{binder.tab.schedule}"
-                            >
-                                <i class="bi bi-calendar-week-fill"></i>
-                                <span
-                                    class="tab-label"
-                                    th:text="#{binder.tab.schedule}"
-                                    >Horario</span
-                                >
-                            </a>
-                            <a
-                                th:href="@{/estudiante/kardex}"
-                                class="binder-tab tab-teal"
-                                th:attr="title=#{binder.tab.kardex}"
-                            >
-                                <i class="bi bi-journal-bookmark-fill"></i>
-                                <span
-                                    class="tab-label"
-                                    th:text="#{binder.tab.kardex}"
-                                    >Kárdex</span
-                                >
-                            </a>
-                        </div>
+            <!-- LADO IZQUIERDO: Credencial de Identificación del estudiante -->
+            <aside class="student-id-badge"> <!-- Reutilizamos el contenedor estético del gafete -->
+                <div class="badge-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <h4 class="fw-bold mb-1 text-dark" th:text="${estudiante.nombre}">Nombre completo</h4>
+                <p class="text-muted small mb-2" th:text="${estudiante.numeroControl}">Número de control</p>
+                <hr class="w-100 my-2 text-muted opacity-25">
+                <span class="text-secondary small fw-medium" th:text="${estudiante.carrera}">Carrera</span>
+            </aside>
 
-                        <div class="folder-cover">
-                            <div
-                                class="folder-content d-flex flex-column h-100"
-                            >
-                                <div class="student-avatar-box mb-3">
-                                    <i class="bi bi-person-fill"></i>
-                                </div>
-                                <h3
-                                    class="student-name mb-1"
-                                    th:text="${estudiante.nombreCompleto}"
-                                >
-                                    Nombre del alumno
-                                </h3>
-                                <p class="student-control text-muted mb-2">
-                                    <i class="bi bi-card-heading me-1"></i>
-                                    <span
-                                        class="text-black"
-                                        th:text="${estudiante.numeroControl}"
-                                        >No. control</span
-                                    >
-                                </p>
-                                <span
-                                    class="text-black w-100 text-truncate mb-3"
-                                    style="font-size: 0.8rem"
-                                    th:text="${estudiante.carrera}"
-                                    >Carrera</span
-                                >
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- LADO DERECHO: Lienzo de Contenido -->
-                    <div class="binder-content-sheet">
-                        <div class="mb-4">
-                            <h1
-                                class="h2 fw-bold mb-1"
-                                th:text="#{inicio.heading.title}"
-                            >
-                                Resumen académico
-                            </h1>
-                            <p
-                                class="text-secondary mb-0"
-                                th:text="#{inicio.heading.desc}"
-                            >
-                                Información general sobre tu estatus y avance
-                                escolar.
-                            </p>
-                        </div>
-
-                        <div class="row g-3 mb-4">
-                            <!-- Card Promedio General -->
-                            <div class="col-md-6">
-                                <div
-                                    class="content-card bg-light border-0 p-3 h-100 d-flex align-items-center"
-                                >
-                                    <div class="student-feature-icon me-3">
-                                        <i class="bi bi-trophy-fill"></i>
-                                    </div>
-                                    <div>
-                                        <span
-                                            class="small text-muted d-block fw-bold"
-                                            th:text="#{inicio.average.title}"
-                                            >PROMEDIO GENERAL</span
-                                        >
-                                        <strong
-                                            class="h3 fw-bold text-navy mb-0"
-                                            th:text="${#numbers.formatDecimal(estudiante.promedio, 1, 2)}"
-                                            >0.00</strong
-                                        >
-                                        <small
-                                            class="text-muted d-block"
-                                            th:text="#{inicio.average.suffix}"
-                                            >de 100 puntos</small
-                                        >
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Card Materias Inscritas -->
-                            <div class="col-md-6">
-                                <div
-                                    class="content-card bg-light border-0 p-3 h-100 d-flex align-items-center"
-                                >
-                                    <div class="student-feature-icon me-3">
-                                        <i class="bi bi-book-half"></i>
-                                    </div>
-                                    <div>
-                                        <span
-                                            class="small text-muted d-block fw-bold"
-                                            th:text="#{inicio.schedule.summary}"
-                                            >Materias cursando actualmente</span
-                                        >
-                                        <strong
-                                            class="h3 fw-bold text-navy mb-0"
-                                            th:text="${#lists.size(materias)}"
-                                            >0</strong
-                                        >
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+            <!-- LADO DERECHO: Hoja de Contenido Principal -->
+            <section class="main-sheet">
+                
+                <!-- Saludo de Bienvenida -->
+                <div class="mb-4">
+                    <h1 class="h2 fw-bold mb-3" th:text="#{teacher.welcome.msg(${estudiante.nombre})}">
+                        Bienvenido/a Nombre
+                    </h1>
+                    
+                    <!-- Botones de Acción Rápida -->
+                    <div class="d-flex gap-3">
+                        <a th:href="@{/estudiante/horario}" class="btn btn-sky rounded-pill px-4 py-2 fw-medium shadow-sm">
+                            <i class="bi bi-calendar-week me-1"></i> Ver horario
+                        </a>
+                        <a th:href="@{/estudiante/kardex}" class="btn btn-sky rounded-pill px-4 py-2 fw-medium shadow-sm">
+                            <i class="bi bi-journal-text me-1"></i> Ver cárdex
+                        </a>
                     </div>
                 </div>
-            </div>
-        </main>
 
-        <footer th:replace="~{template :: footer}"></footer>
-    </body>
+                <!-- Sección: Clases de Hoy -->
+                <div class="mt-4">
+                    <h5 class="fw-bold text-dark mb-3">Clases de hoy</h5>
+                    
+                    <div class="table-responsive">
+                        <table class="table align-middle table-bordered border-light bg-white rounded-3 overflow-hidden table-custom-header">
+                            <thead>
+                                <tr>
+                                    <th class="py-3 px-3 text-center" style="width: 25%;">Hora</th>
+                                    <th class="py-3 px-3" style="width: 55%;">Materia</th>
+                                    <th class="py-3 px-3 text-center" style="width: 20%;">Aula</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="clase : ${clasesHoy}">
+                                    <td class="text-center fw-semibold text-secondary" th:text="${clase.hora}">07:00 - 09:00</td>
+                                    <td class="fw-medium text-dark" th:text="${clase.materia}">Sistemas Operativos</td>
+                                    <td class="text-center text-muted" th:text="${clase.aula}">Lab 3</td>
+                                </tr>
+                                <tr th:if="${clasesHoy == null or clasesHoy.empty}">
+                                    <td colspan="3" class="text-center text-muted py-4">No hay clases programadas para el día de hoy.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </section>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{template :: footer}"></footer>
+</body>
 </html>

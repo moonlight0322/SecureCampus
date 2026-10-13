@@ -1,0 +1,302 @@
+<!-- <!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <head th:replace="~{template :: head(#{teacher.panel.title})}"></head>
+    </head>
+    <body class="portal-body">
+        <!-- Navbar global 
+        <nav th:replace="~{template :: navbar}"></nav>
+
+        <main class="flex-grow-1 py-4 d-flex align-items-center">
+            <div class="container-fluid px-4 page-shell my-auto">
+                <div class="binder-wrapper">
+                    <!-- LADO IZQ: Folder (Pestañas y Tarjeta del Profesor) 
+                    <div class="binder-sidebar">
+                        <div class="binder-tabs">
+                            <a
+                                th:href="@{/profesor/inicio}"
+                                class="binder-tab tab-yellow active"
+                                th:attr="title=#{teacher.nav.home}"
+                            >
+                                <i class="bi bi-house-door-fill"></i>
+                                <span
+                                    class="tab-label"
+                                    th:text="#{teacher.nav.home}"
+                                    >Inicio</span
+                                >
+                            </a>
+                            <a
+                                th:href="@{/profesor/grupos}"
+                                class="binder-tab tab-orange"
+                                th:attr="title=#{teacher.nav.groups}"
+                            >
+                                <i class="bi bi-journal-bookmark-fill"></i>
+                                <span
+                                    class="tab-label"
+                                    th:text="#{teacher.nav.groups}"
+                                    >Grupos</span
+                                >
+                            </a>
+                            <a
+                                th:href="@{/profesor/calificaciones}"
+                                class="binder-tab tab-teal"
+                                th:attr="title=#{teacher.nav.grades}"
+                            >
+                                <i class="bi bi-pencil-square"></i>
+                                <span
+                                    class="tab-label"
+                                    th:text="#{teacher.nav.grades}"
+                                    >Calificaciones</span
+                                >
+                            </a>
+                        </div>
+
+                        <div class="folder-cover">
+                            <div
+                                class="folder-content d-flex flex-column h-100"
+                            >
+                                <div class="student-avatar-box mb-3">
+                                    <i class="bi bi-person-badge-fill"></i>
+                                </div>
+                                <h3
+                                    class="student-name mb-1"
+                                    th:text="${profesor.nombre}"
+                                >
+                                    Nombre del profesor
+                                </h3>
+                                <p class="student-control text-muted mb-2">
+                                    <i class="bi bi-card-heading me-1"></i>
+                                    <span
+                                        class="text-black"
+                                        th:text="${profesor.numeroEmpleado}"
+                                        >No. empleado</span
+                                    >
+                                </p>
+                                <span
+                                    class="text-black w-100 text-truncate mb-3"
+                                    style="font-size: 0.8rem"
+                                    th:text="${profesor.departamento}"
+                                    >Departamento</span
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Fin folder -->
+
+                    <!-- LADO DER: Papeleo (Contenido principal del Dashboard) 
+                    <div class="binder-content-sheet">
+                        <div class="mb-4">
+                            <h1
+                                class="h2 fw-bold mb-1"
+                                th:text="#{teacher.heading.main}"
+                            >
+                                Panel Principal
+                            </h1>
+                            <p
+                                class="text-secondary mb-0"
+                                th:text="#{teacher.heading.desc}"
+                            >
+                                Resumen general de tus actividades y grupos
+                                asignados.
+                            </p>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <!-- Card Grupos Asignados 
+                            <div class="col-md-6">
+                                <div
+                                    class="content-card bg-light border-0 p-3 h-100 d-flex align-items-center"
+                                >
+                                    <div class="student-feature-icon me-3">
+                                        <i class="bi bi-people-fill"></i>
+                                    </div>
+                                    <div>
+                                        <span
+                                            class="small text-muted d-block fw-bold"
+                                            th:text="#{teacher.metrics.groups}"
+                                            >GRUPOS ASIGNADOS</span
+                                        >
+                                        <strong
+                                            class="h3 fw-bold text-navy mb-0"
+                                            th:text="${totalGrupos}"
+                                            >0</strong
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card Total de Alumnos 
+                            <div class="col-md-6">
+                                <div
+                                    class="content-card bg-light border-0 p-3 h-100 d-flex align-items-center"
+                                >
+                                    <div class="student-feature-icon me-3">
+                                        <i class="bi bi-mortarboard-fill"></i>
+                                    </div>
+                                    <div>
+                                        <span
+                                            class="small text-muted d-block fw-bold"
+                                            th:text="#{teacher.metrics.students}"
+                                            >TOTAL DE ALUMNOS</span
+                                        >
+                                        <strong
+                                            class="h3 fw-bold text-navy mb-0"
+                                            th:text="${totalAlumnos}"
+                                            >0</strong
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección: Clases de Hoy 
+                        <h5
+                            class="fw-bold mb-3 text-secondary"
+                            th:text="#{teacher.classes.today}"
+                        >
+                            Clases de Hoy
+                        </h5>
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th
+                                            class="border-0"
+                                            th:text="#{teacher.table.time}"
+                                        >
+                                            Hora
+                                        </th>
+                                        <th
+                                            class="border-0"
+                                            th:text="#{teacher.table.subject}"
+                                        >
+                                            Materia
+                                        </th>
+                                        <th
+                                            class="border-0"
+                                            th:text="#{teacher.table.group}"
+                                        >
+                                            Grupo
+                                        </th>
+                                        <th
+                                            class="border-0"
+                                            th:text="#{teacher.table.classroom}"
+                                        >
+                                            Aula
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="clase : ${clasesHoy}">
+                                        <td
+                                            class="fw-semibold text-primary"
+                                            th:text="${clase.hora}"
+                                        >
+                                            08:00 - 10:00
+                                        </td>
+                                        <td th:text="${clase.materia}">
+                                            Sistemas Operativos
+                                        </td>
+                                        <td>
+                                            <span
+                                                class="badge bg-light text-dark border"
+                                                th:text="${clase.grupo}"
+                                                >5SC1</span
+                                            >
+                                        </td>
+                                        <td th:text="${clase.aula}">Lab 3</td>
+                                    </tr>
+                                    <tr
+                                        th:if="${clasesHoy == null or clasesHoy.empty}"
+                                    >
+                                        <td
+                                            colspan="4"
+                                            class="text-center text-muted py-3"
+                                        >
+                                            No hay clases programadas para hoy.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Fin Papeleo 
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{template :: footer}"></footer>
+    </body>
+</html> -->
+
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <head th:replace="~{template :: head(#{teacher.panel.title})}"></head>
+</head>
+<body class="portal-body">
+    <!-- Navbar global -->
+    <nav th:replace="~{template :: navbar}"></nav>
+    
+    <main>
+        <div class="badge-wrapper">
+
+            <!-- LADO IZQUIERDO: Credencial de Identificación del Profesor -->
+            <aside class="teacher-id-badge">
+                <div class="badge-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <h4 class="fw-bold mb-1 text-dark" th:text="${profesor.nombre}">Nombre completo</h4>
+                <p class="text-muted small mb-2" th:text="${profesor.numeroEmpleado}">Numero empleado</p>
+                <hr class="w-100 my-2 text-muted opacity-25">
+                <span class="text-secondary small fw-medium" th:text="${profesor.departamento}">Departamento</span>
+            </aside>
+
+            <!-- LADO DERECHO: Hoja de Contenido Principal -->
+            <section class="teacher-main-sheet">
+                
+                <!-- Saludo e indicador -->
+                <div class="mb-4">
+                    <h1 class="h2 fw-bold mb-3" th:text="#{teacher.welcome.msg(${profesor.nombre})}">
+                        Bienvenido/a Nombre
+                    </h1>
+                    <!-- Botón Ver Grupos -->
+                    <a th:href="@{/profesor/grupos}" class="btn btn-sky shadow-sm">
+                        <span th:text="#{teacher.btn.view.groups}">Ver grupos</span>
+                    </a>
+                </div>
+
+                <!-- Título de la tabla -->
+                <h5 class="fw-bold mb-3 text-secondary mt-2" th:text="#{teacher.classes.today}">Clases de hoy</h5>
+
+                <!-- Tabla con diseño personalizado -->
+                <div class="table-responsive flex-grow-1">
+                    <table class="table align-middle table-bordered border-2 bg-white rounded-3 overflow-hidden">
+                        <thead class="table-sky-header">
+                            <tr>
+                                <th class="text-center py-3" th:text="#{teacher.table.time}">Hora</th>
+                                <th class="text-center py-3" th:text="#{teacher.table.group}">Grupo</th>
+                                <th class="py-3 px-4" th:text="#{teacher.table.subject}">Materia</th>
+                                <th class="text-center py-3" th:text="#{teacher.table.classroom}">Aula</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="clase : ${clasesHoy}">
+                                <td class="text-center fw-semibold text-secondary" th:text="${clase.hora}">08:00 - 10:00</td>
+                                <td class="text-center"><span class="badge bg-light text-dark border px-2 py-1" th:text="${clase.grupo}">5SC1</span></td>
+                                <td class="fw-medium px-4" th:text="${clase.materia}">Sistemas Operativos</td>
+                                <td class="text-center text-muted" th:text="${clase.aula}">Lab 3</td>
+                            </tr>
+                            <tr th:if="${clasesHoy == null or clasesHoy.empty}">
+                                <td colspan="4" class="text-center text-muted py-4">No hay clases programadas para hoy.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </section>
+
+        </div>
+    </main>
+    <footer th:replace="~{template :: footer}"></footer>
+</body>
+</html>

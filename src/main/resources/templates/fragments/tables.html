@@ -2,8 +2,24 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
     <body>
         <!-- =========================================================
-         TABLA: HORARIO
-         Uso:
+         TABLA DE HORARIO: tablaHorario
+         Propósito: mostrar las materias inscritas del estudiante junto con
+         sus datos de grupo, horario, salón, docente y periodo.
+         Parámetros:
+         - materias: colección de objetos con las propiedades materia, clave,
+           grupo, horario, salon, profesor y periodo.
+         Comportamiento:
+         - La tabla solo se renderiza cuando materias no está vacía.
+         - Genera una fila por cada elemento de materias.
+         - Muestra el nombre de la materia y su clave en la misma celda.
+         Internacionalización: utiliza las claves table.col.materia,
+         table.col.grupo, table.col.horario, table.col.salon,
+         table.col.docente y table.col.periodo.
+         Presentación: Bootstrap table-responsive, table-hover y align-middle.
+         Los atributos data-label replican el nombre de cada columna para
+         permitir estilos adaptables definidos en CSS.
+         
+         Se invoca así:
          <div th:replace="~{fragments/tables :: tablaHorario(${materias})}"></div>
          ========================================================= -->
         <div
@@ -76,8 +92,25 @@
         </div>
 
         <!-- =========================================================
-         TABLA: KÁRDEX
-         Uso:
+         TABLA DE CÁRDEX: tablaKardex
+         Propósito: mostrar el historial académico de las materias con su
+         periodo, calificación, estatus y oportunidad de cursado.
+         Parámetros:
+         - materias: colección de objetos con las propiedades materia, clave,
+           periodo, calificacion, estatus y oportunidad.
+         Comportamiento:
+         - La tabla solo se renderiza cuando materias no está vacía.
+         - Genera una fila por cada elemento de materias.
+         - Reutiliza los fragmentos calificacion y opportunityBadge de
+           fragments/components para mostrar la calificación y la oportunidad.
+         Internacionalización: utiliza table.col.materia, table.col.periodo,
+         table.col.calificacion, table.col.estatus y table.col.oportunidad.
+         Presentación: Bootstrap table-responsive, table-hover y align-middle;
+         la insignia de estatus utiliza status-badge.
+         Los atributos data-label replican el nombre de cada columna para
+         permitir estilos adaptables definidos en CSS.
+         
+         Se invoca así:
          <div th:replace="~{fragments/tables :: tablaKardex(${materias})}"></div>
          ========================================================= -->
         <div
@@ -121,11 +154,10 @@
                         >
                             Periodo
                         </td>
-                        <td
-                            th:attr="data-label=#{table.col.calificacion}"
-                            th:replace="~{fragments/components :: calificacion(${m.calificacion})}"
-                        >
-                            —
+                        <!-- th:replace va en un <span> interno: si estuviera en el <td>,
+                             reemplazaría la celda completa y la fila quedaría sin celda. -->
+                        <td th:attr="data-label=#{table.col.calificacion}">
+                            <span th:replace="~{fragments/components :: calificacion(${m.calificacion})}">—</span>
                         </td>
                         <td th:attr="data-label=#{table.col.estatus}">
                             <span
@@ -134,11 +166,8 @@
                                 >Estatus</span
                             >
                         </td>
-                        <td
-                            th:attr="data-label=#{table.col.oportunidad}"
-                            th:replace="~{fragments/components :: opportunityBadge(${m.oportunidad})}"
-                        >
-                            Primera oportunidad
+                        <td th:attr="data-label=#{table.col.oportunidad}">
+                            <span th:replace="~{fragments/components :: opportunityBadge(${m.oportunidad})}">Primera oportunidad</span>
                         </td>
                     </tr>
                 </tbody>
