@@ -1,19 +1,42 @@
 package com.ds.securecampus.controller;
 
-import org.springframework.security.core.Authentication;
+import java.util.List;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import com.ds.securecampus.model.Estudiante;
+import com.ds.securecampus.model.MateriaHorario;
+import com.ds.securecampus.model.MateriaKardex;
+import com.ds.securecampus.model.PerfilEstudiante;
+import com.ds.securecampus.service.DocumentoPdfService;
 import com.ds.securecampus.service.EstudianteService;
+import com.ds.securecampus.service.NotificacionService;
+import com.ds.securecampus.service.SolicitudService;
 
 @Controller
 public class PortalController {
     private final EstudianteService estudianteService;
+    private final DocumentoPdfService documentoPdfService;
+    private final SolicitudService solicitudService;
+    private final NotificacionService notificacionService;
 
-    public PortalController(EstudianteService estudianteService) {
+    public PortalController(EstudianteService estudianteService,
+                            DocumentoPdfService documentoPdfService,
+                            SolicitudService solicitudService,
+                            NotificacionService notificacionService) {
         this.estudianteService = estudianteService;
+        this.documentoPdfService = documentoPdfService;
+        this.solicitudService = solicitudService;
+        this.notificacionService = notificacionService;
     }
 
     @GetMapping({"/", "/login"})
@@ -23,33 +46,120 @@ public class PortalController {
                 : "redirect:/acceso";
     }
 
+    @GetMapping("/recuperar")
+    public String recuperarContrasena() {
+        return "recuperar";
+    }
+
+    @PostMapping("/recuperar")
+    public String procesarRecuperacion(@RequestParam("numeroControl") String numeroControl, Model model) {
+        model.addAttribute("mensaje", "Si el número de control " + numeroControl + " está registrado, se han enviado las instrucciones de recuperación a su correo institucional.");
+        return "recuperar";
+    }
+
     @GetMapping("/acceso")
     public String acceso(Authentication authentication) {
-        if (authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ESTUDIANTE"))) {
+        if (authentication == null) return "redirect:/login";
+        if (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ESTUDIANTE"))) {
             return "redirect:/estudiante";
+        }
+        if (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_PROFESOR"))) {
+            return "redirect:/profesor";
+        }
+        if (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMINISTRADOR") || a.getAuthority().equals("ROLE_ADMINISTRATIVO"))) {
+            return "redirect:/admin";
+        }
+        if (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_JEFE_DEPARTAMENTO"))) {
+            return "redirect:/jefe";
         }
         return "rol-no-disponible";
     }
 
     @GetMapping("/estudiante")
     public String inicioEstudiante(Authentication authentication, Model model) {
-        model.addAttribute("estudiante", estudianteService.obtenerPerfil(authentication.getName()));
-        model.addAttribute("materias", estudianteService.obtenerHorario(authentication.getName()));
+        String numControl = authentication.getName();
+        model.addAttribute("estudiante", estudianteService.obtenerPerfil(numControl));
+        model.addAttribute("materias", estudianteService.obtenerHorario(numControl));
+        model.addAttribute("notificaciones", notificacionService.obtenerNotificaciones(numControl));
+        model.addAttribute("solicitudes", solicitudService.obtenerPorUsuario(numControl));
         return "estudiante/inicio";
     }
 
     @GetMapping("/estudiante/horario")
     public String horario(Authentication authentication, Model model) {
-        model.addAttribute("estudiante", estudianteService.obtenerPerfil(authentication.getName()));
-        model.addAttribute("materias", estudianteService.obtenerHorario(authentication.getName()));
+        String numControl = authentication.getName();
+        model.addAttribute("estudiante", estudianteService.obtenerPerfil(numControl));
+        model.addAttribute("materias", estudianteService.obtenerHorario(numControl));
         return "estudiante/horario";
     }
 
     @GetMapping("/estudiante/kardex")
     public String kardex(Authentication authentication, Model model) {
-        model.addAttribute("estudiante", estudianteService.obtenerPerfil(authentication.getName()));
-        model.addAttribute("materias", estudianteService.obtenerKardex(authentication.getName()));
+        String numControl = authentication.getName();
+        model.addAttribute("estudiante", estudianteService.obtenerPerfil(numControl));
+        model.addAttribute("materias", estudianteService.obtenerKardex(numControl));
         return "estudiante/kardex";
+    }
+
+    @GetMapping("/estudiante/solicitudes")
+    public String solicitudes(Authentication authentication, Model model) {
+        String numControl = authentication.getName();
+        model.addAttribute("estudiante", estudianteService.obtenerPerfil(numControl));
+        model.addAttribute("solicitudes", solicitudService.obtenerPorUsuario(numControl));
+        return "estudiante/solicitudes";
+    }
+
+    @PostMapping("/estudiante/solicitudes/crear")
+    public String crearSolicitud(Authentication authentication,
+                                 @RequestParam("tipoTramite") String tipoTramite,
+                                 @RequestParam("motivo") String motivo) {
+        solicitudService.crearSolicitud(authentication.getName(), tipoTramite, motivo, null);
+        return "redirect:/estudiante/solicitudes?creada=true";
+    }
+
+    // --- Descargas de Documentos PDF Oficiales ---
+
+    @GetMapping("/estudiante/constancia/pdf")
+    public ResponseEntity<byte[]> descargarConstancia(Authentication authentication) {
+        String numControl = authentication.getName();
+        PerfilEstudiante perfil = estudianteService.obtenerPerfil(numControl);
+        Estudiante est = estudianteService.obtenerEntidad(numControl);
+
+        // Validación de regla de negocio: debe estar inscrito
+        if (!"S".equalsIgnoreCase(est.getPagoReinscripcion())) {
+            return ResponseEntity.badRequest().body("No es posible generar la constancia: El alumno no cuenta con estatus inscrito vigente.".getBytes());
+        }
+
+        byte[] pdf = documentoPdfService.generarConstanciaEstudios(perfil, est);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"Constancia_" + numControl + ".pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
+    }
+
+    @GetMapping("/estudiante/kardex/pdf")
+    public ResponseEntity<byte[]> descargarKardexPdf(Authentication authentication) {
+        String numControl = authentication.getName();
+        PerfilEstudiante perfil = estudianteService.obtenerPerfil(numControl);
+        List<MateriaKardex> kardex = estudianteService.obtenerKardex(numControl);
+
+        byte[] pdf = documentoPdfService.generarKardexPdf(perfil, kardex);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"Kardex_" + numControl + ".pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
+    }
+
+    @GetMapping("/estudiante/horario/pdf")
+    public ResponseEntity<byte[]> descargarHorarioPdf(Authentication authentication) {
+        String numControl = authentication.getName();
+        PerfilEstudiante perfil = estudianteService.obtenerPerfil(numControl);
+        List<MateriaHorario> horarios = estudianteService.obtenerHorario(numControl);
+
+        byte[] pdf = documentoPdfService.generarHorarioPdf(perfil, horarios);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"Horario_" + numControl + ".pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
     }
 }

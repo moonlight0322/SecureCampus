@@ -46,6 +46,15 @@
                                     >Kárdex</span
                                 >
                             </a>
+                            <a
+                                th:href="@{/estudiante/solicitudes}"
+                                class="binder-tab tab-purple"
+                                style="background-color: #8b5cf6; color: #fff;"
+                                title="Solicitudes y Trámites"
+                            >
+                                <i class="bi bi-file-earmark-text-fill"></i>
+                                <span class="tab-label">Trámites</span>
+                            </a>
                         </div>
 
                         <div class="folder-cover">
@@ -147,6 +156,108 @@
                                         >
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LADO DERECHO: Lienzo de Contenido -->
+                    <div class="binder-content-sheet">
+                        <div class="mb-4">
+                            <h1
+                                class="h2 fw-bold mb-1"
+                                th:text="#{inicio.heading.title}"
+                            >
+                                Resumen académico
+                            </h1>
+                            <p
+                                class="text-secondary mb-0"
+                                th:text="#{inicio.heading.desc}"
+                            >
+                                Información general sobre tu estatus y avance
+                                escolar.
+                            </p>
+                        </div>
+
+                        <!-- Notificaciones Académicas -->
+                        <div th:if="${notificaciones != null && !notificaciones.isEmpty()}" class="mb-4">
+                            <h5 class="fw-bold mb-2"><i class="bi bi-bell-fill text-warning me-2"></i>Avisos y Notificaciones</h5>
+                            <div class="list-group">
+                                <div th:each="notif : ${notificaciones}" class="list-group-item list-group-item-action flex-column align-items-start">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1 fw-bold text-navy" th:text="${notif.titulo}">Título</h6>
+                                        <small class="text-muted" th:text="${#temporals.format(notif.fechaCreacion, 'dd/MM/yyyy HH:mm')}">Fecha</small>
+                                    </div>
+                                    <p class="mb-1 text-secondary small" th:text="${notif.mensaje}">Mensaje</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <!-- Card Promedio General -->
+                            <div class="col-md-6">
+                                <div
+                                    class="content-card bg-light border-0 p-3 h-100 d-flex align-items-center"
+                                >
+                                    <div class="student-feature-icon me-3">
+                                        <i class="bi bi-trophy-fill"></i>
+                                    </div>
+                                    <div>
+                                        <span
+                                            class="small text-muted d-block fw-bold"
+                                            th:text="#{inicio.average.title}"
+                                            >PROMEDIO GENERAL</span
+                                        >
+                                        <strong
+                                            class="h3 fw-bold text-navy mb-0"
+                                            th:text="${#numbers.formatDecimal(estudiante.promedio, 1, 2)}"
+                                            >0.00</strong
+                                        >
+                                        <small
+                                            class="text-muted d-block"
+                                            th:text="#{inicio.average.suffix}"
+                                            >de 100 puntos</small
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card Materias Inscritas -->
+                            <div class="col-md-6">
+                                <div
+                                    class="content-card bg-light border-0 p-3 h-100 d-flex align-items-center"
+                                >
+                                    <div class="student-feature-icon me-3">
+                                        <i class="bi bi-book-half"></i>
+                                    </div>
+                                    <div>
+                                        <span
+                                            class="small text-muted d-block fw-bold"
+                                            th:text="#{inicio.schedule.summary}"
+                                            >Materias cursando actualmente</span
+                                        >
+                                        <strong
+                                            class="h3 fw-bold text-navy mb-0"
+                                            th:text="${#lists.size(materias)}"
+                                            >0</strong
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Documentos Oficiales en PDF -->
+                        <div class="content-card p-4 border bg-white rounded-3 shadow-sm mb-4">
+                            <h5 class="fw-bold mb-3"><i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i>Descarga de Documentos Oficiales</h5>
+                            <div class="d-flex flex-wrap gap-2">
+                                <a th:href="@{/estudiante/constancia/pdf}" class="btn btn-outline-danger d-inline-flex align-items-center gap-2">
+                                    <i class="bi bi-file-earmark-check"></i>Constancia de Estudios
+                                </a>
+                                <a th:href="@{/estudiante/kardex/pdf}" class="btn btn-outline-primary d-inline-flex align-items-center gap-2">
+                                    <i class="bi bi-journal-bookmark"></i>Kárdex Oficial
+                                </a>
+                                <a th:href="@{/estudiante/horario/pdf}" class="btn btn-outline-success d-inline-flex align-items-center gap-2">
+                                    <i class="bi bi-calendar-event"></i>Horario Escolar
+                                </a>
                             </div>
                         </div>
                     </div>

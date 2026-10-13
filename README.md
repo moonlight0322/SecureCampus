@@ -26,6 +26,7 @@ Las cuentas se validan contra `perfiles_base.numero_control`, `perfiles_base.pas
 | Estudiante | `22280120` | `PW_22280120` |
 | Administrativo | `10280070` | `PW_10280070` |
 | Profesor | `19280703` | `PW_19280703` |
+| Jefe Depto | `00334456` | `deptosist` |
 
 Úsalas solo en entornos de prueba. La migración incluida añade `estudiantes.fecha_ingreso` si falta; en una base ya existente, ejecuta ese bloque de migración por separado antes de insertar el estudiante (no vuelvas a ejecutar todos los `CREATE TABLE`).
 
