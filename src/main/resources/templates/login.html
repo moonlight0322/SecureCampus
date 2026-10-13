@@ -1,14 +1,8 @@
 <!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <head th:replace="~{template :: head(#{meta.title.login})}">
-            <link
-                rel="icon"
-                type="image/svg+xml"
-                th:href="@{/images/favicon.svg}"
-            />
-        </head>
-    </head>
+    <head
+        th:replace="~{template :: head('Portal académico | Instituto Tecnológico de Toluca')}"
+    ></head>
     <body class="login-page">
         <main
             class="container min-vh-100 d-flex align-items-center py-4 py-lg-5"
@@ -19,38 +13,38 @@
                 <section class="col-12 col-md-6">
                     <div class="login-intro">
                         <div class="institution-lockup">
-                            <span class="institution-seal">
-                                <i class="bi bi-mortarboard-fill"></i>
-                            </span>
-                            <span>
-                                <strong th:text="#{institution.name}"></strong>
-                                <small th:text="#{institution.sub}"></small>
-                            </span>
+                            <span class="institution-seal"
+                                ><i class="bi bi-mortarboard-fill"></i
+                            ></span>
+                            <span
+                                >INSTITUTO TECNOLÓGICO DE TOLUCA<small
+                                    >Tecnológico Nacional de México</small
+                                ></span
+                            >
                         </div>
-
-                        <p class="eyebrow mb-3" th:text="#{login.eyebrow}"></p>
-                        <h1 class="mb-3" th:text="#{login.title}"></h1>
-                        <p th:text="#{login.description}"></p>
-
+                        <p class="eyebrow mb-3">
+                            PLATAFORMA DE SERVICIOS ESCOLARES
+                        </p>
+                        <h1 class="mb-3">
+                            Tu información académica, en un solo lugar.
+                        </h1>
+                        <p>
+                            Consulta de forma segura tu información, horario e
+                            historial académico desde el portal institucional.
+                        </p>
                         <div class="login-highlights">
-                            <span>
-                                <i class="bi bi-shield-check"></i>
-                                <span
-                                    th:text="#{login.highlight.secure}"
-                                ></span>
-                            </span>
-                            <span>
-                                <i class="bi bi-calendar3"></i>
-                                <span
-                                    th:text="#{login.highlight.schedule}"
-                                ></span>
-                            </span>
-                            <span>
-                                <i class="bi bi-journal-text"></i>
-                                <span
-                                    th:text="#{login.highlight.history}"
-                                ></span>
-                            </span>
+                            <span
+                                ><i class="bi bi-shield-check"></i>Acceso
+                                institucional protegido</span
+                            >
+                            <span
+                                ><i class="bi bi-calendar3"></i>Horario del
+                                periodo vigente</span
+                            >
+                            <span
+                                ><i class="bi bi-journal-text"></i>Historial
+                                académico actualizado</span
+                            >
                         </div>
                     </div>
                 </section>
@@ -65,14 +59,6 @@
                             th:text="#{login.action}"
                         ></h2>
 
-<<<<<<< HEAD
-                        <th:block th:if="${param.error}">
-                            <div th:replace="~{fragments/components :: alert('danger', 'Número de control o contraseña incorrectos, o cuenta inactiva.')}"></div>
-                        </th:block>
-                        <th:block th:if="${param.logout}">
-                            <div th:replace="~{fragments/components :: alert('success', 'Tu sesión se cerró correctamente.')}"></div>
-                        </th:block>
-=======
                         <!-- Banner de error de autenticación con clase contenedora -->
                         <div
                             th:if="${param.error != null}"
@@ -93,14 +79,19 @@
                             ></div>
                         </div>
 
->>>>>>> 7991c5f7fd60a300427a67d6b90f1ff735d00b79
+                        <!-- Banner de cuenta bloqueada -->
+                        <div th:if="${param.blocked != null}" class="flash-alert-wrapper">
+                            <div class="alert alert-danger" role="alert">
+                                <i class="bi bi-shield-slash-fill me-2"></i>
+                                <strong>Cuenta bloqueada temporalmente:</strong> Se ha superado el límite de 5 intentos fallidos. Por seguridad, la cuenta permanecerá bloqueada durante 15 minutos.
+                            </div>
+                        </div>
+
                         <form th:action="@{/login}" method="post">
                             <div class="mb-3">
-                                <label
-                                    for="numeroControl"
-                                    class="form-label"
-                                    th:text="#{login.label.user}"
-                                ></label>
+                                <label for="numeroControl" class="form-label"
+                                    >Usuario / Número de control</label
+                                >
                                 <input
                                     id="numeroControl"
                                     name="numeroControl"
@@ -113,11 +104,14 @@
                                 />
                             </div>
                             <div class="mb-4">
-                                <label
-                                    for="password"
-                                    class="form-label"
-                                    th:text="#{login.label.password}"
-                                ></label>
+                                <div class="d-flex justify-content-between">
+                                    <label
+                                        for="password"
+                                        class="form-label"
+                                        th:text="#{login.label.password}"
+                                    ></label>
+                                    <a th:href="@{/recuperar}" class="small text-decoration-none">¿Olvidaste tu contraseña?</a>
+                                </div>
                                 <input
                                     id="password"
                                     name="password"
@@ -131,60 +125,23 @@
                                 class="btn btn-orange btn-lg w-100"
                                 type="submit"
                             >
-                                <span th:text="#{login.btn.submit}"></span>
+                                Iniciar sesión
                                 <i class="bi bi-arrow-right ms-1"></i>
                             </button>
                         </form>
                         <div class="small text-secondary mt-4 d-flex gap-2">
                             <i class="bi bi-info-circle mt-1"></i>
-                            <span th:text="#{login.footer.hint}"></span>
+                            <span
+                                >Utiliza tu número de control y la contraseña
+                                vinculada a tu cuenta institucional.</span
+                            >
                         </div>
                     </div>
                 </section>
             </div>
         </main>
-
-        <footer>
-            <div
-                class="login-copyright text-center text-white-50 small pb-3"
-                th:text="#{footer.copyright}"
-            ></div>
-        </footer>
-
-        <!-- Script robusto para limpiar URL y desvanecer las alertas por clase -->
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const alertWrappers = document.querySelectorAll(
-                    ".flash-alert-wrapper",
-                );
-
-                if (alertWrappers.length > 0) {
-                    // Limpia los parámetros ?error o ?logout de la URL al instante para evitar efectos de caché o F5
-                    if (window.history.replaceState && window.location.search) {
-                        const cleanUrl =
-                            window.location.protocol +
-                            "//" +
-                            window.location.host +
-                            window.location.pathname;
-                        window.history.replaceState(
-                            { path: cleanUrl },
-                            "",
-                            cleanUrl,
-                        );
-                    }
-
-                    // Temporizador para desvanecer y remover el contenedor después de 4 segundos
-                    setTimeout(function () {
-                        alertWrappers.forEach((wrapper) => {
-                            wrapper.style.transition =
-                                "opacity 0.5s ease, transform 0.5s ease";
-                            wrapper.style.opacity = "0";
-                            wrapper.style.transform = "translateY(-10px)";
-                            setTimeout(() => wrapper.remove(), 500);
-                        });
-                    }, 4000);
-                }
-            });
-        </script>
+        <div class="login-copyright text-center text-white-50 small pb-3">
+            Instituto Tecnológico de Toluca · Tecnológico Nacional de México
+        </div>
     </body>
 </html>
