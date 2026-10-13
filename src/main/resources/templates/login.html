@@ -59,16 +59,12 @@
                             Ingresa con los datos de tu cuenta institucional.
                         </p>
 
-                        <div
-                            th:replace="~{fragments/components
-                :: alert('danger', 'Número de control o contraseña incorrectos, o cuenta inactiva.')}"
-                            th:if="${param.error}"
-                        ></div>
-                        <div
-                            th:replace="~{fragments/components
-                :: alert('success', 'Tu sesión se cerró correctamente.')}"
-                            th:if="${param.logout}"
-                        ></div>
+                        <th:block th:if="${param.error}">
+                            <div th:replace="~{fragments/components :: alert('danger', 'Número de control o contraseña incorrectos, o cuenta inactiva.')}"></div>
+                        </th:block>
+                        <th:block th:if="${param.logout}">
+                            <div th:replace="~{fragments/components :: alert('success', 'Tu sesión se cerró correctamente.')}"></div>
+                        </th:block>
                         <form th:action="@{/login}" method="post">
                             <div class="mb-3">
                                 <label for="numeroControl" class="form-label"
