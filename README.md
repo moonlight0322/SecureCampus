@@ -34,6 +34,7 @@ Las cuentas se validan contra `perfiles_base.numero_control`, `perfiles_base.pas
 | Estudiante | `22280120` | `PW_22280120` |
 | Administrativo | `10280070` | `PW_10280070` |
 | Profesor | `19280703` | `PW_19280703` |
+| Jefe Depto | `00334456` | `deptosist` |
 
 Úsalas solo en entornos de prueba. Si la base TiDB/MySQL ya existe y no tiene `estudiantes.fecha_ingreso`, agrega la columna antes de insertar el estudiante:
 
