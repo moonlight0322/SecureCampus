@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import org.hibernate.annotations.ColumnDefault;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -47,11 +48,12 @@ public class Kardex {
     private BigDecimal calificacionFinal;
 
     @Column(name = "tipo_acreditacion", nullable = false, length = 20)
+    @ColumnDefault("'ORDINARIO'")
     private String tipoAcreditacion = "ORDINARIO";
 
     @Column(nullable = false, length = 15)
     private String estatus;
 
-    @Column(name = "creditos_obtenidos", nullable = false, precision = 2)
-    private Integer creditosObtenidos;
+    @Column(name = "creditos_obtenidos", nullable = false, precision = 2, scale = 0)
+    private BigDecimal creditosObtenidos;
 }

@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.ColumnDefault;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,5 +42,6 @@ public class Periodo {
     private LocalDate limiteCapturaCalificaciones;
 
     @Column(name = "captura_activa", nullable = false, length = 1)
+    @ColumnDefault("'N'")
     private String capturaActiva = "N";
 }

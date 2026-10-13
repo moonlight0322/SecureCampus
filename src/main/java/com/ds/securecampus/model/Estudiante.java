@@ -12,6 +12,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,8 +32,9 @@ public class Estudiante {
     private String numeroControl;
 
     @MapsId
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "numero_control")
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "numero_control", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Usuario usuario;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -41,11 +45,14 @@ public class Estudiante {
     private LocalDate fechaIngreso;
 
     @Column(precision = 5, scale = 2)
+    @ColumnDefault("0.00")
     private BigDecimal promedio;
 
     @Column(name = "pago_reinscripcion", nullable = false, length = 1)
+    @ColumnDefault("'N'")
     private String pagoReinscripcion = "N";
 
     @Column(name = "tiene_adeudos", nullable = false, length = 1)
+    @ColumnDefault("'N'")
     private String tieneAdeudos = "N";
 }

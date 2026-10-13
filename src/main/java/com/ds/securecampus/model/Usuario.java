@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.ColumnDefault;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,10 +34,12 @@ public class Usuario {
     private Rol rol;
 
     @Column(nullable = false)
-    private Integer activo = 1;
+    @ColumnDefault("1")
+    private Byte activo = 1;
 
     @Column(name = "debe_cambiar_pass", nullable = false)
-    private Integer debeCambiarPass = 1;
+    @ColumnDefault("1")
+    private Byte debeCambiarPass = 1;
 
     @Column(nullable = false, length = 50)
     private String nombre;
@@ -60,5 +63,6 @@ public class Usuario {
     private String correoInstitucional;
 
     @Column(name = "fecha_creacion")
+    @ColumnDefault("(CURRENT_DATE)")
     private LocalDate fechaCreacion;
 }
