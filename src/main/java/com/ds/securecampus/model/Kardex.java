@@ -43,7 +43,7 @@ public class Kardex {
     @JoinColumn(name = "periodo_id", nullable = false)
     private Periodo periodo;
 
-    @Column(name = "calificacion_final", nullable = false, precision = 4, scale = 2)
+    @Column(name = "calificacion_final", nullable = false, precision = 5, scale = 2)
     private BigDecimal calificacionFinal;
 
     @Column(name = "tipo_acreditacion", nullable = false, length = 20)

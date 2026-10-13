@@ -38,10 +38,10 @@ public class CargaAlumno {
     @JoinColumn(name = "grupo_id", nullable = false)
     private Grupo grupo;
 
-    @Column(name = "calificacion_parcial1", precision = 4, scale = 2)
+    @Column(name = "calificacion_parcial1", precision = 5, scale = 2)
     private BigDecimal calificacionParcial1;
 
-    @Column(name = "calificacion_parcial2", precision = 4, scale = 2)
+    @Column(name = "calificacion_parcial2", precision = 5, scale = 2)
     private BigDecimal calificacionParcial2;
 
     @Column(name = "calificacion_final", precision = 5, scale = 2)

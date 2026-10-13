@@ -24,7 +24,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name = "grupos", uniqueConstraints = @UniqueConstraint(
-        name = "uk_codigo_periodo_grupo", columnNames = {"codigo_grupo", "periodo_id"}))
+        name = "uk_codigo_materia_periodo_grupo",
+        columnNames = {"codigo_grupo", "materia_id", "periodo_id"}))
 public class Grupo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

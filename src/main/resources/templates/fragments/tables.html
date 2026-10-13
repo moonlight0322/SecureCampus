@@ -14,44 +14,58 @@
             <table class="table table-hover align-middle">
                 <thead>
                     <tr>
-                        <th scope="col">Materia</th>
-                        <th scope="col">Grupo</th>
-                        <th scope="col">Horario</th>
-                        <th scope="col">Salón</th>
-                        <th scope="col">Docente</th>
-                        <th scope="col">Periodo</th>
+                        <th scope="col" th:text="#{table.col.materia}">
+                            Materia
+                        </th>
+                        <th scope="col" th:text="#{table.col.grupo}">Grupo</th>
+                        <th scope="col" th:text="#{table.col.horario}">
+                            Horario
+                        </th>
+                        <th scope="col" th:text="#{table.col.salon}">Salón</th>
+                        <th scope="col" th:text="#{table.col.docente}">
+                            Docente
+                        </th>
+                        <th scope="col" th:text="#{table.col.periodo}">
+                            Periodo
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="m : ${materias}">
-                        <td th:attr="data-label='Materia'">
-                            <strong th:text="${m.materia}">Materia</strong>
-                            <small
+                        <td th:attr="data-label=#{table.col.materia}">
+                            <strong th:text="${m.materia}">Materia</strong
+                            ><small
                                 class="d-block text-secondary"
                                 th:text="${m.clave}"
                                 >Clave</small
                             >
                         </td>
-                        <td th:attr="data-label='Grupo'" th:text="${m.grupo}">
+                        <td
+                            th:attr="data-label=#{table.col.grupo}"
+                            th:text="${m.grupo}"
+                        >
                             Grupo
                         </td>
                         <td
-                            th:attr="data-label='Horario'"
+                            th:attr="data-label=#{table.col.horario}"
                             th:text="${m.horario}"
                         >
                             Horario
                         </td>
-                        <td th:attr="data-label='Salón'" th:text="${m.salon}">
+                        <td
+                            th:attr="data-label=#{table.col.salon}"
+                            th:text="${m.salon}"
+                        >
                             Salón
                         </td>
                         <td
-                            th:attr="data-label='Docente'"
+                            th:attr="data-label=#{table.col.docente}"
                             th:text="${m.profesor}"
                         >
                             Docente
                         </td>
                         <td
-                            th:attr="data-label='Periodo'"
+                            th:attr="data-label=#{table.col.periodo}"
                             th:text="${m.periodo}"
                         >
                             Periodo
@@ -74,36 +88,46 @@
             <table class="table table-hover align-middle">
                 <thead>
                     <tr>
-                        <th scope="col">Materia</th>
-                        <th scope="col">Periodo</th>
-                        <th scope="col">Calificación</th>
-                        <th scope="col">Estatus</th>
-                        <th scope="col">Oportunidad</th>
+                        <th scope="col" th:text="#{table.col.materia}">
+                            Materia
+                        </th>
+                        <th scope="col" th:text="#{table.col.periodo}">
+                            Periodo
+                        </th>
+                        <th scope="col" th:text="#{table.col.calificacion}">
+                            Calificación
+                        </th>
+                        <th scope="col" th:text="#{table.col.estatus}">
+                            Estatus
+                        </th>
+                        <th scope="col" th:text="#{table.col.oportunidad}">
+                            Oportunidad
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="m : ${materias}">
-                        <td th:attr="data-label='Materia'">
-                            <strong th:text="${m.materia}">Materia</strong>
-                            <small
+                        <td th:attr="data-label=#{table.col.materia}">
+                            <strong th:text="${m.materia}">Materia</strong
+                            ><small
                                 class="d-block text-secondary"
                                 th:text="${m.clave}"
                                 >Clave</small
                             >
                         </td>
                         <td
-                            th:attr="data-label='Periodo'"
+                            th:attr="data-label=#{table.col.periodo}"
                             th:text="${m.periodo}"
                         >
                             Periodo
                         </td>
                         <td
-                            th:attr="data-label='Calificación'"
+                            th:attr="data-label=#{table.col.calificacion}"
                             th:replace="~{fragments/components :: calificacion(${m.calificacion})}"
                         >
                             —
                         </td>
-                        <td th:attr="data-label='Estatus'">
+                        <td th:attr="data-label=#{table.col.estatus}">
                             <span
                                 class="badge rounded-pill text-bg-light status-badge"
                                 th:text="${m.estatus}"
@@ -111,7 +135,7 @@
                             >
                         </td>
                         <td
-                            th:attr="data-label='Oportunidad'"
+                            th:attr="data-label=#{table.col.oportunidad}"
                             th:replace="~{fragments/components :: opportunityBadge(${m.oportunidad})}"
                         >
                             Primera oportunidad

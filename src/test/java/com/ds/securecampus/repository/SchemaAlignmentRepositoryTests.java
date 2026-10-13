@@ -122,6 +122,7 @@ class SchemaAlignmentRepositoryTests {
         estudiante.setNumeroControl(usuario.getNumeroControl());
         estudiante.setUsuario(usuario);
         estudiante.setCarrera(carrera);
+        estudiante.setFechaIngreso(LocalDate.of(2026, 1, 1));
         estudiante.setPromedio(new BigDecimal("90.00"));
         estudiante.setPagoReinscripcion("N");
         estudiante.setTieneAdeudos("N");
