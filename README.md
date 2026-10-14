@@ -17,15 +17,31 @@ Selecciona una base de datos vacía en TiDB Cloud o MySQL y ejecuta `CreacionBD.
 mysql -h <host> -P <puerto> -u <usuario> -p <base_de_datos> < CreacionBD.sql
 ```
 
-Configura las variables de conexión que usa Spring Boot. Para MySQL local, por ejemplo:
+La aplicación necesita conectarse a una base MySQL/TiDB para iniciar sesión y cargar los datos. No basta con ejecutar Spring Boot: si no se configuran variables, intenta conectarse a `localhost`, lo que requiere tener MySQL instalado y en ejecución en esa computadora.
 
-```bash
-export DB_URL='jdbc:mysql://localhost:3306/securecampus?serverTimezone=UTC'
-export DB_USERNAME='root'
-export DB_PASSWORD='tu-contraseña'
+En Windows PowerShell, para una base local:
+
+```powershell
+$env:DB_URL = "jdbc:mysql://localhost:3306/securecampus?serverTimezone=UTC"
+$env:DB_USERNAME = "root"
+$env:DB_PASSWORD = "<contraseña-de-MySQL>"
 ```
 
-Para TiDB Cloud, usa el host, puerto, base de datos y usuario del panel de conexión de TiDB; configura el TLS requerido por tu clúster en `DB_URL`. No guardes contraseñas en el repositorio.
+Si no tienes MySQL local, usa la URL, el usuario y la contraseña que proporcione la persona que administra la base remota. Para TiDB Cloud, la URL normalmente tiene este formato:
+
+```powershell
+$env:DB_URL = "jdbc:mysql://<host>:<puerto>/<base>?sslMode=VERIFY_IDENTITY"
+$env:DB_USERNAME = "<usuario-de-la-base>"
+$env:DB_PASSWORD = "<contraseña-de-la-base>"
+```
+
+Reemplaza los valores entre `< >` con los datos del proveedor. Ejecuta después la aplicación desde esa misma ventana de PowerShell; las variables definidas con `$env:` no se comparten al clonar el repositorio ni se conservan al cerrar la ventana:
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+Las credenciales de conexión a MySQL/TiDB son distintas de los números de control y contraseñas con los que cada persona inicia sesión en el portal. Los usuarios de prueba del script sólo existen después de ejecutar `CreacionBD.sql` en la base a la que apunta `DB_URL`. Si el esquema ya fue creado por el equipo, no vuelvas a ejecutar el script sin confirmar con quien administra la base; solicita que verifique que se insertaron las cuentas y que la IP de tu equipo tiene permitido el acceso remoto. No guardes credenciales en el repositorio ni las compartas en commits.
 
 Las cuentas se validan contra `perfiles_base.numero_control`, `perfiles_base.password_hash` y el rol asociado en `roles`. El script contiene registros de prueba; configura y cambia sus contraseñas antes de usar esos datos en cualquier entorno compartido. No publiques contraseñas, tokens ni credenciales de bases de datos.
 
@@ -45,6 +61,8 @@ TiDB Cloud no soporta triggers. Por eso, las reglas que requieren comparar varia
 ```bash
 ./mvnw spring-boot:run
 ```
+
+El comando anterior presupone que ya configuraste `DB_URL`, `DB_USERNAME` y `DB_PASSWORD` en la terminal, como se indica arriba. Si sólo quieres ejecutar las pruebas, no necesitas una base MySQL: usan H2 en memoria con `.\mvnw.cmd test`.
 
 Abre <http://localhost:8080>. Los módulos disponibles incluyen:
 
