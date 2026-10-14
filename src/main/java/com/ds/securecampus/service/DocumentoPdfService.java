@@ -1,11 +1,13 @@
 package com.ds.securecampus.service;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -17,9 +19,11 @@ import com.ds.securecampus.model.PerfilEstudiante;
 
 @Service
 public class DocumentoPdfService {
+    private static final Charset PDF_TEXT_CHARSET = Charset.forName("windows-1252");
+    private static final int PDF_LINES_PER_PAGE = 55;
 
     public byte[] generarConstanciaEstudios(PerfilEstudiante perfil, Estudiante estudiante) {
-        String folio = "CONST-" + System.currentTimeMillis() % 1000000;
+        String folio = "CONST-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         String fecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
         
         StringBuilder sb = new StringBuilder();
@@ -39,7 +43,6 @@ public class DocumentoPdfService {
         sb.append("  ESTATUS REINSCR.:   ").append("S".equalsIgnoreCase(estudiante.getPagoReinscripcion()) ? "INSCRITO Y VIGENTE" : "PENDIENTE").append("\n");
         sb.append("  ADEUDOS:            ").append("N".equalsIgnoreCase(estudiante.getTieneAdeudos()) ? "SIN ADEUDOS" : "CON ADEUDOS PENDIENTES").append("\n\n");
         sb.append("Se extiende la presente constancia para los fines legales y académicos que al interesado convengan.\n\n");
-        sb.append("CÓDIGO DE VERIFICACIÓN ELECTRÓNICA: SHA256-SC-").append(Integer.toHexString(folio.hashCode()).toUpperCase()).append("\n");
         sb.append("================================================================================\n");
         sb.append("Este documento cuenta con validez oficial emitida por la plataforma SecureCampus.\n");
 
@@ -64,7 +67,7 @@ public class DocumentoPdfService {
         }
         sb.append("--------------------------------------------------------------------------------\n");
         sb.append("TOTAL DE ASIGNATURAS REGISTRADAS: ").append(materias.size()).append("\n");
-        sb.append("VERIFICACIÓN: SC-KD-").append(Integer.toHexString(perfil.getNumeroControl().hashCode()).toUpperCase()).append("\n");
+        sb.append("FOLIO DE CONSULTA: SC-KD-").append(UUID.randomUUID().toString().substring(0, 8).toUpperCase()).append("\n");
 
         return construirPdfPlano(sb.toString(), "KARDEX OFICIAL - " + perfil.getNumeroControl());
     }
@@ -86,13 +89,13 @@ public class DocumentoPdfService {
                     h.getClave(), mat, h.getGrupo(), h.getSalon(), h.getHorario()));
         }
         sb.append("--------------------------------------------------------------------------------\n");
-        sb.append("VERIFICACIÓN: SC-HR-").append(Integer.toHexString(perfil.getNumeroControl().hashCode()).toUpperCase()).append("\n");
+        sb.append("FOLIO DE CONSULTA: SC-HR-").append(UUID.randomUUID().toString().substring(0, 8).toUpperCase()).append("\n");
 
         return construirPdfPlano(sb.toString(), "HORARIO ESCOLAR - " + perfil.getNumeroControl());
     }
 
     public byte[] generarListaGrupoPdf(Long grupoId, String materiaNombre, String grupoCodigo, String profesorNombre, List<CargaAlumno> alumnos) {
-        String folio = "LISTA-" + grupoId + "-" + System.currentTimeMillis() % 10000;
+        String folio = "LISTA-" + grupoId + "-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         String fecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
         StringBuilder sb = new StringBuilder();
         sb.append("================================================================================\n");
@@ -118,73 +121,89 @@ public class DocumentoPdfService {
         }
         sb.append("--------------------------------------------------------------------------------\n");
         sb.append("\nFIRMA DEL DOCENTE: ___________________________   FIRMA DE SERVICIOS ESCOLARES: ___________________________\n\n");
-        sb.append("CÓDIGO DIGITAL DE VERIFICACIÓN INSTITUCIONAL: SECURECAMPUS-CERT-").append(Integer.toHexString(folio.hashCode()).toUpperCase()).append("\n");
-
         return construirPdfPlano(sb.toString(), "LISTA GRUPO " + grupoCodigo);
     }
 
-    /**
-     * Construye un archivo binario PDF 1.4 canónico sin requerir librerías externas adicionales.
-     */
     private byte[] construirPdfPlano(String texto, String titulo) {
-        try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            out.write("%PDF-1.4\n".getBytes(StandardCharsets.ISO_8859_1));
+        String[] lines = texto.split("\n", -1);
+        int pageCount = Math.max(1, (lines.length + PDF_LINES_PER_PAGE - 1) / PDF_LINES_PER_PAGE);
+        int fontId = 3 + pageCount * 2;
+        int infoId = fontId + 1;
+        int objectCount = infoId;
+        List<Integer> offsets = new ArrayList<>(objectCount + 1);
+        for (int i = 0; i <= objectCount; i++) {
+            offsets.add(0);
+        }
 
-            // Escapar texto para PDF
-            String escaped = texto.replace("\\", "\\\\")
-                                  .replace("(", "\\(")
-                                  .replace(")", "\\)");
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.writeBytes("%PDF-1.4\n".getBytes(StandardCharsets.US_ASCII));
+        writeObject(out, offsets, 1, ascii("<< /Type /Catalog /Pages 2 0 R /Info " + infoId + " 0 R >>"));
 
-            StringBuilder textStream = new StringBuilder();
-            textStream.append("BT\n");
-            textStream.append("/F1 9 Tf\n");
-            textStream.append("12 TL\n");
-            textStream.append("36 750 Td\n");
+        StringBuilder kids = new StringBuilder("<< /Type /Pages /Kids [");
+        for (int page = 0; page < pageCount; page++) {
+            kids.append(3 + page * 2).append(" 0 R ");
+        }
+        kids.append("] /Count ").append(pageCount).append(" >>");
+        writeObject(out, offsets, 2, ascii(kids.toString()));
 
-            String[] lines = escaped.split("\n");
-            for (String line : lines) {
-                textStream.append("(").append(line).append(") '\n");
+        for (int page = 0; page < pageCount; page++) {
+            int pageId = 3 + page * 2;
+            int contentId = pageId + 1;
+            writeObject(out, offsets, pageId, ascii("<< /Type /Page /Parent 2 0 R "
+                    + "/MediaBox [0 0 612 792] /Contents " + contentId
+                    + " 0 R /Resources << /Font << /F1 " + fontId + " 0 R >> >> >>"));
+
+            StringBuilder textStream = new StringBuilder("BT\n/F1 9 Tf\n12 TL\n36 756 Td\n");
+            int firstLine = page * PDF_LINES_PER_PAGE;
+            int lastLine = Math.min(firstLine + PDF_LINES_PER_PAGE, lines.length);
+            for (int line = firstLine; line < lastLine; line++) {
+                textStream.append('(').append(escapePdfText(lines[line])).append(") Tj T*\n");
             }
             textStream.append("ET\n");
-
-            byte[] streamBytes = textStream.toString().getBytes(StandardCharsets.ISO_8859_1);
-
-            int[] offsets = new int[6];
-
-            // Obj 1: Catalog
-            offsets[1] = out.size();
-            out.write("1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n".getBytes(StandardCharsets.ISO_8859_1));
-
-            // Obj 2: Pages
-            offsets[2] = out.size();
-            out.write("2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n".getBytes(StandardCharsets.ISO_8859_1));
-
-            // Obj 3: Page
-            offsets[3] = out.size();
-            out.write("3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n".getBytes(StandardCharsets.ISO_8859_1));
-
-            // Obj 4: Contents
-            offsets[4] = out.size();
-            out.write(("4 0 obj\n<< /Length " + streamBytes.length + " >>\nstream\n").getBytes(StandardCharsets.ISO_8859_1));
-            out.write(streamBytes);
-            out.write("\nendstream\nendobj\n".getBytes(StandardCharsets.ISO_8859_1));
-
-            // Obj 5: Font (Courier monoespaciada para tablas)
-            offsets[5] = out.size();
-            out.write("5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>\nendobj\n".getBytes(StandardCharsets.ISO_8859_1));
-
-            // Xref
-            int startXref = out.size();
-            out.write("xref\n0 6\n0000000000 65535 f \n".getBytes(StandardCharsets.ISO_8859_1));
-            for (int i = 1; i <= 5; i++) {
-                out.write(String.format("%010d 00000 n \n", offsets[i]).getBytes(StandardCharsets.ISO_8859_1));
-            }
-            out.write(("trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n" + startXref + "\n%%EOF\n").getBytes(StandardCharsets.ISO_8859_1));
-
-            return out.toByteArray();
-        } catch (IOException e) {
-            return texto.getBytes(StandardCharsets.UTF_8);
+            byte[] streamBytes = textStream.toString().getBytes(PDF_TEXT_CHARSET);
+            writeStreamObject(out, offsets, contentId, streamBytes);
         }
+
+        writeObject(out, offsets, fontId, ascii("<< /Type /Font /Subtype /Type1 "
+                + "/BaseFont /Courier /Encoding /WinAnsiEncoding >>"));
+        ByteArrayOutputStream info = new ByteArrayOutputStream();
+        info.writeBytes("<< /Title (".getBytes(StandardCharsets.US_ASCII));
+        info.writeBytes(escapePdfText(titulo).getBytes(PDF_TEXT_CHARSET));
+        info.writeBytes(") /Creator (SecureCampus) >>".getBytes(StandardCharsets.US_ASCII));
+        writeObject(out, offsets, infoId, info.toByteArray());
+
+        int startXref = out.size();
+        out.writeBytes(ascii("xref\n0 " + (objectCount + 1) + "\n0000000000 65535 f \n"));
+        for (int i = 1; i <= objectCount; i++) {
+            out.writeBytes(ascii(String.format("%010d 00000 n \n", offsets.get(i))));
+        }
+        out.writeBytes(ascii("trailer\n<< /Size " + (objectCount + 1)
+                + " /Root 1 0 R /Info " + infoId + " 0 R >>\nstartxref\n"
+                + startXref + "\n%%EOF\n"));
+        return out.toByteArray();
+    }
+
+    private static void writeObject(ByteArrayOutputStream out, List<Integer> offsets,
+                                    int objectId, byte[] content) {
+        offsets.set(objectId, out.size());
+        out.writeBytes(ascii(objectId + " 0 obj\n"));
+        out.writeBytes(content);
+        out.writeBytes(ascii("\nendobj\n"));
+    }
+
+    private static void writeStreamObject(ByteArrayOutputStream out, List<Integer> offsets,
+                                          int objectId, byte[] stream) {
+        offsets.set(objectId, out.size());
+        out.writeBytes(ascii(objectId + " 0 obj\n<< /Length " + stream.length + " >>\nstream\n"));
+        out.writeBytes(stream);
+        out.writeBytes(ascii("\nendstream\nendobj\n"));
+    }
+
+    private static byte[] ascii(String value) {
+        return value.getBytes(StandardCharsets.US_ASCII);
+    }
+
+    private static String escapePdfText(String value) {
+        return value.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)");
     }
 }
