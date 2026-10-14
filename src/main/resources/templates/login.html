@@ -1,13 +1,35 @@
 <!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <head th:replace="~{template :: head(#{meta.title.login})}">
-            <link
-                rel="icon"
-                type="image/svg+xml"
-                th:href="@{/images/favicon.svg}"
-            />
-        </head>
+    <head th:with="pageTitle=#{meta.title.login}">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <head th:replace="~{template :: head(${pageTitle})}"></head>
+
+        
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+        />
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" th:href="@{/css/portal.css(v=5)}" />
+        <link
+            rel="icon"
+            type="image/svg+xml"
+            th:href="@{/images/favicon.svg}"
+        />
+        <script
+            defer
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        ></script>
     </head>
     <body class="login-page">
         <main
@@ -23,32 +45,20 @@
                                 <i class="bi bi-mortarboard-fill"></i>
                             </span>
                             <span>
-                                <strong th:text="#{institution.name}"></strong>
-                                <small th:text="#{institution.sub}"></small>
+                                <strong th:text="#{meta.ittol}"></strong>
+                                <small th:text="#{meta.tecnm}"></small>
                             </span>
                         </div>
 
-                        <p class="eyebrow mb-3" th:text="#{login.eyebrow}"></p>
-                        <h1 class="mb-3" th:text="#{login.title}"></h1>
-                        <p th:text="#{login.description}"></p>
+                        <p class="eyebrow mb-3" th:text="#{meta.login.eyebrow}"></p>
+                        <h1 class="mb-3" th:text="#{meta.login.title}"></h1>
+                        <p th:text="#{meta.login.description}"></p>
 
                         <div class="login-highlights">
                             <span>
                                 <i class="bi bi-shield-check"></i>
                                 <span
-                                    th:text="#{login.highlight.secure}"
-                                ></span>
-                            </span>
-                            <span>
-                                <i class="bi bi-calendar3"></i>
-                                <span
-                                    th:text="#{login.highlight.schedule}"
-                                ></span>
-                            </span>
-                            <span>
-                                <i class="bi bi-journal-text"></i>
-                                <span
-                                    th:text="#{login.highlight.history}"
+                                    th:text="#{meta.login.highlight.secure}"
                                 ></span>
                             </span>
                         </div>
@@ -59,10 +69,10 @@
                         <div class="brand-mark mb-4">
                             <i class="bi bi-person-lock"></i>
                         </div>
-                        <p class="eyebrow mb-2" th:text="#{login.welcome}"></p>
+                        <p class="eyebrow mb-2" th:text="#{meta.login.welcome}"></p>
                         <h2
                             class="h3 fw-bold mb-2"
-                            th:text="#{login.action}"
+                            th:text="#{meta.login.action}"
                         ></h2>
 
                         <!-- Banner de error de autenticación con clase contenedora -->
@@ -71,7 +81,7 @@
                             class="flash-alert-wrapper"
                         >
                             <div
-                                th:replace="~{fragments/components :: alert('danger', #{login.error.credentials})}"
+                                th:replace="~{fragments/components :: alert('danger', #{meta.login.error.credentials})}"
                             ></div>
                         </div>
 
@@ -81,16 +91,21 @@
                             class="flash-alert-wrapper"
                         >
                             <div
-                                th:replace="~{fragments/components :: alert('success', #{login.error.logout})}"
+                                th:replace="~{fragments/components :: alert('success', #{meta.login.error.logout})}"
                             ></div>
                         </div>
 
                         <!-- Banner de cuenta bloqueada -->
-                        <div th:if="${param.blocked != null}" class="flash-alert-wrapper">
-                            <div class="alert alert-danger" role="alert">
-                                <i class="bi bi-shield-slash-fill me-2"></i>
-                                <strong>Cuenta bloqueada temporalmente:</strong> Se ha superado el límite de 5 intentos fallidos. Por seguridad, la cuenta permanecerá bloqueada durante 15 minutos.
+                        <div
+                            th:if="${param.logout != null}"
+                            class="flash-alert-wrapper"
+                        >
+                            <div 
+                                th:replace="~{fragments/components:: alert('danger', #{meta.login.error.block.title})}"
+                            >
+                                <p th:text="#{meta.login.error.block.desc}"></p>
                             </div>
+                                
                         </div>
 
                         <form th:action="@{/login}" method="post">
@@ -98,7 +113,7 @@
                                 <label
                                     for="numeroControl"
                                     class="form-label"
-                                    th:text="#{login.label.user}"
+                                    th:text="#{meta.login.label.user}"
                                 ></label>
                                 <input
                                     id="numeroControl"
@@ -116,9 +131,9 @@
                                     <label
                                         for="password"
                                         class="form-label"
-                                        th:text="#{login.label.password}"
+                                        th:text="#{meta.login.label.password}"
                                     ></label>
-                                    <a th:href="@{/recuperar}" class="small text-decoration-none">¿Olvidaste tu contraseña?</a>
+                                    <a th:href="@{/recuperar}" class="small text-decoration-none" th:text="#{meta.login.label.forgot}">¿Olvidaste tu contraseña?</a>
                                 </div>
                                 <input
                                     id="password"
@@ -133,13 +148,13 @@
                                 class="btn btn-orange btn-lg w-100"
                                 type="submit"
                             >
-                                <span th:text="#{login.btn.submit}"></span>
+                                <span th:text="#{meta.login.btn.submit}"></span>
                                 <i class="bi bi-arrow-right ms-1"></i>
                             </button>
                         </form>
                         <div class="small text-secondary mt-4 d-flex gap-2">
                             <i class="bi bi-info-circle mt-1"></i>
-                            <span th:text="#{login.footer.hint}"></span>
+                            <span th:text="#{meta.login.footer.hint}"></span>
                         </div>
                     </div>
                 </section>
@@ -149,7 +164,7 @@
         <footer>
             <div
                 class="login-copyright text-center text-white-50 small pb-3"
-                th:text="#{footer.copyright}"
+                th:text="#{meta.template.copyright}"
             ></div>
         </footer>
 

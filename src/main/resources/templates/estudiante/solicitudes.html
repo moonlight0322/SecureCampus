@@ -1,135 +1,61 @@
 <!doctype html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org" class="h-100">
-    <head th:replace="~{template :: head('Trámites y Solicitudes | Portal del estudiante')}"></head>
-    <body class="d-flex flex-column min-vh-100">
-        <nav th:replace="~{template :: navbar}"></nav>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head th:with="pageTitle=#{estudiante.solicitudes.pagetitle}">
+        <head th:replace="~{template :: head(${pageTitle})}"></head>
+    </head>
+<body class="portal-body">
+    <!-- Navbar global -->
+    <nav th:replace="~{template :: navbar}"></nav>
+    
+    <main>
+        <div class="badge-wrapper">
 
-        <main class="flex-grow-1 py-4 d-flex align-items-center">
-            <div class="container-fluid px-4 page-shell my-auto">
-                <div class="binder-wrapper">
-                    <!-- SIDEBAR -->
-                    <div class="binder-sidebar">
-                        <div class="binder-tabs">
-                            <a th:href="@{/estudiante}" class="binder-tab tab-yellow" title="Perfil">
-                                <i class="bi bi-person-badge-fill"></i>
-                                <span class="tab-label">Perfil</span>
-                            </a>
-                            <a th:href="@{/estudiante/horario}" class="binder-tab tab-orange" title="Horario">
-                                <i class="bi bi-calendar-week-fill"></i>
-                                <span class="tab-label">Horario</span>
-                            </a>
-                            <a th:href="@{/estudiante/kardex}" class="binder-tab tab-teal" title="Kárdex">
-                                <i class="bi bi-journal-bookmark-fill"></i>
-                                <span class="tab-label">Kárdex</span>
-                            </a>
-                            <a th:href="@{/estudiante/solicitudes}" class="binder-tab tab-purple active" style="background-color: #8b5cf6; color: #fff;" title="Solicitudes">
-                                <i class="bi bi-file-earmark-text-fill"></i>
-                                <span class="tab-label">Trámites</span>
-                            </a>
-                        </div>
-                        <div class="folder-cover">
-                            <div class="folder-content d-flex flex-column h-100">
-                                <div class="student-avatar-box mb-3">
-                                    <i class="bi bi-person-fill"></i>
-                                </div>
-                                <h3 class="student-name mb-1" th:text="${estudiante.nombreCompleto}">Nombre</h3>
-                                <p class="student-control text-muted mb-2">
-                                    <i class="bi bi-card-heading me-1"></i>
-                                    <span class="text-black" th:text="${estudiante.numeroControl}">Control</span>
-                                </p>
-                                <span class="text-black w-100 text-truncate mb-3" style="font-size: 0.8rem" th:text="${estudiante.carrera}">Carrera</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- CONTENT SHEET -->
-                    <div class="binder-content-sheet">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <div>
-                                <h1 class="h2 fw-bold mb-1">Trámites Escolares Digitales</h1>
-                                <p class="text-secondary mb-0">Genera y da seguimiento a solicitudes académicas con folio oficial.</p>
-                            </div>
-                            <button type="button" class="btn btn-orange" data-bs-toggle="modal" data-bs-target="#modalNuevaSolicitud">
-                                <i class="bi bi-plus-circle me-1"></i>Nueva Solicitud
-                            </button>
-                        </div>
-
-                        <div th:if="${param.creada != null}" class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="bi bi-check-circle-fill me-2"></i>Tu solicitud ha sido registrada exitosamente con folio único.
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-
-                        <!-- Historial de Solicitudes -->
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>Folio</th>
-                                        <th>Trámite</th>
-                                        <th>Motivo</th>
-                                        <th>Fecha</th>
-                                        <th>Estatus</th>
-                                        <th>Respuesta</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:if="${solicitudes == null || solicitudes.isEmpty()}">
-                                        <td colspan="6" class="text-center text-muted py-4">No tienes trámites o solicitudes registradas.</td>
-                                    </tr>
-                                    <tr th:each="sol : ${solicitudes}">
-                                        <td><strong class="text-navy" th:text="${sol.folio}">FOL-000</strong></td>
-                                        <td th:text="${sol.tipoTramite}">Tipo</td>
-                                        <td th:text="${sol.motivo}">Motivo</td>
-                                        <td th:text="${#temporals.format(sol.fechaSolicitud, 'dd/MM/yyyy HH:mm')}">Fecha</td>
-                                        <td>
-                                            <span class="badge" 
-                                                  th:classappend="${sol.estatus == 'APROBADA' ? 'bg-success' : (sol.estatus == 'RECHAZADA' ? 'bg-danger' : 'bg-warning text-dark')}"
-                                                  th:text="${sol.estatus}">PENDIENTE</span>
-                                        </td>
-                                        <td class="small" th:text="${sol.respuestaAdmin != null ? sol.respuestaAdmin : 'En revisión'}">Respuesta</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+            <!-- LADO IZQUIERDO: Credencial de Identificación del estudiante -->
+            <aside class="student-id-badge">
+                <div class="badge-avatar">
+                    <i class="bi bi-person-fill"></i>
                 </div>
-            </div>
-        </main>
+                <h4 class="fw-bold mb-1 text-dark" th:text="${estudiante.nombre}">Nombre completo</h4>
+                <p class="text-muted small mb-2" th:text="${estudiante.numeroControl}">Número de control</p>
+                <hr class="w-100 my-2 text-muted opacity-25">
+                <span class="text-dark small fw-medium" th:text="${estudiante.carrera}">Carrera</span>
+            </aside>
 
-        <!-- Modal Nueva Solicitud -->
-        <div class="modal fade" id="modalNuevaSolicitud" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <form th:action="@{/estudiante/solicitudes/crear}" method="post">
-                        <div class="modal-header">
-                            <h5 class="modal-title fw-bold">Iniciar Solicitud Escolar</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label for="tipoTramite" class="form-label fw-bold">Tipo de trámite</label>
-                                <select id="tipoTramite" name="tipoTramite" class="form-select" required>
-                                    <option value="CONSTANCIA_ESPECIAL">Constancia Especial con Horario</option>
-                                    <option value="REVISION_CALIFICACION">Revisión de Calificación Parcial</option>
-                                    <option value="BAJA_TEMPORAL">Solicitud de Baja Temporal</option>
-                                    <option value="SEGURO_FACULTATIVO">Trámite de Afiliación IMSS</option>
-                                    <option value="OTRO">Otro requerimiento académico</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="motivo" class="form-label fw-bold">Exposición de motivos</label>
-                                <textarea id="motivo" name="motivo" class="form-control" rows="4" placeholder="Describe brevemente el motivo o detalle de tu petición..." required></textarea>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-orange">Generar Folio y Enviar</button>
-                        </div>
-                    </form>
+            <!-- LADO DERECHO: Hoja de Contenido Principal -->
+            <section class="main-sheet">
+                
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <div>
+                        <h1 class="h3 fw-bold mb-1 text-dark" th:text="#{estudiante.solicitudes.maintitle}">Trámites Escolares Digitales</h1>
+                        
+                    </div>
+                    <a th:href="@{/estudiante/inicio}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                        <i class="bi bi-arrow-left me-1"></i> <span th:text="#{estudiante.horario.btn.back}">Volver al inicio</span>
+                    </a>
                 </div>
-            </div>
+
+                <div th:if="${param.creada != null}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <span th:text="#{estudiante.solicitudes.alert.success}">Tu solicitud ha sido registrada exitosamente con folio único.</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Historial de Solicitudes (Invocando fragmento de tabla) -->
+                <div class="table-responsive mt-3">
+                    <table th:replace="~{fragments/tables :: tablaSolicitudes(${solicitudes})}"></table>
+                </div>
+                <button type="button" class="btn btn-orange rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalNuevaSolicitud">
+                    <i class="bi bi-plus-circle me-1"></i><span th:text="#{estudiante.solicitudes.btn.new}">Nueva Solicitud</span>
+                </button>
+
+            </section>
+
         </div>
+    </main>
 
-        <footer th:replace="~{template :: footer}"></footer>
-    </body>
+    <!-- Modal Nueva Solicitud (Invocando fragmento de componente) -->
+    <div th:replace="~{fragments/components :: modalNuevaSolicitud}"></div>
+
+    <footer th:replace="~{template :: footer}"></footer>
+</body>
 </html>
