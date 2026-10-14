@@ -2,34 +2,35 @@ package com.ds.securecampus.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.ds.securecampus.model.CargaAlumno;
 import com.ds.securecampus.model.Grupo;
+import com.ds.securecampus.model.HorarioClase;
+import com.ds.securecampus.model.MateriaHorario;
 import com.ds.securecampus.model.Periodo;
 import com.ds.securecampus.repository.CargaAlumnoRepository;
 import com.ds.securecampus.repository.GrupoRepository;
-import com.ds.securecampus.repository.PeriodoRepository;
 
 @Service
 public class ProfesorService {
     private final GrupoRepository grupoRepository;
     private final CargaAlumnoRepository cargaAlumnoRepository;
-    private final PeriodoRepository periodoRepository;
     private final AuditoriaService auditoriaService;
     private final NotificacionService notificacionService;
 
     public ProfesorService(GrupoRepository grupoRepository,
                            CargaAlumnoRepository cargaAlumnoRepository,
-                           PeriodoRepository periodoRepository,
                            AuditoriaService auditoriaService,
                            NotificacionService notificacionService) {
         this.grupoRepository = grupoRepository;
         this.cargaAlumnoRepository = cargaAlumnoRepository;
-        this.periodoRepository = periodoRepository;
         this.auditoriaService = auditoriaService;
         this.notificacionService = notificacionService;
     }
@@ -40,13 +41,42 @@ public class ProfesorService {
     }
 
     @Transactional(readOnly = true)
-    public Grupo obtenerGrupo(Long grupoId) {
-        return grupoRepository.findById(grupoId).orElseThrow(() -> new IllegalArgumentException("Grupo no encontrado"));
+    public Grupo obtenerGrupoProfesor(Long grupoId, String profesorControl) {
+        return grupoRepository.findByGrupoIdAndProfesorNumeroControl(grupoId, profesorControl)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Grupo no encontrado."));
     }
 
     @Transactional(readOnly = true)
-    public List<CargaAlumno> obtenerAlumnosGrupo(Long grupoId) {
-        return cargaAlumnoRepository.findByGrupoGrupoId(grupoId);
+    public List<CargaAlumno> obtenerAlumnosGrupoProfesor(Long grupoId, String profesorControl) {
+        return cargaAlumnoRepository.findByGrupoGrupoIdAndGrupoProfesorNumeroControl(grupoId, profesorControl);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MateriaHorario> obtenerHorarioProfesor(String profesorControl) {
+        List<MateriaHorario> horario = new ArrayList<>();
+        for (Grupo grupo : grupoRepository.findByProfesorNumeroControl(profesorControl)) {
+            for (HorarioClase clase : grupo.getHorarios()) {
+                String dia = switch (clase.getDiaSemana()) {
+                    case 1 -> "Lunes";
+                    case 2 -> "Martes";
+                    case 3 -> "Miércoles";
+                    case 4 -> "Jueves";
+                    case 5 -> "Viernes";
+                    case 6 -> "Sábado";
+                    default -> "Día no definido";
+                };
+                horario.add(new MateriaHorario(
+                        grupo.getMateria().getNombre(),
+                        grupo.getMateria().getClave(),
+                        grupo.getCodigoGrupo(),
+                        clase.getAula().getNombreAula(),
+                        dia + " " + clase.getHoraInicio() + " - " + clase.getHoraFin(),
+                        grupo.getProfesor().getUsuario().getNombre() + " "
+                                + grupo.getProfesor().getUsuario().getApellidoPaterno(),
+                        grupo.getPeriodo().getNombre()));
+            }
+        }
+        return horario;
     }
 
     @Transactional(readOnly = true)
@@ -58,20 +88,28 @@ public class ProfesorService {
     }
 
     @Transactional
-    public void guardarCalificacion(Long cargaId, BigDecimal p1, BigDecimal p2, String profesorControl) {
+    public void guardarCalificacion(Long grupoId, Long cargaId, BigDecimal p1, BigDecimal p2, String profesorControl) {
         CargaAlumno carga = cargaAlumnoRepository.findById(cargaId)
                 .orElseThrow(() -> new IllegalArgumentException("Carga no encontrada"));
 
         Grupo grupo = carga.getGrupo();
+        if (!grupoId.equals(grupo.getGrupoId())
+                || grupo.getProfesor() == null
+                || !profesorControl.equals(grupo.getProfesor().getNumeroControl())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Grupo o carga no encontrados.");
+        }
         if (!puedeCapturar(grupo)) {
             throw new IllegalStateException("El periodo de captura se encuentra cerrado para este grupo. Solicite desbloqueo al administrador.");
         }
 
+        if (p1 == null || p2 == null) {
+            throw new IllegalArgumentException("Captura las dos calificaciones parciales antes de guardar.");
+        }
         // Validación de rango 0 a 100
-        if (p1 != null && (p1.compareTo(BigDecimal.ZERO) < 0 || p1.compareTo(new BigDecimal("100")) > 0)) {
+        if (p1.compareTo(BigDecimal.ZERO) < 0 || p1.compareTo(new BigDecimal("100")) > 0) {
             throw new IllegalArgumentException("La calificación parcial 1 debe estar entre 0 y 100.");
         }
-        if (p2 != null && (p2.compareTo(BigDecimal.ZERO) < 0 || p2.compareTo(new BigDecimal("100")) > 0)) {
+        if (p2.compareTo(BigDecimal.ZERO) < 0 || p2.compareTo(new BigDecimal("100")) > 0) {
             throw new IllegalArgumentException("La calificación parcial 2 debe estar entre 0 y 100.");
         }
 
@@ -79,14 +117,12 @@ public class ProfesorService {
         carga.setCalificacionParcial2(p2);
 
         // Promedio automático
-        if (p1 != null && p2 != null) {
-            BigDecimal finalScore = p1.add(p2).divide(new BigDecimal("2"), 2, RoundingMode.HALF_UP);
-            carga.setCalificacionFinal(finalScore);
-            if (finalScore.compareTo(new BigDecimal("70")) >= 0) {
-                carga.setEstatus("APROBADA");
-            } else {
-                carga.setEstatus("REPROBADA");
-            }
+        BigDecimal finalScore = p1.add(p2).divide(new BigDecimal("2"), 2, RoundingMode.HALF_UP);
+        carga.setCalificacionFinal(finalScore);
+        if (finalScore.compareTo(new BigDecimal("70")) >= 0) {
+            carga.setEstatus("APROBADA");
+        } else {
+            carga.setEstatus("REPROBADA");
         }
 
         cargaAlumnoRepository.save(carga);

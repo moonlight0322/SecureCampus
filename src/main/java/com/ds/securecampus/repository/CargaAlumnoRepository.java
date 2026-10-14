@@ -47,4 +47,7 @@ public interface CargaAlumnoRepository extends JpaRepository<CargaAlumno, Long> 
             @Param("fechaActual") LocalDate fechaActual);
 
     List<CargaAlumno> findByGrupoGrupoId(Long grupoId);
+
+    List<CargaAlumno> findByGrupoGrupoIdAndGrupoProfesorNumeroControl(
+            Long grupoId, String profesorNumeroControl);
 }
