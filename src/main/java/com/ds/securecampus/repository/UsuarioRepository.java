@@ -12,4 +12,6 @@ import com.ds.securecampus.model.Usuario;
 public interface UsuarioRepository extends JpaRepository<Usuario, String> {
     @EntityGraph(attributePaths = "rol")
     Optional<Usuario> findByNumeroControl(String numeroControl);
+
+    boolean existsByCorreoInstitucional(String correoInstitucional);
 }

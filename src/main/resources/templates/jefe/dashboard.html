@@ -6,6 +6,7 @@
 
         <main class="flex-grow-1 py-4">
             <div class="container page-shell my-auto">
+                <div th:replace="~{fragments/components :: accountBanner('Jefatura de departamento', ${numeroControl})}"></div>
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
                         <p class="eyebrow text-uppercase text-orange fw-bold mb-1">COORDINACIÓN Y PLANES DE ESTUDIO</p>
@@ -22,6 +23,7 @@
                     </div>
                 </div>
 
+                <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
                 <div th:if="${param.materiaCreada != null}" class="alert alert-success alert-dismissible fade show">
                     <i class="bi bi-check-circle-fill me-2"></i>Asignatura incorporada exitosamente a la retícula curricular.
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -30,6 +32,7 @@
                     <i class="bi bi-check-circle-fill me-2"></i>Docente y asignatura asignados al grupo satisfactoriamente.
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
+                <div th:if="${param.error != null && error == null}" class="alert alert-danger">No se pudo completar la operación. Revisa los datos e inténtalo de nuevo.</div>
 
                 <!-- Catálogo de Materias -->
                 <div class="card shadow-sm border-0 rounded-3">
@@ -85,7 +88,7 @@
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Carrera</label>
                                 <select name="carreraId" class="form-select" required>
-                                    <option th:each="c : ${carreras}" th:value="${c.idCarrera}" th:text="${c.nombre}"></option>
+                                    <option th:each="c : ${carreras}" th:value="${c.carreraId}" th:text="${c.nombre}"></option>
                                 </select>
                             </div>
                         </div>

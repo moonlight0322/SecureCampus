@@ -6,6 +6,7 @@
 
         <main class="flex-grow-1 py-4">
             <div class="container page-shell my-auto">
+                <div th:replace="~{fragments/components :: accountBanner('Administración escolar', ${numeroControl})}"></div>
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
                         <p class="eyebrow text-uppercase text-orange fw-bold mb-1">MÓDULO DE CONTROL CENTRAL</p>
@@ -22,15 +23,22 @@
                     </div>
                 </div>
 
+                <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+                <div th:if="${param.usuarioActualizado != null}" class="alert alert-success" role="status">El estatus de la cuenta se actualizó correctamente.</div>
+                <div th:if="${param.creado != null}" class="alert alert-success">Usuario creado y perfil académico registrado correctamente.</div>
+                <div th:if="${param.passwordRestablecida != null}" class="alert alert-success">Contraseña restablecida. Comparte la contraseña temporal con el usuario por un canal seguro.</div>
+                <div th:if="${param.grupoAsignado != null}" class="alert alert-success">Grupo creado y asignado correctamente.</div>
+                <div th:if="${param.solicitudProcesada != null}" class="alert alert-success" role="status">El trámite o desbloqueo se resolvió correctamente.</div>
+
                 <!-- Nav Tabs del Administrador -->
                 <ul class="nav nav-pills mb-4" id="adminTabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="usuarios-tab" data-bs-toggle="pill" data-bs-target="#tab-usuarios" type="button" role="tab">
+                        <button class="nav-link" th:classappend="${activeTab == 'usuarios'} ? ' active'" id="usuarios-tab" data-bs-toggle="pill" data-bs-target="#tab-usuarios" type="button" role="tab" th:attr="aria-selected=${activeTab == 'usuarios'}">
                             <i class="bi bi-people-fill me-1"></i>Usuarios y Roles
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="solicitudes-tab" data-bs-toggle="pill" data-bs-target="#tab-solicitudes" type="button" role="tab">
+                        <button class="nav-link" th:classappend="${activeTab == 'solicitudes'} ? ' active'" id="solicitudes-tab" data-bs-toggle="pill" data-bs-target="#tab-solicitudes" type="button" role="tab" th:attr="aria-selected=${activeTab == 'solicitudes'}">
                             <i class="bi bi-inbox-fill me-1"></i>Trámites y Desbloqueos
                         </button>
                     </li>
@@ -43,7 +51,7 @@
 
                 <div class="tab-content" id="adminTabsContent">
                     <!-- TAB 1: USUARIOS -->
-                    <div class="tab-pane fade show active" id="tab-usuarios" role="tabpanel">
+                    <div class="tab-pane fade" th:classappend="${activeTab == 'usuarios'} ? ' show active'" id="tab-usuarios" role="tabpanel">
                         <div class="card shadow-sm border-0 rounded-3">
                             <div class="card-body p-0 table-responsive">
                                 <table class="table table-hover align-middle mb-0">
@@ -75,7 +83,15 @@
                                                         <span th:text="${u.activo == 1 ? 'Desactivar' : 'Activar'}"></span>
                                                     </button>
                                                 </form>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                        data-bs-toggle="modal" data-bs-target="#modalPasswordReset"
+                                                        th:attr="data-control=${u.numeroControl}">
+                                                    <i class="bi bi-key"></i><span class="visually-hidden">Restablecer contraseña</span>
+                                                </button>
                                             </td>
+                                        </tr>
+                                        <tr th:if="${usuarios == null || usuarios.isEmpty()}">
+                                            <td colspan="6" class="text-center text-muted py-4">No hay cuentas registradas.</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -84,7 +100,7 @@
                     </div>
 
                     <!-- TAB 2: SOLICITUDES / TICKETS -->
-                    <div class="tab-pane fade" id="tab-solicitudes" role="tabpanel">
+                    <div class="tab-pane fade" th:classappend="${activeTab == 'solicitudes'} ? ' show active'" id="tab-solicitudes" role="tabpanel">
                         <div class="card shadow-sm border-0 rounded-3">
                             <div class="card-body p-0 table-responsive">
                                 <table class="table table-hover align-middle mb-0">
@@ -153,6 +169,9 @@
                                             <td th:text="${l.detalles}">DETALLES</td>
                                             <td th:text="${l.ipOrigen}">IP</td>
                                         </tr>
+                                        <tr th:if="${logs == null || logs.isEmpty()}">
+                                            <td colspan="6" class="text-center text-muted py-4">Aún no hay eventos de auditoría registrados.</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -175,41 +194,86 @@
                             <div class="row g-2 mb-3">
                                 <div class="col-6">
                                     <label class="form-label">No. Control</label>
-                                    <input name="numeroControl" class="form-control" required pattern="[0-9]+" />
+                                    <input name="numeroControl" class="form-control" required pattern="[0-9]+" maxlength="20" />
                                 </div>
                                 <div class="col-6">
                                     <label class="form-label">Rol</label>
                                     <select name="rolId" class="form-select" required>
-                                        <option th:each="r : ${roles}" th:value="${r.rolId}" th:text="${r.nombreRol}"></option>
+                                        <option value="">-- Selecciona un rol --</option>
+                                        <option th:each="r : ${roles}" th:value="${r.rolId}" th:attr="data-role=${r.nombreRol}" th:text="${r.nombreRol}"></option>
                                     </select>
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Nombre</label>
-                                <input name="nombre" class="form-control" required />
+                                <input name="nombre" class="form-control" required maxlength="50" />
                             </div>
                             <div class="row g-2 mb-3">
                                 <div class="col-6">
                                     <label class="form-label">Apellido Paterno</label>
-                                    <input name="apellidoPaterno" class="form-control" required />
+                                    <input name="apellidoPaterno" class="form-control" required maxlength="50" />
                                 </div>
                                 <div class="col-6">
                                     <label class="form-label">Apellido Materno</label>
-                                    <input name="apellidoMaterno" class="form-control" />
+                                    <input name="apellidoMaterno" class="form-control" maxlength="50" />
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Correo Institucional</label>
-                                <input name="correoInstitucional" type="email" class="form-control" required />
+                                <input name="correoInstitucional" type="email" class="form-control" required maxlength="100" />
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Contraseña Inicial</label>
-                                <input name="password" type="password" class="form-control" required />
+                                <input name="password" type="password" class="form-control" minlength="12" maxlength="72" autocomplete="new-password" required />
+                                <div class="form-text">Al menos 12 caracteres, hasta 72 bytes en UTF-8. El usuario puede cambiarla desde su cuenta.</div>
+                            </div>
+                            <div id="careerFields" class="d-none">
+                                <div class="mb-3">
+                                    <label class="form-label" for="newUserCareer">Carrera / adscripción</label>
+                                    <select id="newUserCareer" name="carreraId" class="form-select">
+                                        <option value="">-- Selecciona una carrera --</option>
+                                        <option th:each="c : ${carreras}" th:value="${c.carreraId}" th:text="${c.nombre}"></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="professorFields" class="d-none">
+                                <div class="mb-3">
+                                    <label class="form-label" for="tipoContratacion">Tipo de contratación</label>
+                                    <input id="tipoContratacion" name="tipoContratacion" class="form-control" maxlength="20" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label" for="cubiculo">Cubículo (opcional)</label>
+                                    <input id="cubiculo" name="cubiculo" class="form-control" maxlength="20" />
+                                </div>
                             </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                             <button type="submit" class="btn btn-navy">Crear Usuario</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modalPasswordReset" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form th:action="@{/admin/usuarios/restablecer-password}" method="post">
+                        <div class="modal-header">
+                            <h5 class="modal-title fw-bold">Restablecer contraseña</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input id="resetNumeroControl" type="hidden" name="numeroControl" />
+                            <p>Establece una contraseña temporal para <strong id="resetUsuario"></strong>.</p>
+                            <label class="form-label" for="resetPassword">Contraseña temporal</label>
+                            <input id="resetPassword" type="password" name="password" class="form-control" minlength="12" maxlength="72" autocomplete="new-password" required />
+                            <div class="form-text">Al menos 12 caracteres, hasta 72 bytes en UTF-8; entrégala al usuario por un canal seguro.</div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-navy">Restablecer</button>
                         </div>
                     </form>
                 </div>
@@ -233,6 +297,7 @@
                             <div class="mb-3">
                                 <label class="form-label">Materia</label>
                                 <select name="materiaId" class="form-select" required>
+                                    <option value="">-- Selecciona una materia --</option>
                                     <option th:each="m : ${materias}" th:value="${m.materiaId}" th:text="${m.clave + ' - ' + m.nombre}"></option>
                                 </select>
                             </div>
@@ -246,6 +311,7 @@
                             <div class="mb-3">
                                 <label class="form-label">Periodo Escolar</label>
                                 <select name="periodoId" class="form-select" required>
+                                    <option value="">-- Selecciona un periodo --</option>
                                     <option th:each="pe : ${periodos}" th:value="${pe.periodoId}" th:text="${pe.nombre}"></option>
                                 </select>
                             </div>
@@ -282,7 +348,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Observaciones / Respuesta oficial</label>
-                                    <textarea name="respuesta" class="form-control" rows="3" required></textarea>
+                                    <textarea name="respuesta" class="form-control" rows="3" maxlength="500" required></textarea>
                                 </div>
                             </div>
                             <div class="modal-footer">
@@ -296,5 +362,29 @@
         </div>
 
         <footer th:replace="~{template :: footer}"></footer>
+        <script>
+            const roleSelect = document.querySelector('#modalNuevoUsuario select[name="rolId"]');
+            const careerFields = document.getElementById('careerFields');
+            const careerSelect = document.getElementById('newUserCareer');
+            const professorFields = document.getElementById('professorFields');
+            const contractInput = document.getElementById('tipoContratacion');
+
+            function updateProfileFields() {
+                const role = roleSelect.selectedOptions[0]?.dataset.role;
+                const needsCareer = role === 'ESTUDIANTE' || role === 'PROFESOR';
+                careerFields.classList.toggle('d-none', !needsCareer);
+                professorFields.classList.toggle('d-none', role !== 'PROFESOR');
+                careerSelect.required = needsCareer;
+                contractInput.required = role === 'PROFESOR';
+            }
+            roleSelect.addEventListener('change', updateProfileFields);
+            updateProfileFields();
+
+            document.getElementById('modalPasswordReset').addEventListener('show.bs.modal', event => {
+                const control = event.relatedTarget.dataset.control;
+                document.getElementById('resetNumeroControl').value = control;
+                document.getElementById('resetUsuario').textContent = control;
+            });
+        </script>
     </body>
 </html>

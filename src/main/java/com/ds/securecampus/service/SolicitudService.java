@@ -50,13 +50,22 @@ public class SolicitudService {
 
     @Transactional
     public void resolverSolicitud(Long idSolicitud, String nuevoEstatus, String respuestaAdmin, String adminUser) {
-        solicitudRepository.findById(idSolicitud).ifPresent(sol -> {
-            sol.setEstatus(nuevoEstatus);
-            sol.setRespuestaAdmin(respuestaAdmin);
-            solicitudRepository.save(sol);
+        if (!"APROBADA".equals(nuevoEstatus) && !"RECHAZADA".equals(nuevoEstatus)) {
+            throw new IllegalArgumentException("Selecciona si la solicitud será aprobada o rechazada.");
+        }
+        if (respuestaAdmin == null || respuestaAdmin.isBlank() || respuestaAdmin.length() > 500) {
+            throw new IllegalArgumentException("La respuesta debe contener entre 1 y 500 caracteres.");
+        }
 
-            auditoriaService.registrar(adminUser, "ADMINISTRADOR", "SOLICITUD_RESUELTA", 
-                    "Folio: " + sol.getFolio() + " resuelta como " + nuevoEstatus, "127.0.0.1");
-        });
+        SolicitudTramite solicitud = solicitudRepository.findById(idSolicitud)
+                .orElseThrow(() -> new IllegalArgumentException("La solicitud ya no existe."));
+        if (!"PENDIENTE".equals(solicitud.getEstatus())) {
+            throw new IllegalArgumentException("Esta solicitud ya fue resuelta.");
+        }
+        solicitud.setEstatus(nuevoEstatus);
+        solicitud.setRespuestaAdmin(respuestaAdmin.trim());
+        solicitudRepository.save(solicitud);
+        auditoriaService.registrar(adminUser, "ADMINISTRADOR", "SOLICITUD_RESUELTA",
+                "Folio: " + solicitud.getFolio() + " resuelta como " + nuevoEstatus, "127.0.0.1");
     }
 }
