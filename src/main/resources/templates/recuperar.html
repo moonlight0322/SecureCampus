@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-    <head th:replace="~{template :: head('Recuperación de Contraseña | Instituto Tecnológico de Toluca')}"></head>
+    <head th:with="pageTitle=#{meta.forgot.pagetitle}">
+        <head th:replace="~{template :: head(${pageTitle})}"></head>
+    </head>
     <body class="login-page">
         <main class="container min-vh-100 d-flex align-items-center py-4 py-lg-5">
             <div class="row login-layout w-100 align-items-center justify-content-center mx-auto">
@@ -9,9 +11,9 @@
                         <div class="brand-mark mb-4">
                             <i class="bi bi-key-fill"></i>
                         </div>
-                        <p class="eyebrow mb-2">SEGURIDAD INSTITUCIONAL</p>
-                        <h2 class="h3 fw-bold mb-2">Recuperar acceso</h2>
-                        <p class="text-secondary mb-4">
+                        <p class="eyebrow mb-2" th:text="#{meta.forgot.eyebrow}">SEGURIDAD INSTITUCIONAL</p>
+                        <h2 class="h3 fw-bold mb-2" th:text="#{meta.forgot.title}">Recuperar acceso</h2>
+                        <p class="text-secondary mb-4" th:text="#{meta.forgot.subtitle}">
                             Ingresa tu número de control institucional para restablecer tu contraseña.
                         </p>
 
@@ -22,18 +24,18 @@
 
                         <form th:action="@{/recuperar}" method="post">
                             <div class="mb-3">
-                                <label for="numeroControl" class="form-label">Número de control</label>
+                                <label for="numeroControl" class="form-label" th:text="#{meta.forgot.label.control}">Número de control</label>
                                 <input id="numeroControl" name="numeroControl" class="form-control form-control-lg" type="text" maxlength="50" required autofocus />
                             </div>
                             <button class="btn btn-orange btn-lg w-100" type="submit">
-                                Enviar instrucciones
+                                <span th:text="#{meta.forgot.btn.submit}">Enviar instrucciones</span>
                                 <i class="bi bi-send ms-1"></i>
                             </button>
                         </form>
 
                         <div class="mt-4 text-center">
                             <a th:href="@{/login}" class="text-decoration-none small">
-                                <i class="bi bi-arrow-left me-1"></i>Volver al inicio de sesión
+                                <i class="bi bi-arrow-left me-1"></i><span th:text="#{meta.forgot.link.back}">Volver al inicio de sesión</span>
                             </a>
                         </div>
                     </div>

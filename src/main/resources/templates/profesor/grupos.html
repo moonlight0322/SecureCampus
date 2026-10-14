@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <head th:replace="~{template :: head(#{teacher.groups.title})}"></head>
-</head>
+    <head th:with="pageTitle=#{profesor.grupos.title}">
+        <head th:replace="~{template :: head(${pageTitle})}"></head>
+    </head>
 <body class="portal-body">
     <!-- Navbar global -->
     <nav th:replace="~{template :: navbar}"></nav>
@@ -10,7 +10,7 @@
     <main>
         <div class="badge-wrapper">
 
-            <!-- LADO IZQUIERDO: Credencial de Identificación del Profesor (Reutilizada) -->
+            <!-- LADO IZQUIERDO: Credencial de Identificación del Profesor -->
             <aside class="teacher-id-badge">
                 <div class="badge-avatar">
                     <i class="bi bi-person-fill"></i>
@@ -18,38 +18,38 @@
                 <h4 class="fw-bold mb-1 text-dark" th:text="${profesor.nombre}">Nombre completo</h4>
                 <p class="text-muted small mb-2" th:text="${profesor.numeroEmpleado}">Numero empleado</p>
                 <hr class="w-100 my-2 text-muted opacity-25">
-                <span class="text-secondary small fw-medium" th:text="${profesor.departamento}">Departamento</span>
+                <span class="text-dark small fw-medium" th:text="${profesor.departamento}">Departamento</span>
             </aside>
 
             <!-- LADO DERECHO: Hoja de Contenido Principal (Grupos) -->
             <section class="teacher-main-sheet">
-                <!-- En la sección principal de profesor/grupos.html, antes del título -->
                 <div class="mb-4">
                     <a th:href="@{/profesor/inicio}" class="btn btn-outline-secondary btn-sm rounded-pill mb-2 px-3">
-                        <i class="bi bi-arrow-left me-1"></i> <span th:text="#{teacher.btn.back}">Regresar</span>
+                        <i class="bi bi-arrow-left me-1"></i> <span th:text="#{profesor.grupos.btn.back}">Regresar</span>
                     </a>
-                    <h1 class="h2 fw-bold mb-0" th:text="#{teacher.groups.heading}">Grupos</h1>
+                    <h1 class="h2 fw-bold mb-0" th:text="#{profesor.grupos.heading}">Grupos</h1>
                 </div>
+
                 <!-- Cuadrícula de Tarjetas de Grupos -->
                 <div class="row g-4">
                     <div class="col-md-4" th:each="grupo : ${listaGrupos}">
                         <div class="group-card h-100 d-flex flex-column justify-content-between text-center">
                             <div>
-                                <!-- Nombre del Grupo (ej. Clave o Título) -->
+                                <!-- Nombre del Grupo -->
                                 <h5 class="fw-bold text-dark mb-1" th:text="${grupo.clave}">Grupo</h5>
                                 <!-- Materia -->
                                 <p class="text-secondary small mb-4" th:text="${grupo.materia}">Materia</p>
                             </div>
 
                             <div>
-                                <!-- Horario y Aula alineados como en el diseño -->
+                                <!-- Horario y Aula alineados -->
                                 <div class="d-flex justify-content-between text-muted small mb-3 px-1">
                                     <span th:text="${grupo.horario}">Horario</span>
                                     <span th:text="${grupo.aula}">Aula</span>
                                 </div>
                                 <!-- Botón Detalles -->
                                 <a th:href="@{/profesor/grupo/{id}(id=${grupo.id})}" class="btn btn-sky w-100 btn-sm py-2">
-                                    <span th:text="#{teacher.groups.btn.details}">Detalles</span>
+                                    <span th:text="#{profesor.grupos.btn.details}">Detalles</span>
                                 </a>
                             </div>
                         </div>
@@ -58,7 +58,7 @@
 
                 <!-- Mensaje por si no hay grupos -->
                 <div th:if="${listaGrupos == null or listaGrupos.empty}" class="text-center text-muted py-5">
-                    <p>No tienes grupos asignados actualmente.</p>
+                    <p th:text="#{profesor.grupos.empty}">No tienes grupos asignados actualmente.</p>
                 </div>
 
             </section>

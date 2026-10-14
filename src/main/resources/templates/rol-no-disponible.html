@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-    <head th:replace="~{template :: head(#{meta.title.access})}">
+        <head th:with="pageTitle=#{meta.role.title}">
+            <head th:replace="~{template :: head(${pageTitle})}"></head>
+        </head>
         <link
             rel="icon"
             type="image/svg+xml"
@@ -15,14 +17,14 @@
                 <div class="brand-mark mx-auto mb-4">
                     <i class="bi bi-person-lock"></i>
                 </div>
-                <p class="eyebrow" th:text="#{institution.name}"></p>
+                <p class="eyebrow" th:text="#{meta.ittol}"></p>
                 <h1 class="h3 fw-bold" th:text="#{error.role.title}"></h1>
-                <p class="text-secondary" th:text="#{error.role.desc}"></p>
+                <p class="text-secondary" th:text="#{meta.role.error.desc}"></p>
                 <form th:action="@{/logout}" method="post">
                     <button
                         class="btn btn-orange"
                         type="submit"
-                        th:text="#{btn.logout}"
+                        th:text="#{meta.template.btn.logout}"
                     ></button>
                 </form>
             </section>
