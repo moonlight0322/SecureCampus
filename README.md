@@ -27,16 +27,9 @@ export DB_PASSWORD='tu-contraseña'
 
 Para TiDB Cloud, usa el host, puerto, base de datos y usuario del panel de conexión de TiDB; configura el TLS requerido por tu clúster en `DB_URL`. No guardes contraseñas en el repositorio.
 
-Las cuentas se validan contra `perfiles_base.numero_control`, `perfiles_base.password_hash` y el rol asociado en `roles`. El script incluye estas cuentas de prueba, con contraseñas almacenadas como hashes BCrypt y habilitadas para cambiarla (`debe_cambiar_pass = 1`):
+Las cuentas se validan contra `perfiles_base.numero_control`, `perfiles_base.password_hash` y el rol asociado en `roles`. El script contiene registros de prueba; configura y cambia sus contraseñas antes de usar esos datos en cualquier entorno compartido. No publiques contraseñas, tokens ni credenciales de bases de datos.
 
-| Tipo | Número de control | Contraseña inicial |
-|---|---|---|
-| Estudiante | `22280120` | `PW_22280120` |
-| Administrativo | `10280070` | `PW_10280070` |
-| Profesor | `19280703` | `PW_19280703` |
-| Jefe Depto | `00334456` | `deptosist` |
-
-Úsalas solo en entornos de prueba. Si la base TiDB/MySQL ya existe y no tiene `estudiantes.fecha_ingreso`, agrega la columna antes de insertar el estudiante:
+Si la base TiDB/MySQL ya existe y no tiene `estudiantes.fecha_ingreso`, agrega la columna antes de insertar el estudiante:
 
 ```sql
 ALTER TABLE estudiantes
@@ -53,4 +46,17 @@ TiDB Cloud no soporta triggers. Por eso, las reglas que requieren comparar varia
 ./mvnw spring-boot:run
 ```
 
-Abre <http://localhost:8080>. El portal implementa las páginas del estudiante: resumen académico, horario del periodo vigente y kárdex. Las cuentas administrativas y de profesor pueden autenticarse, pero muestran una pantalla informativa porque esos módulos no están dentro del alcance actual.
+Abre <http://localhost:8080>. Los módulos disponibles incluyen:
+
+- **Estudiante:** resumen, horario, kárdex, solicitudes y descarga de documentos PDF. La constancia requiere reinscripción vigente (`pago_reinscripcion = 'S'`).
+- **Profesor:** grupos asignados, captura de dos parciales, promedio automático, solicitud de desbloqueo, lista oficial PDF y horario.
+- **Jefe de departamento:** alta de materias y creación/asignación de grupos a docentes.
+- **Administración:** alta de usuarios y su perfil académico, activación de cuentas, asignación de grupos, atención de solicitudes y restablecimiento de contraseñas.
+
+Todos los roles autenticados pueden cambiar su propia contraseña en **Contraseña**. El administrador puede fijar una contraseña temporal; debe compartirla por un canal seguro. La recuperación automática por correo todavía no está habilitada. Las sesiones terminan después de 10 minutos sin actividad. Los PDF se generan localmente y se paginan cuando el documento lo requiere.
+
+Para validar el proyecto:
+
+```powershell
+.\mvnw.cmd test
+```

@@ -93,7 +93,7 @@ class SchemaAlignmentRepositoryTests {
                         .param("numeroControl", "00280691")
                         .param("password", "incorrecta"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login?error"));
+                .andExpect(redirectedUrl("/login?error=true"));
     }
 
     @Test
