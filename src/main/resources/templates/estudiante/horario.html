@@ -6,81 +6,9 @@
 
         <main class="flex-grow-1 py-4 d-flex align-items-center">
             <div class="container-fluid px-4 page-shell my-auto">
-                <div class="binder-wrapper">
-                    <!-- LADO IZQUIERDO: Portada del Binder -->
-                    <div class="binder-sidebar">
-                        <div class="binder-tabs">
-                            <a
-                                th:href="@{/estudiante}"
-                                class="binder-tab tab-yellow"
-                                th:attr="title=#{binder.tab.profile}"
-                            >
-                                <i class="bi bi-person-badge-fill"></i>
-                                <span
-                                    class="tab-label"
-                                    th:text="#{binder.tab.profile}"
-                                    >Perfil</span
-                                >
-                            </a>
-                            <a
-                                th:href="@{/estudiante/horario}"
-                                class="binder-tab tab-orange active"
-                                th:attr="title=#{binder.tab.schedule}"
-                            >
-                                <i class="bi bi-calendar-week-fill"></i>
-                                <span
-                                    class="tab-label"
-                                    th:text="#{binder.tab.schedule}"
-                                    >Horario</span
-                                >
-                            </a>
-                            <a
-                                th:href="@{/estudiante/kardex}"
-                                class="binder-tab tab-teal"
-                                th:attr="title=#{binder.tab.kardex}"
-                            >
-                                <i class="bi bi-journal-bookmark-fill"></i>
-                                <span
-                                    class="tab-label"
-                                    th:text="#{binder.tab.kardex}"
-                                    >Kárdex</span
-                                >
-                            </a>
-                        </div>
-
-                        <div class="folder-cover">
-                            <div
-                                class="folder-content d-flex flex-column h-100"
-                            >
-                                <div class="student-avatar-box mb-3">
-                                    <i class="bi bi-person-fill"></i>
-                                </div>
-                                <h3
-                                    class="student-name mb-1"
-                                    th:text="${estudiante.nombreCompleto}"
-                                >
-                                    Nombre del alumno
-                                </h3>
-                                <p class="student-control text-muted mb-2">
-                                    <i class="bi bi-card-heading me-1"></i>
-                                    <span
-                                        class="text-black"
-                                        th:text="${estudiante.numeroControl}"
-                                        >No. control</span
-                                    >
-                                </p>
-                                <span
-                                    class="text-black w-100 text-truncate mb-3"
-                                    style="font-size: 0.8rem"
-                                    th:text="${estudiante.carrera}"
-                                    >Carrera</span
-                                >
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- LADO DERECHO: Tabla de Horario -->
-                    <div class="binder-content-sheet d-flex flex-column">
+                <div class="badge-wrapper">
+                    <aside th:replace="~{fragments/components :: studentBadge('horario', ${estudiante})}"></aside>
+                    <section class="main-sheet">
                         <div
                             th:replace="~{fragments/components :: pageTitle(#{schedule.heading.title})}"
                         ></div>
@@ -110,7 +38,7 @@
                                 >
                             </a>
                         </div>
-                    </div>
+                    </section>
                 </div>
             </div>
         </main>

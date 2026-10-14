@@ -6,44 +6,9 @@
 
         <main class="flex-grow-1 py-4 d-flex align-items-center">
             <div class="container-fluid px-4 page-shell my-auto">
-                <div class="binder-wrapper">
-                    <!-- SIDEBAR -->
-                    <div class="binder-sidebar">
-                        <div class="binder-tabs">
-                            <a th:href="@{/estudiante}" class="binder-tab tab-yellow" title="Perfil">
-                                <i class="bi bi-person-badge-fill"></i>
-                                <span class="tab-label">Perfil</span>
-                            </a>
-                            <a th:href="@{/estudiante/horario}" class="binder-tab tab-orange" title="Horario">
-                                <i class="bi bi-calendar-week-fill"></i>
-                                <span class="tab-label">Horario</span>
-                            </a>
-                            <a th:href="@{/estudiante/kardex}" class="binder-tab tab-teal" title="Kárdex">
-                                <i class="bi bi-journal-bookmark-fill"></i>
-                                <span class="tab-label">Kárdex</span>
-                            </a>
-                            <a th:href="@{/estudiante/solicitudes}" class="binder-tab tab-purple active" style="background-color: #8b5cf6; color: #fff;" title="Solicitudes">
-                                <i class="bi bi-file-earmark-text-fill"></i>
-                                <span class="tab-label">Trámites</span>
-                            </a>
-                        </div>
-                        <div class="folder-cover">
-                            <div class="folder-content d-flex flex-column h-100">
-                                <div class="student-avatar-box mb-3">
-                                    <i class="bi bi-person-fill"></i>
-                                </div>
-                                <h3 class="student-name mb-1" th:text="${estudiante.nombreCompleto}">Nombre</h3>
-                                <p class="student-control text-muted mb-2">
-                                    <i class="bi bi-card-heading me-1"></i>
-                                    <span class="text-black" th:text="${estudiante.numeroControl}">Control</span>
-                                </p>
-                                <span class="text-black w-100 text-truncate mb-3" style="font-size: 0.8rem" th:text="${estudiante.carrera}">Carrera</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- CONTENT SHEET -->
-                    <div class="binder-content-sheet">
+                <div class="badge-wrapper">
+                    <aside th:replace="~{fragments/components :: studentBadge('solicitudes', ${estudiante})}"></aside>
+                    <section class="main-sheet">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <div>
                                 <h1 class="h2 fw-bold mb-1">Trámites Escolares Digitales</h1>
@@ -91,7 +56,7 @@
                                 </tbody>
                             </table>
                         </div>
-                    </div>
+                    </section>
                 </div>
             </div>
         </main>

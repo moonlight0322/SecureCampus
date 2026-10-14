@@ -53,7 +53,7 @@ public class PortalController {
 
     @PostMapping("/recuperar")
     public String procesarRecuperacion(@RequestParam("numeroControl") String numeroControl, Model model) {
-        model.addAttribute("mensaje", "Si el número de control " + numeroControl + " está registrado, se han enviado las instrucciones de recuperación a su correo institucional.");
+        model.addAttribute("mensaje", "La recuperación automática por correo aún no está habilitada. Solicita el restablecimiento de tu contraseña al administrador escolar.");
         return "recuperar";
     }
 
@@ -127,7 +127,10 @@ public class PortalController {
 
         // Validación de regla de negocio: debe estar inscrito
         if (!"S".equalsIgnoreCase(est.getPagoReinscripcion())) {
-            return ResponseEntity.badRequest().body("No es posible generar la constancia: El alumno no cuenta con estatus inscrito vigente.".getBytes());
+            return ResponseEntity.status(403)
+                    .contentType(new MediaType("text", "plain", java.nio.charset.StandardCharsets.UTF_8))
+                    .body("No es posible generar la constancia: el alumno no cuenta con estatus inscrito vigente."
+                            .getBytes(java.nio.charset.StandardCharsets.UTF_8));
         }
 
         byte[] pdf = documentoPdfService.generarConstanciaEstudios(perfil, est);
