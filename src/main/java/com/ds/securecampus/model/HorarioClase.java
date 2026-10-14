@@ -9,6 +9,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,6 +30,7 @@ public class HorarioClase {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "grupo_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Grupo grupo;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -35,7 +38,7 @@ public class HorarioClase {
     private Aula aula;
 
     @Column(name = "dia_semana", nullable = false)
-    private Integer diaSemana;
+    private Byte diaSemana;
 
     @Column(name = "hora_inicio", nullable = false, length = 5)
     private String horaInicio;

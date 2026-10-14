@@ -20,7 +20,7 @@ import lombok.Setter;
 public class Carrera {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_carrera")
+    @Column(name = "id_carrera", nullable = false)
     private Long carreraId;
 
     @Column(name = "clave_carrera", nullable = false, unique = true, length = 20)

@@ -85,6 +85,14 @@
                             ></div>
                         </div>
 
+                        <!-- Banner de cuenta bloqueada -->
+                        <div th:if="${param.blocked != null}" class="flash-alert-wrapper">
+                            <div class="alert alert-danger" role="alert">
+                                <i class="bi bi-shield-slash-fill me-2"></i>
+                                <strong>Cuenta bloqueada temporalmente:</strong> Se ha superado el límite de 5 intentos fallidos. Por seguridad, la cuenta permanecerá bloqueada durante 15 minutos.
+                            </div>
+                        </div>
+
                         <form th:action="@{/login}" method="post">
                             <div class="mb-3">
                                 <label
@@ -104,11 +112,14 @@
                                 />
                             </div>
                             <div class="mb-4">
-                                <label
-                                    for="password"
-                                    class="form-label"
-                                    th:text="#{login.label.password}"
-                                ></label>
+                                <div class="d-flex justify-content-between">
+                                    <label
+                                        for="password"
+                                        class="form-label"
+                                        th:text="#{login.label.password}"
+                                    ></label>
+                                    <a th:href="@{/recuperar}" class="small text-decoration-none">¿Olvidaste tu contraseña?</a>
+                                </div>
                                 <input
                                     id="password"
                                     name="password"

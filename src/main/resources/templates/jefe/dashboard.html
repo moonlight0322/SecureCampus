@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" class="h-100">
+    <head th:replace="~{template :: head('Gestión Académica - Jefe de Departamento | SecureCampus')}"></head>
+    <body class="d-flex flex-column min-vh-100">
+        <nav th:replace="~{template :: navbar}"></nav>
+
+        <main class="flex-grow-1 py-4">
+            <div class="container page-shell my-auto">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <p class="eyebrow text-uppercase text-orange fw-bold mb-1">COORDINACIÓN Y PLANES DE ESTUDIO</p>
+                        <h1 class="h2 fw-bold text-navy mb-1">Gestión Académica de Carreras y Materias</h1>
+                        <p class="text-secondary mb-0">Alta de asignaturas curriculares y asignación de docentes a la plantilla escolar.</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-navy" data-bs-toggle="modal" data-bs-target="#modalAltaMateria">
+                            <i class="bi bi-journal-plus me-1"></i>Alta de Materia
+                        </button>
+                        <button type="button" class="btn btn-orange" data-bs-toggle="modal" data-bs-target="#modalAsignarProfesor">
+                            <i class="bi bi-person-video3 me-1"></i>Asignar a Grupo
+                        </button>
+                    </div>
+                </div>
+
+                <div th:if="${param.materiaCreada != null}" class="alert alert-success alert-dismissible fade show">
+                    <i class="bi bi-check-circle-fill me-2"></i>Asignatura incorporada exitosamente a la retícula curricular.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <div th:if="${param.asignado != null}" class="alert alert-info alert-dismissible fade show">
+                    <i class="bi bi-check-circle-fill me-2"></i>Docente y asignatura asignados al grupo satisfactoriamente.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Catálogo de Materias -->
+                <div class="card shadow-sm border-0 rounded-3">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="card-title fw-bold text-navy mb-0"><i class="bi bi-book-half text-orange me-2"></i>Oferta Académica de Materias</h5>
+                    </div>
+                    <div class="card-body p-0 table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Clave</th>
+                                    <th>Nombre de la Asignatura</th>
+                                    <th>Créditos SATCA</th>
+                                    <th>Carrera Asociada</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="m : ${materias}">
+                                    <td><strong class="text-navy" th:text="${m.clave}">CLAVE</strong></td>
+                                    <td th:text="${m.nombre}">Materia</td>
+                                    <td><span class="badge bg-light text-dark border" th:text="${m.creditos} + ' créditos'">5</span></td>
+                                    <td th:text="${m.carrera.nombre}">Carrera</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Modal Alta de Materia -->
+        <div class="modal fade" id="modalAltaMateria" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form th:action="@{/jefe/materias/alta}" method="post">
+                        <div class="modal-header">
+                            <h5 class="modal-title fw-bold">Registrar Nueva Asignatura</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Clave de Materia</label>
+                                <input name="clave" class="form-control" placeholder="Ej. SCB-1020" required />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Nombre de la Materia</label>
+                                <input name="nombre" class="form-control" placeholder="Ej. Inteligencia Artificial" required />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Créditos</label>
+                                <input name="creditos" type="number" min="1" max="10" class="form-control" value="5" required />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Carrera</label>
+                                <select name="carreraId" class="form-select" required>
+                                    <option th:each="c : ${carreras}" th:value="${c.idCarrera}" th:text="${c.nombre}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-navy">Dar de Alta Materia</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Asignar Profesor a Grupo -->
+        <div class="modal fade" id="modalAsignarProfesor" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form th:action="@{/jefe/grupos/asignar}" method="post">
+                        <div class="modal-header">
+                            <h5 class="modal-title fw-bold">Asignación de Cátedra a Docente</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Código de Grupo</label>
+                                <input name="codigoGrupo" class="form-control" placeholder="Ej. IA-901" required />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Materia</label>
+                                <select name="materiaId" class="form-select" required>
+                                    <option th:each="m : ${materias}" th:value="${m.materiaId}" th:text="${m.clave + ' - ' + m.nombre}"></option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Docente Asignado</label>
+                                <select name="profesorControl" class="form-select" required>
+                                    <option th:each="p : ${profesores}" th:value="${p.numeroControl}" th:text="${p.numeroControl + ' - ' + p.usuario.nombre + ' ' + p.usuario.apellidoPaterno}"></option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Periodo Escolar</label>
+                                <select name="periodoId" class="form-select" required>
+                                    <option th:each="pe : ${periodos}" th:value="${pe.periodoId}" th:text="${pe.nombre}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-orange">Asignar Docente</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <footer th:replace="~{template :: footer}"></footer>
+    </body>
+</html>

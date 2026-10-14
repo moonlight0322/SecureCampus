@@ -45,4 +45,6 @@ public interface CargaAlumnoRepository extends JpaRepository<CargaAlumno, Long> 
     List<MateriaHorario> buscarHorarioActual(
             @Param("numeroControl") String numeroControl,
             @Param("fechaActual") LocalDate fechaActual);
+
+    List<CargaAlumno> findByGrupoGrupoId(Long grupoId);
 }
