@@ -85,6 +85,12 @@
                             ></div>
                         </div>
 
+                        <div th:if="${param.expired != null}" class="flash-alert-wrapper">
+                            <div class="alert alert-warning" role="alert">
+                                <i class="bi bi-clock-history me-2"></i>Tu sesión se cerró porque pasaste 10 minutos sin actividad. Inicia sesión nuevamente.
+                            </div>
+                        </div>
+
                         <!-- Banner de cuenta bloqueada -->
                         <div th:if="${param.blocked != null}" class="flash-alert-wrapper">
                             <div class="alert alert-danger" role="alert">

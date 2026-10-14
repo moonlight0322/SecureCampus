@@ -12,24 +12,13 @@
                         <p class="eyebrow mb-2">SEGURIDAD INSTITUCIONAL</p>
                         <h2 class="h3 fw-bold mb-2">Recuperar acceso</h2>
                         <p class="text-secondary mb-4">
-                            Ingresa tu número de control institucional para restablecer tu contraseña.
+                            La recuperación por correo aún no está habilitada. Para recuperar tu acceso, solicita el restablecimiento al administrador escolar.
                         </p>
 
-                        <div th:if="${mensaje != null}" class="alert alert-success" role="alert">
-                            <i class="bi bi-check-circle-fill me-2"></i>
+                        <div th:if="${mensaje != null}" class="alert alert-info" role="alert">
+                            <i class="bi bi-info-circle-fill me-2"></i>
                             <span th:text="${mensaje}"></span>
                         </div>
-
-                        <form th:action="@{/recuperar}" method="post">
-                            <div class="mb-3">
-                                <label for="numeroControl" class="form-label">Número de control</label>
-                                <input id="numeroControl" name="numeroControl" class="form-control form-control-lg" type="text" maxlength="50" required autofocus />
-                            </div>
-                            <button class="btn btn-orange btn-lg w-100" type="submit">
-                                Enviar instrucciones
-                                <i class="bi bi-send ms-1"></i>
-                            </button>
-                        </form>
 
                         <div class="mt-4 text-center">
                             <a th:href="@{/login}" class="text-decoration-none small">

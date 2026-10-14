@@ -114,6 +114,67 @@
             </div>
         </section>
 
+        <section
+            th:fragment="accountBanner(rol, numeroControl)"
+            class="profile-banner mb-4"
+            aria-label="Perfil de acceso"
+        >
+            <div class="d-flex align-items-center gap-3">
+                <div class="avatar" aria-hidden="true">
+                    <i class="bi bi-person-vcard-fill"></i>
+                </div>
+                <div>
+                    <p class="small text-white-50 mb-1">PERFIL INSTITUCIONAL</p>
+                    <h2 class="h4 mb-1 fw-bold" th:text="${rol}">Rol</h2>
+                    <p class="mb-0 text-white-50">Número de control: <span th:text="${numeroControl}">000000</span></p>
+                </div>
+            </div>
+            <div class="average-score mt-4 mt-md-0">
+                <span class="small text-white-50 d-block">SESIÓN ACTIVA</span>
+                <strong><i class="bi bi-shield-check" aria-hidden="true"></i></strong>
+                <span class="small text-white-50 d-block">Acceso autenticado</span>
+            </div>
+        </section>
+
+        <aside
+            th:fragment="studentBadge(activeSection, estudiante)"
+            class="student-id-badge"
+        >
+            <div class="badge-avatar" aria-hidden="true">
+                <i class="bi bi-person-fill"></i>
+            </div>
+            <h2
+                class="h5 fw-bold mb-1 text-dark"
+                th:text="${estudiante.nombreCompleto}"
+            >Nombre completo</h2>
+            <p class="text-muted small mb-2">
+                <i class="bi bi-card-heading me-1" aria-hidden="true"></i>
+                <span th:text="${estudiante.numeroControl}">Número de control</span>
+            </p>
+            <span
+                class="text-dark small fw-medium"
+                th:text="${estudiante.carrera}"
+            >Carrera</span>
+            <nav class="student-badge-nav" aria-label="Navegación del estudiante">
+                <a
+                    th:href="@{/estudiante}"
+                    th:attr="aria-current=${activeSection == 'inicio' ? 'page' : null}"
+                ><i class="bi bi-person-badge-fill" aria-hidden="true"></i>Inicio</a>
+                <a
+                    th:href="@{/estudiante/horario}"
+                    th:attr="aria-current=${activeSection == 'horario' ? 'page' : null}"
+                ><i class="bi bi-calendar-week-fill" aria-hidden="true"></i>Horario</a>
+                <a
+                    th:href="@{/estudiante/kardex}"
+                    th:attr="aria-current=${activeSection == 'kardex' ? 'page' : null}"
+                ><i class="bi bi-journal-bookmark-fill" aria-hidden="true"></i>Kárdex</a>
+                <a
+                    th:href="@{/estudiante/solicitudes}"
+                    th:attr="aria-current=${activeSection == 'solicitudes' ? 'page' : null}"
+                ><i class="bi bi-file-earmark-text-fill" aria-hidden="true"></i>Solicitudes</a>
+            </nav>
+        </aside>
+
         <!-- =========================================================
          BADGE DE OPORTUNIDAD (kárdex)
          Uso:
@@ -124,8 +185,12 @@
             th:fragment="opportunityBadge(oportunidad)"
             class="badge opportunity-badge"
             th:classappend="${oportunidad == 'ESPECIAL'} ? ' opportunity-special' : ''"
-            th:text="${oportunidad == 'PRIMERA' ? #{opportunity.first} : oportunidad == 'SEGUNDA' ? #{opportunity.second} : oportunidad == 'REPETICION' ? #{opportunity.repeat} : #{opportunity.special}"
-            >Primera oportunidad</span
+        >
+            <span th:if="${oportunidad == 'PRIMERA'}" th:text="#{opportunity.first}">Primera oportunidad</span>
+            <span th:if="${oportunidad == 'SEGUNDA'}" th:text="#{opportunity.second}">Segunda oportunidad</span>
+            <span th:if="${oportunidad == 'REPETICION'}" th:text="#{opportunity.repeat}">Repetición</span>
+            <span th:if="${oportunidad != 'PRIMERA' && oportunidad != 'SEGUNDA' && oportunidad != 'REPETICION'}" th:text="#{opportunity.special}">Especial</span>
+        </span>
         >
 
         <!-- =========================================================
