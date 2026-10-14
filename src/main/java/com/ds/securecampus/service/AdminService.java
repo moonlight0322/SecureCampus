@@ -2,6 +2,7 @@ package com.ds.securecampus.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.math.BigDecimal;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -38,15 +39,15 @@ public class AdminService {
     private final PasswordEncoder passwordEncoder;
 
     public AdminService(UsuarioRepository usuarioRepository,
-                        RolRepository rolRepository,
-                        MateriaRepository materiaRepository,
-                        CarreraRepository carreraRepository,
-                        GrupoRepository grupoRepository,
-                        ProfesorRepository profesorRepository,
-                        PeriodoRepository periodoRepository,
-                        LogAuditoriaRepository logAuditoriaRepository,
-                        AuditoriaService auditoriaService,
-                        PasswordEncoder passwordEncoder) {
+            RolRepository rolRepository,
+            MateriaRepository materiaRepository,
+            CarreraRepository carreraRepository,
+            GrupoRepository grupoRepository,
+            ProfesorRepository profesorRepository,
+            PeriodoRepository periodoRepository,
+            LogAuditoriaRepository logAuditoriaRepository,
+            AuditoriaService auditoriaService,
+            PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.rolRepository = rolRepository;
         this.materiaRepository = materiaRepository;
@@ -77,17 +78,18 @@ public class AdminService {
     @Transactional
     public void alternarEstatusUsuario(String numeroControl, String adminUser) {
         usuarioRepository.findByNumeroControl(numeroControl).ifPresent(u -> {
-            int nuevo = (u.getActivo() != null && u.getActivo() == 1) ? 0 : 1;
+            byte nuevo = (u.getActivo() != null && u.getActivo() == 1) ? (byte) 0 : (byte) 1;
             u.setActivo(nuevo);
             usuarioRepository.save(u);
-            auditoriaService.registrar(adminUser, "ADMINISTRADOR", "MODIFICAR_ESTATUS_USUARIO", 
-                    "Usuario " + numeroControl + " estatus cambiado a " + (nuevo == 1 ? "ACTIVO" : "INACTIVO"), "127.0.0.1");
+            auditoriaService.registrar(adminUser, "ADMINISTRADOR", "MODIFICAR_ESTATUS_USUARIO",
+                    "Usuario " + numeroControl + " estatus cambiado a " + (nuevo == 1 ? "ACTIVO" : "INACTIVO"),
+                    "127.0.0.1");
         });
     }
 
     @Transactional
-    public void crearUsuario(String numeroControl, String password, String nombre, String apePat, 
-                             String apeMat, String correo, Long rolId, String adminUser) {
+    public void crearUsuario(String numeroControl, String password, String nombre, String apePat,
+            String apeMat, String correo, Long rolId, String adminUser) {
         if (usuarioRepository.findByNumeroControl(numeroControl).isPresent()) {
             throw new IllegalArgumentException("El número de control ya se encuentra registrado.");
         }
@@ -102,12 +104,12 @@ public class AdminService {
         u.setApellidoPaterno(apePat);
         u.setApellidoMaterno(apeMat);
         u.setCorreoInstitucional(correo);
-        u.setActivo(1);
-        u.setDebeCambiarPass(1);
+        u.setActivo((byte) 1);
+        u.setDebeCambiarPass((byte) 1);
         u.setFechaCreacion(LocalDate.now());
         usuarioRepository.save(u);
 
-        auditoriaService.registrar(adminUser, "ADMINISTRADOR", "ALTA_USUARIO", 
+        auditoriaService.registrar(adminUser, "ADMINISTRADOR", "ALTA_USUARIO",
                 "Nuevo usuario registrado: " + numeroControl + " (" + rol.getNombreRol() + ")", "127.0.0.1");
     }
 
@@ -143,16 +145,17 @@ public class AdminService {
         Materia m = new Materia();
         m.setClave(clave);
         m.setNombre(nombre);
-        m.setCreditos(creditos);
+        m.setCreditos(creditos != null ? BigDecimal.valueOf(creditos) : null);
         m.setCarrera(carrera);
         materiaRepository.save(m);
 
-        auditoriaService.registrar(jefeUser, "JEFE_DEPARTAMENTO", "ALTA_MATERIA", 
+        auditoriaService.registrar(jefeUser, "JEFE_DEPARTAMENTO", "ALTA_MATERIA",
                 "Nueva materia: " + clave + " - " + nombre, "127.0.0.1");
     }
 
     @Transactional
-    public void crearGrupoAsignacion(String codigoGrupo, Long materiaId, String profesorControl, Long periodoId, String operadorUser) {
+    public void crearGrupoAsignacion(String codigoGrupo, Long materiaId, String profesorControl, Long periodoId,
+            String operadorUser) {
         Materia materia = materiaRepository.findById(materiaId)
                 .orElseThrow(() -> new IllegalArgumentException("Materia no encontrada."));
         Periodo periodo = periodoRepository.findById(periodoId)
@@ -169,8 +172,9 @@ public class AdminService {
         g.setPeriodo(periodo);
         grupoRepository.save(g);
 
-        auditoriaService.registrar(operadorUser, "ACADEMICO", "ASIGNACION_GRUPO", 
-                "Grupo " + codigoGrupo + " asignado a materia " + materia.getNombre() + 
-                (profesor != null ? " y docente " + profesor.getUsuario().getNombre() : " sin docente"), "127.0.0.1");
+        auditoriaService.registrar(operadorUser, "ACADEMICO", "ASIGNACION_GRUPO",
+                "Grupo " + codigoGrupo + " asignado a materia " + materia.getNombre() +
+                        (profesor != null ? " y docente " + profesor.getUsuario().getNombre() : " sin docente"),
+                "127.0.0.1");
     }
 }

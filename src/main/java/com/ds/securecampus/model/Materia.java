@@ -22,8 +22,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name = "materias", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_materia_carrera_clave", columnNames = {"id_carrera", "clave_materia"}),
-        @UniqueConstraint(name = "uk_materia_id_carrera", columnNames = {"materia_id", "id_carrera"})
+        @UniqueConstraint(name = "uk_materia_carrera_clave", columnNames = { "id_carrera", "clave_materia" }),
+        @UniqueConstraint(name = "uk_materia_id_carrera", columnNames = { "materia_id", "id_carrera" })
 })
 public class Materia {
     @Id
