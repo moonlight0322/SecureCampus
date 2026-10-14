@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" class="h-100">
+    <head th:replace="~{template :: head('Cambiar contraseña | SecureCampus')}"></head>
+    <body class="d-flex flex-column min-vh-100">
+        <nav th:replace="~{template :: navbar}"></nav>
+
+        <main class="flex-grow-1 py-4">
+            <div class="container page-shell">
+                <div class="row justify-content-center">
+                    <section class="col-12 col-lg-7">
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-body p-4 p-md-5">
+                                <p class="eyebrow text-uppercase text-orange fw-bold mb-1">SEGURIDAD DE LA CUENTA</p>
+                                <h1 class="h3 fw-bold text-navy mb-2">Cambiar contraseña</h1>
+                                <p class="small text-secondary mb-2">Cuenta autenticada: <strong th:text="${numeroControl}">Número de control</strong></p>
+                                <p class="text-secondary mb-4">Verificaremos la contraseña actual contra la cuenta con la que iniciaste sesión. Usa una contraseña nueva de al menos 12 caracteres (máximo 72 bytes en UTF-8).</p>
+                                <div th:if="${mensaje}" class="alert alert-success" role="status" th:text="${mensaje}"></div>
+                                <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+                                <form th:action="@{/cuenta/contrasena}" method="post">
+                                    <div class="mb-3">
+                                        <label for="passwordActual" class="form-label">Contraseña actual</label>
+                                        <input id="passwordActual" name="passwordActual" type="password" class="form-control" autocomplete="current-password" required />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="passwordNueva" class="form-label">Nueva contraseña</label>
+                                        <input id="passwordNueva" name="passwordNueva" type="password" class="form-control" minlength="12" maxlength="72" autocomplete="new-password" required />
+                                    </div>
+                                    <div class="mb-4">
+                                        <label for="confirmarPassword" class="form-label">Confirmar nueva contraseña</label>
+                                        <input id="confirmarPassword" name="confirmarPassword" type="password" class="form-control" minlength="12" maxlength="72" autocomplete="new-password" required />
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <button type="submit" class="btn btn-orange">Actualizar contraseña</button>
+                                        <a th:href="@{/acceso}" class="btn btn-outline-secondary">Cancelar y volver al inicio</a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+
+        <footer th:replace="~{template :: footer}"></footer>
+    </body>
+</html>

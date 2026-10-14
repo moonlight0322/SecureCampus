@@ -32,6 +32,7 @@ public class SecurityConfig {
                         .requestMatchers("/profesor/**").hasRole("PROFESOR")
                         .requestMatchers("/admin/**").hasAnyRole("ADMINISTRADOR", "ADMINISTRATIVO")
                         .requestMatchers("/jefe/**").hasRole("JEFE_DEPARTAMENTO")
+                        .requestMatchers("/cuenta/**").authenticated()
                         .requestMatchers("/acceso").authenticated()
                         .anyRequest().authenticated())
                 .formLogin(form -> form
@@ -44,7 +45,10 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutSuccessUrl("/login?logout")
                         .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
                         .clearAuthentication(true))
+                .sessionManagement(session -> session
+                        .invalidSessionUrl("/login?expired"))
                 .build();
     }
 }
