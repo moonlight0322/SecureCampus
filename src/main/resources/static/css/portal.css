@@ -16,6 +16,9 @@
     --student-avatar: #3965c4;
     --student-background: #fff;
 
+    --badge-orange-bg: #ffb6a0;
+    --badge-blue-bg: #adc7ff ;
+
     /* Tipografías estándar profesionales */
     --font-sans:
         "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -673,7 +676,7 @@ h6,
 
 .binder-wrapper {
     display: flex;
-    gap: 5rem; /* Espacio de separación controlado entre el folder y el papeleo */
+    gap: 1rem; /* Espacio de separación controlado entre el folder y el papeleo */
     min-height: calc(100vh - 180px);
     width: 100%;
     margin-left: 0; /* Alineado de forma natural con el padding del contenedor */
@@ -683,7 +686,8 @@ h6,
 .binder-sidebar {
     display: flex;
     position: relative;
-    width: 340px; /* Ancho fijo optimizado para la portada */
+    width: 480px; /* Ancho fijo optimizado para la portada */
+    min-width: 480px;
     flex-shrink: 0;
 }
 
@@ -766,6 +770,7 @@ h6,
         inset 0 1px 0 rgba(255, 255, 255, 0.4);
     display: flex;
     flex-direction: column;
+    /*min-width: 350px;*/
     z-index: 2;
 }
 
@@ -814,7 +819,6 @@ h6,
 /* Columna Derecha: Sección "Papeleo" expandida hasta el borde de la pantalla */
 .binder-content-sheet {
     flex: 1 1 auto; /* Se expande de forma fluida ocupando todo el ancho restante */
-    width: auto;
     background: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 1.2rem;
@@ -886,6 +890,214 @@ h6,
     .binder-tab.active {
         transform: translateY(-4px);
     }
+}
+
+.student-id-badge {
+    width: 280px;
+    background: var(--badge-blue-bg);
+    border: 1px solid var(--navy);
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.student-id-badge::before {
+    content: '';
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 14px;
+    height: 30px;
+    border: 4px solid #b0b0b0;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    background: #e0e0e0;
+}
+.student-id-badge::after {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 12px;
+    height: 12px;
+    background: #333;
+    border-radius: 50%;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+}
+
+/* Profesor */
+.badge-wrapper {
+    display: flex;
+    gap: 2.5rem;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 1350px; /* Evita que en pantallas gigantes se estire de más */
+    min-height: calc(100vh - 180px);
+    margin: 1.5rem auto; /* 'auto' centra el contenedor perfectamente sin desbordar los lados */
+    padding: 0 1rem;
+    box-sizing: border-box; /* Asegura que el padding no afecte el ancho total */
+}
+
+
+/* Gafete vertical colgante */
+.teacher-id-badge {
+    width: 280px;
+    background: var(--badge-orange-bg);
+    border: 1px solid var(--orange);
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    flex-shrink: 0;
+}
+
+/* Clip o gancho metálico superior */
+.teacher-id-badge::before {
+    content: '';
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 14px;
+    height: 30px;
+    border: 4px solid #b0b0b0;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    background: #e0e0e0;
+}
+.teacher-id-badge::after {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 12px;
+    height: 12px;
+    background: #333;
+    border-radius: 50%;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+}
+
+/* Avatar circular de la credencial */
+.badge-avatar {
+    width: 130px;
+    height: 130px;
+    background-color: #fff;
+    border-radius: 50%;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--navy);
+    font-size: 3rem;
+    box-shadow: inset 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Hoja principal derecha */
+.teacher-main-sheet {
+    flex: 1;
+    min-width: 0; /* Vital para que las tablas no rompan el flexbox */
+    background-color: #ffffff;
+    border: 1px solid #eeeeee;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+    padding: 2.5rem;
+    min-height: 90%;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.main-sheet {
+    flex: 1;
+    min-width: 0; /* Vital para que las tablas no rompan el flexbox */
+    background-color: #ffffff;
+    border: 1px solid #eeeeee;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+    padding: 2.5rem;
+    min-height: 90%;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+/* Botón de acción */
+.btn-sky {
+    background-color: var(--navy);
+    color: #fff;
+    border: 1px solid var(--navy);
+    font-weight: 600;
+    padding: 0.5rem 1.5rem;
+    border-radius: 50rem;
+    transition: all 0.2s ease;
+}
+.btn-sky:hover {
+    background-color: #fff;
+    color: var(--navy);
+    border-color: var(--navy);
+}
+
+/* Tabla con cabecera estilo ID */
+.table-sky-header thead th {
+    background-color: var(--navy) !important;
+    color: #fff;
+    border: none;
+    font-weight: 600;
+}
+.table-sky-header th:first-child {
+    border-top-left-radius: 10px;
+}
+.table-sky-header th:last-child {
+    border-top-right-radius: 10px;
+}
+
+.group-card {
+    background-color: #ffffff;
+    border: 1px solid #e5e0d8;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.group-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+}
+
+.action-links a {
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.action-links a:hover {
+    color: var(--navy-light) !important;
+}
+
+.table-custom-header thead th {
+    background-color: #f1f0eb;
+    color: #212529;
+    border-bottom: 2px solid #e2d9c2;
+    font-weight: 600;
+}
+
+.acta-visor { 
+    max-height: 350px;
+    overflow: auto;
+    font-size: .85rem; 
 }
 
 @media (prefers-reduced-motion: reduce) {

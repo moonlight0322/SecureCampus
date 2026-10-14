@@ -2,19 +2,16 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
     <body>
         <!-- =========================================================
-         PAGE HEADING con botón de acción
-         Uso:
-         <div th:replace="~{fragments/components
-             :: pageHeadingWithAction(
-                 'ESPACIO DEL ESTUDIANTE',
-                 'Mi horario',
-                 'Materias inscritas en el periodo vigente.',
-                 '/estudiante/kardex',
-                 'Ir al kárdex',
-                 'journal-check'
-             )}"></div>
+         TÍTULO SIMPLE: pageTitle
+         Propósito: mostrar únicamente el título de una sección o página.
+         Parámetros:
+         - titulo: texto que se presenta como encabezado.
+         Dependencias: clases Bootstrap h3 y mb-0; clase propia page-heading.
+         
+         Se invoca así:
+         <div th:replace="~{fragments/components :: pageTitle('Mi horario')}"></div>
+         Nota: este fragmento no incluye descripción, eyebrow ni botón de acción.
          ========================================================= -->
-        <!-- Definición del fragmento sin eyebrow (ahora recibe 5 parámetros: titulo, descripcion, actionHref, actionTexto, actionIcono) -->
         <div th:fragment="pageTitle(titulo)" class="page-heading">
             <div>
                 <h3 class="h3 mb-0" th:text="${titulo}"></h3>
@@ -22,7 +19,20 @@
         </div>
 
         <!-- =========================================================
-         PAGE HEADING simple (sin botón)
+         ENCABEZADO DE PÁGINA: pageHeading
+         Propósito: presentar el contexto, título y descripción de una página.
+         Parámetros:
+         - eyebrow: etiqueta breve que identifica la sección.
+         - titulo: encabezado principal.
+         - descripcion: explicación corta del contenido de la página.
+         Dependencias: clase propia page-heading, clase eyebrow y utilidades Bootstrap.
+         
+         Se invoca así:
+         <div th:replace="~{fragments/components :: pageHeading(
+             'ESPACIO DEL ESTUDIANTE',
+             'Mi horario',
+             'Materias inscritas en el periodo vigente.'
+         )}"></div>
          ========================================================= -->
         <div
             th:fragment="pageHeading(eyebrow, titulo, descripcion)"
@@ -36,8 +46,15 @@
         </div>
 
         <!-- =========================================================
-         EMPTY STATE
-         Uso:
+         ESTADO VACÍO: emptyState
+         Propósito: informar que una lista o sección no contiene datos.
+         Parámetros:
+         - icono: sufijo del icono de Bootstrap Icons, sin el prefijo "bi-".
+         - mensaje: texto que se mostrará al usuario.
+         Accesibilidad: role="status" anuncia el estado a tecnologías de asistencia.
+         Dependencias: Bootstrap Icons y la clase propia empty-state.
+         
+         Se invoca así:
          <div th:if="${#lists.isEmpty(materias)}"
               th:replace="~{fragments/components
                  :: emptyState('calendar2-x', 'No hay materias inscritas.')}"></div>
@@ -52,8 +69,16 @@
         </div>
 
         <!-- =========================================================
-         ALERT (para login, errores, éxito)
-         Uso:
+         ALERTA: alert
+         Propósito: mostrar mensajes informativos, de error o de confirmación.
+         Parámetros:
+         - tipo: variante contextual de Bootstrap, por ejemplo danger, success,
+           warning o info.
+         - mensaje: contenido textual de la alerta.
+         Accesibilidad: role="alert" y aria-live="polite" comunican el mensaje.
+         Dependencias: clases alert de Bootstrap.
+         
+         Se invoca así:
          <div th:replace="~{fragments/components
              :: alert('danger', 'Usuario o contraseña incorrectos.')}"></div>
          ========================================================= -->
@@ -68,7 +93,23 @@
         </div>
 
         <!-- =========================================================
-         PROFILE BANNER (inicio del estudiante)
+         BANNER DE PERFIL: profileBanner
+         Propósito: mostrar la identidad académica del estudiante y su promedio.
+         Parámetros:
+         - nombreCompleto: nombre que se muestra en el perfil.
+         - numeroControl: número de control institucional.
+         - carrera: programa académico del estudiante.
+         - promedio: promedio general; se formatea con dos decimales.
+         Internacionalización: utiliza profile.banner.aria, profile.banner.title,
+         profile.average.label y profile.average.suffix del archivo de mensajes.
+         Dependencias: clases propias profile-banner, avatar y average-score;
+         Bootstrap, Bootstrap Icons y utilidades de formato de Thymeleaf.
+         
+         Se invoca así:
+         <section th:replace="~{fragments/components :: profileBanner(
+             ${estudiante.nombreCompleto}, ${estudiante.numeroControl},
+             ${estudiante.carrera}, ${estudiante.promedio}
+         )}"></section>
          ========================================================= -->
         <section
             th:fragment="profileBanner(nombreCompleto, numeroControl, carrera, promedio)"
@@ -115,8 +156,15 @@
         </section>
 
         <!-- =========================================================
-         BADGE DE OPORTUNIDAD (kárdex)
-         Uso:
+         INSIGNIA DE OPORTUNIDAD: opportunityBadge
+         Propósito: representar visualmente la oportunidad de cursado de una materia.
+         Parámetros:
+         - oportunidad: valor esperado PRIMERA, SEGUNDA, REPETICION o ESPECIAL.
+         Internacionalización: utiliza opportunity.first, opportunity.second,
+         opportunity.repeat y opportunity.special.
+         Estilos: agrega opportunity-special cuando el valor es ESPECIAL.
+         
+         Se invoca así:
          <span th:replace="~{fragments/components
              :: opportunityBadge(${m.oportunidad})}"></span>
          ========================================================= -->
@@ -124,13 +172,19 @@
             th:fragment="opportunityBadge(oportunidad)"
             class="badge opportunity-badge"
             th:classappend="${oportunidad == 'ESPECIAL'} ? ' opportunity-special' : ''"
-            th:text="${oportunidad == 'PRIMERA' ? #{opportunity.first} : oportunidad == 'SEGUNDA' ? #{opportunity.second} : oportunidad == 'REPETICION' ? #{opportunity.repeat} : #{opportunity.special}"
+            th:text="${oportunidad == 'PRIMERA'} ? #{opportunity.first} : (${oportunidad == 'SEGUNDA'} ? #{opportunity.second} : (${oportunidad == 'REPETICION'} ? #{opportunity.repeat} : #{opportunity.special}))"
             >Primera oportunidad</span
         >
 
         <!-- =========================================================
-         CALIFICACIÓN con formato o guion
-         Uso:
+         CALIFICACIÓN: calificacion
+         Propósito: mostrar una calificación con dos decimales o un guion si es nula.
+         Parámetros:
+         - valor: calificación numérica; puede ser null.
+         Formato: usa el formateador numérico de Thymeleaf con un mínimo de un
+         dígito entero y dos decimales.
+         
+         Se invoca así:
          <span th:replace="~{fragments/components
              :: calificacion(${m.calificacion})}"></span>
          ========================================================= -->
@@ -140,9 +194,26 @@
             >—</span
         >
 
-        <!--
-         Carpeta
-        -->
+        <!-- =========================================================
+         ESTRUCTURA DEL PORTAL: binderLayout
+         Propósito: construir el marco visual del portal estudiantil, con pestañas
+         de navegación, portada de perfil y área de contenido.
+         Parámetros:
+         - seccion: identificador de la sección activa; admite 'inicio', 'horario'
+           o 'kardex' para resaltar la pestaña correspondiente.
+         - estudiante: objeto con nombreCompleto, numeroControl y carrera.
+         Navegación: enlaza a /estudiante, /estudiante/horario y /estudiante/kardex.
+         Internacionalización: utiliza binder.tab.profile, binder.tab.schedule
+         y binder.tab.kardex.
+         Dependencias: clases propias binder-*, Bootstrap Icons y Bootstrap.
+         Importante: binder-content-sheet es actualmente un contenedor vacío;
+         el contenido de las páginas debe componerse fuera de este fragmento.
+         
+         Se invoca así:
+         <div th:replace="~{fragments/components :: binderLayout(
+             'horario', ${estudiante}
+         )}"></div>
+         ========================================================= -->
         <div
             th:fragment="binderLayout(seccion, estudiante)"
             class="container-fluid px-4 page-shell my-auto"
@@ -227,5 +298,248 @@
                 </div>
             </div>
         </div>
+
+        <!-- =========================================================
+         MODALES DEL PROFESOR
+         Contiene tres fragmentos que trabajan juntos:
+         - modalImprimir: visor del acta con resaltado de Prism.js.
+         - modalEditarCalificaciones: tabla editable de calificaciones.
+         - scriptsModalesProfesor: estilos, librerías y funciones JS de ambos.
+
+         Datos que necesita el modelo de Spring (Model) para el modal de edición:
+         - listaEvaluaciones: lista de nombres de evaluación (columnas).
+         - listaAlumnos: alumnos con numeroControl, nombre y calificaciones.
+
+         Se invocan así (los modales dentro de <body>, los scripts al final,
+         después del script de Bootstrap):
+         <div th:replace="~{fragments/components :: modalImprimir}"></div>
+         <div th:replace="~{fragments/components :: modalEditarCalificaciones}"></div>
+         <th:block th:replace="~{fragments/components :: scriptsModalesProfesor}"></th:block>
+
+         Se abren con botones así:
+         <button data-bs-toggle="modal" data-bs-target="#modalImprimir">...</button>
+         <button data-bs-toggle="modal" data-bs-target="#modalEditarCalificaciones">...</button>
+         ========================================================= -->
+
+        <!-- ========================================== -->
+        <!-- MODAL 1: VISOR DE DOCUMENTOS / IMPRESIÓN   -->
+        <!-- El contenido se genera desde la tabla del modal 2 (ver scripts). -->
+        <!-- ========================================== -->
+        <div th:fragment="modalImprimir" class="modal fade" id="modalImprimir" tabindex="-1" aria-labelledby="modalImprimirLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content border-0 shadow-lg rounded-4 p-3">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold" id="modalImprimirLabel">
+                            <i class="bi bi-file-earmark-text text-primary me-2"></i> Vista Previa de Acta y Lista Oficial
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted small mb-3">Documento generado listo para revisión o impresión oficial:</p>
+                        <pre class="acta-visor rounded-3 border mb-0"><code id="actaCodigo" class="language-markup"></code></pre>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
+                        <!-- Imprime solo el acta (iframe oculto), no la página completa -->
+                        <button type="button" onclick="imprimirActa()" class="btn btn-primary rounded-pill px-4">
+                            <i class="bi bi-printer me-1"></i> Imprimir Documento
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- MODAL 2: EDITAR CALIFICACIONES             -->
+        <!-- Sin <form>: así no se puede enviar ningún formulario externo en el -->
+        <!-- que quede anidado este fragmento (causa probable del salto al login). -->
+        <!-- ========================================== -->
+        <div th:fragment="modalEditarCalificaciones" class="modal fade" id="modalEditarCalificaciones" tabindex="-1" aria-labelledby="modalEditarLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content border-0 shadow-lg rounded-4 p-3">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold" id="modalEditarLabel">
+                            <i class="bi bi-pencil-square text-primary me-2"></i> Captura y Edición de Calificaciones
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted small mb-3">Modifica las calificaciones (0 a 100) y guarda los cambios.</p>
+                        <div class="table-responsive">
+                            <table id="tablaCalificaciones" class="table align-middle table-sm table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Control</th>
+                                        <th>Estudiante</th>
+                                        <th class="text-center" th:each="eval : ${listaEvaluaciones}" th:text="${eval}">Eval</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="alumno : ${listaAlumnos}">
+                                        <td class="small fw-semibold" th:text="${alumno.numeroControl}">21211001</td>
+                                        <td class="small" th:text="${alumno.nombre}">Nombre</td>
+                                        <td class="text-center" th:each="calif : ${alumno.calificaciones}">
+                                            <input type="number" min="0" max="100" class="form-control form-control-sm text-center mx-auto" style="width: 70px;" th:value="${calif}">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" class="btn btn-primary rounded-pill px-4" onclick="guardarCalificaciones()">Guardar Cambios</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCRIPTS: Modales del profesor (Prism + lógica) -->
+        <!-- ========================================== -->
+        <th:block th:fragment="scriptsModalesProfesor">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+
+            <script th:inline="none">
+                /* =====================================================================
+                 * TEMPORAL: ESTE SCRIPT ES PROVISIONAL, A LA ESPERA DEL BACKEND.
+                 * Lo que sigue simula comportamientos que le corresponden al servidor
+                 * (Java / Spring Boot) y se debe reemplazar cuando existan los endpoints:
+                 *
+                 * 1. guardarCalificaciones(): NO guarda nada en el servidor. Solo marca
+                 *    los valores como guardados en la pantalla. Debe sustituirse por un
+                 *    <form th:action method="post"> que envíe al endpoint real (Thymeleaf
+                 *    agrega el token CSRF), con la validación hecha en el backend.
+                 * 2. construirActa(): arma el acta leyendo la tabla de la pantalla y usa
+                 *    datos fijos (objeto ACTA). El acta oficial debe salir del modelo del
+                 *    servidor, como plantilla de Thymeleaf alimentada con datos reales.
+                 * 3. Lo que sí se queda en el front: abrir/cerrar modales, descartar
+                 *    cambios al cancelar, resaltado con Prism e impresión.
+                 * ===================================================================== */
+
+                /**
+                 * Fuente de datos: la tabla #tablaCalificaciones del modal de edición.
+                 * - Cada <input> conserva en defaultValue la última calificación GUARDADA.
+                 * - "Guardar" copia value -> defaultValue; al cerrar el modal se restaura
+                 *   value <- defaultValue, así Cancelar descarta los cambios sin guardar.
+                 */
+                const ACTA = {
+                    institucion: 'INSTITUTO TECNOLÓGICO DE TOLUCA',
+                    titulo: 'ACTA DE EVALUACIÓN PARCIAL - SECURECAMPUS',
+                    materia: 'Sistemas Operativos',
+                    grupo: '5SC1',
+                    aula: 'Lab 3'
+                };
+
+                /** Escapa los caracteres que XML no admite dentro de texto o atributos. */
+                function xmlEscape(s) {
+                    return String(s)
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;');
+                }
+
+                /** Arma el acta como XML a partir de la tabla (solo calificaciones guardadas). */
+                function construirActa() {
+                    // Las dos primeras columnas son Control y Estudiante; el resto son evaluaciones.
+                    const evaluaciones = Array.from(document.querySelectorAll('#tablaCalificaciones thead th'))
+                        .slice(2)
+                        .map(function (th) { return th.textContent.trim(); });
+
+                    const alumnos = Array.from(document.querySelectorAll('#tablaCalificaciones tbody tr')).map(function (tr) {
+                        const celdas = tr.querySelectorAll('td');
+                        const notas = Array.from(tr.querySelectorAll('input')).map(function (input, idx) {
+                            return '      <calificacion evaluacion="' + xmlEscape(evaluaciones[idx] || ('Eval ' + (idx + 1))) + '">'
+                                 + xmlEscape(input.defaultValue) + '</calificacion>';
+                        });
+                        return '    <alumno numeroControl="' + xmlEscape(celdas[0].textContent.trim())
+                             + '" nombre="' + xmlEscape(celdas[1].textContent.trim()) + '">\n'
+                             + notas.join('\n') + '\n    </alumno>';
+                    });
+
+                    return [
+                        '<?xml version="1.0" encoding="UTF-8"?>',
+                        '<acta tipo="evaluacion-parcial">',
+                        '  <institucion>' + xmlEscape(ACTA.institucion) + '</institucion>',
+                        '  <titulo>' + xmlEscape(ACTA.titulo) + '</titulo>',
+                        '  <grupo materia="' + xmlEscape(ACTA.materia) + '" clave="' + xmlEscape(ACTA.grupo)
+                            + '" aula="' + xmlEscape(ACTA.aula) + '"/>',
+                        '  <estado>Registrada provisionalmente en sistema</estado>',
+                        '  <alumnos>'
+                    ].concat(alumnos, [
+                        '  </alumnos>',
+                        '</acta>'
+                    ]).join('\n');
+                }
+
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Al abrir el visor: regenerar el acta y resaltarla con Prism.
+                    const modalImprimir = document.getElementById('modalImprimir');
+                    if (modalImprimir) {
+                        modalImprimir.addEventListener('show.bs.modal', function () {
+                            const code = document.getElementById('actaCodigo');
+                            code.textContent = construirActa();
+                            Prism.highlightElement(code);
+                        });
+                    }
+
+                    // Al cerrar el editor: descartar lo que no se guardó.
+                    const modalEditar = document.getElementById('modalEditarCalificaciones');
+                    if (modalEditar) {
+                        modalEditar.addEventListener('hidden.bs.modal', function () {
+                            modalEditar.querySelectorAll('input[type=number]').forEach(function (i) {
+                                i.value = i.defaultValue;
+                                i.classList.remove('is-invalid');
+                            });
+                        });
+                    }
+                });
+
+                /** Imprime solo el acta, usando un iframe oculto. */
+                function imprimirActa() {
+                    const texto = document.getElementById('actaCodigo').textContent;
+                    const iframe = document.createElement('iframe');
+                    iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
+                    document.body.appendChild(iframe);
+
+                    const doc = iframe.contentWindow.document;
+                    doc.open();
+                    doc.write('<!doctype html><html><head><meta charset="utf-8"><title>Acta de evaluación</title>'
+                            + '<style>body{font:12px monospace;white-space:pre-wrap;margin:2cm}</style></head><body></body></html>');
+                    doc.close();
+                    doc.body.textContent = texto;
+
+                    iframe.contentWindow.onafterprint = function () { iframe.remove(); };
+                    iframe.contentWindow.focus();
+                    iframe.contentWindow.print();
+                }
+
+                /** Valida (0-100), marca los valores como guardados y cierra el modal. */
+                function guardarCalificaciones() {
+                    const inputs = document.querySelectorAll('#modalEditarCalificaciones input[type=number]');
+
+                    for (const i of inputs) {
+                        const v = Number(i.value);
+                        if (i.value === '' || v < 0 || v > 100) {
+                            i.classList.add('is-invalid');
+                            i.focus();
+                            return;
+                        }
+                        i.classList.remove('is-invalid');
+                    }
+
+                    // TEMPORAL / PENDIENTE DE BACKEND: aquí NO se guarda nada en el servidor.
+                    // Los cambios se conservan solo mientras la página siga abierta y se
+                    // pierden al recargar. Reemplazar este método por el envío real del
+                    // formulario cuando exista el endpoint de calificaciones.
+                    inputs.forEach(function (i) { i.defaultValue = i.value; });
+
+                    const el = document.getElementById('modalEditarCalificaciones');
+                    bootstrap.Modal.getInstance(el).hide();
+                }
+            </script>
+        </th:block>
     </body>
 </html>
