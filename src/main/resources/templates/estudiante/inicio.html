@@ -32,7 +32,17 @@
                         Bienvenido/a Nombre
                     </h1>
                     
-                    <!-- Botones de Acción Rápida -->
+                    <!-- Alerta: constancia no disponible por inscripción no activa -->
+                <div th:if="${param.constanciaError}" class="alert alert-warning alert-dismissible fade show mb-3" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>No es posible generar la Constancia de Estudios.</strong>
+                    Tu inscripción para el periodo actual no está confirmada.
+                    Si ya realizaste el pago de reinscripción, acude a
+                    <strong>Servicios Escolares</strong> para que actualicen tu estatus.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+
+                <!-- Botones de Acción Rápida -->
                     <div class="d-flex gap-3 flex-wrap">
                         <a th:href="@{/estudiante/horario}" class="btn btn-sky rounded-pill px-4 py-2 fw-medium shadow-sm">
                             <i class="bi bi-calendar-week me-1"></i> <span th:text="#{estudiante.inicio.btn.schedule}">Ver horario</span>
