@@ -159,19 +159,16 @@ public class PortalController {
     // --- Descargas de Documentos PDF Oficiales ---
 
     @GetMapping("/estudiante/constancia/pdf")
-    public ResponseEntity<byte[]> descargarConstancia(Authentication authentication) {
+    public Object descargarConstancia(Authentication authentication) {
         String numControl = authentication.getName();
-        PerfilEstudiante perfil = estudianteService.obtenerPerfil(numControl);
         Estudiante est = estudianteService.obtenerEntidad(numControl);
 
-        // Validación de regla de negocio: debe estar inscrito
+        // Regla de negocio: requiere inscripción vigente (pago_reinscripcion = 'S')
         if (!"S".equalsIgnoreCase(est.getPagoReinscripcion())) {
-            return ResponseEntity.status(403)
-                    .contentType(new MediaType("text", "plain", java.nio.charset.StandardCharsets.UTF_8))
-                    .body("No es posible generar la constancia: el alumno no cuenta con estatus inscrito vigente."
-                            .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            return "redirect:/estudiante?constanciaError=true";
         }
 
+        PerfilEstudiante perfil = estudianteService.obtenerPerfil(numControl);
         byte[] pdf = documentoPdfService.generarConstanciaEstudios(perfil, est);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"Constancia_" + numControl + ".pdf\"")
