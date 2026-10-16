@@ -28,6 +28,7 @@ class DocumentoPdfServiceTest {
         String pdfText = new String(pdf, StandardCharsets.ISO_8859_1);
 
         assertThat(pdfText).startsWith("%PDF-1.4");
-        assertThat(pdfText).contains("/Count 2", "María Hernández", "KÁRDEX ACADÉMICO", "startxref");
+        assertThat(pdfText).contains("/Count 6", "0 0 0 rg", "María Hernández",
+                "KÁRDEX ACADÉMICO", "startxref");
     }
 }

@@ -74,7 +74,7 @@ public class ProfesorController {
                             @RequestParam(value = "p2", required = false) BigDecimal p2,
                             Authentication authentication) {
         profesorService.obtenerGrupoProfesor(grupoId, authentication.getName());
-        profesorService.guardarCalificacion(cargaId, p1, p2, authentication.getName());
+        profesorService.guardarCalificacion(grupoId, cargaId, p1, p2, authentication.getName());
         return "redirect:/profesor/grupo/" + grupoId + "?guardado=true";
     }
 

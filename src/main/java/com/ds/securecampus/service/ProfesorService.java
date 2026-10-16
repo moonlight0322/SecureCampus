@@ -77,11 +77,15 @@ public class ProfesorService {
     }
 
     @Transactional
-    public void guardarCalificacion(Long cargaId, BigDecimal p1, BigDecimal p2, String profesorControl) {
+    public void guardarCalificacion(Long grupoId, Long cargaId, BigDecimal p1, BigDecimal p2,
+            String profesorControl) {
         CargaAlumno carga = cargaAlumnoRepository.findById(cargaId)
                 .orElseThrow(() -> new IllegalArgumentException("Carga no encontrada"));
 
         Grupo grupo = carga.getGrupo();
+        if (grupo.getGrupoId() == null || !grupo.getGrupoId().equals(grupoId)) {
+            throw new IllegalArgumentException("La carga del estudiante no pertenece al grupo indicado.");
+        }
         validarProfesorAsignado(grupo, profesorControl);
         if (!puedeCapturar(grupo)) {
             throw new IllegalStateException("El periodo de captura se encuentra cerrado para este grupo. Solicite desbloqueo al administrador.");

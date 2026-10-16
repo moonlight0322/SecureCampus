@@ -2,6 +2,7 @@ package com.ds.securecampus.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.ds.securecampus.model.CargaAlumno;
 import com.ds.securecampus.model.Grupo;
@@ -21,6 +21,8 @@ import com.ds.securecampus.model.Periodo;
 import com.ds.securecampus.model.Profesor;
 import com.ds.securecampus.repository.CargaAlumnoRepository;
 import com.ds.securecampus.repository.GrupoRepository;
+import com.ds.securecampus.repository.ProfesorRepository;
+import com.ds.securecampus.repository.SolicitudTramiteRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ProfesorServiceTest {
@@ -34,7 +36,8 @@ class ProfesorServiceTest {
     @BeforeEach
     void setUp() {
         profesorService = new ProfesorService(grupoRepository, cargaAlumnoRepository,
-                auditoriaService, notificacionService);
+                mock(ProfesorRepository.class), auditoriaService, notificacionService,
+                mock(SolicitudTramiteRepository.class));
     }
 
     @Test
@@ -54,7 +57,8 @@ class ProfesorServiceTest {
 
         assertThatThrownBy(() -> profesorService.guardarCalificacion(11L, 20L,
                 new BigDecimal("90"), new BigDecimal("90"), "profesor-1"))
-                .isInstanceOf(ResponseStatusException.class);
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("La carga del estudiante no pertenece al grupo indicado.");
 
         verify(cargaAlumnoRepository, never()).save(carga);
     }

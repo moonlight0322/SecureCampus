@@ -18,15 +18,22 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.ds.securecampus.model.Carrera;
+import com.ds.securecampus.model.Aula;
+import com.ds.securecampus.model.Edificio;
 import com.ds.securecampus.model.Estudiante;
 import com.ds.securecampus.model.Grupo;
 import com.ds.securecampus.model.Materia;
 import com.ds.securecampus.model.Periodo;
+import com.ds.securecampus.model.Profesor;
 import com.ds.securecampus.model.Rol;
 import com.ds.securecampus.model.Usuario;
 import com.ds.securecampus.repository.CarreraRepository;
+import com.ds.securecampus.repository.AulaRepository;
+import com.ds.securecampus.repository.CargaAlumnoRepository;
+import com.ds.securecampus.repository.EdificioRepository;
 import com.ds.securecampus.repository.EstudianteRepository;
 import com.ds.securecampus.repository.GrupoRepository;
+import com.ds.securecampus.repository.HorarioClaseRepository;
 import com.ds.securecampus.repository.LogAuditoriaRepository;
 import com.ds.securecampus.repository.MateriaRepository;
 import com.ds.securecampus.repository.PeriodoRepository;
@@ -46,6 +53,10 @@ class AdminServiceTest {
     @Mock private PeriodoRepository periodoRepository;
     @Mock private LogAuditoriaRepository logAuditoriaRepository;
     @Mock private AuditoriaService auditoriaService;
+    @Mock private AulaRepository aulaRepository;
+    @Mock private EdificioRepository edificioRepository;
+    @Mock private HorarioClaseRepository horarioClaseRepository;
+    @Mock private CargaAlumnoRepository cargaAlumnoRepository;
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private AdminService adminService;
@@ -54,7 +65,8 @@ class AdminServiceTest {
     void setUp() {
         adminService = new AdminService(usuarioRepository, rolRepository, materiaRepository,
                 carreraRepository, estudianteRepository, grupoRepository, profesorRepository,
-                periodoRepository, logAuditoriaRepository, auditoriaService, passwordEncoder);
+                periodoRepository, logAuditoriaRepository, auditoriaService, passwordEncoder,
+                aulaRepository, edificioRepository, horarioClaseRepository, cargaAlumnoRepository);
     }
 
     @Test
@@ -66,17 +78,17 @@ class AdminServiceTest {
         when(rolRepository.findById(3L)).thenReturn(Optional.of(estudianteRol));
         when(carreraRepository.findById(1L)).thenReturn(Optional.of(carrera));
 
-        adminService.crearUsuario("12345678", "ContrasenaInicial123", "Ana", "Pérez",
+        adminService.crearUsuario("12345678", "ContrasenaInicial123!", "Ana", "Pérez",
                 "López", "alumno@example.edu", 3L, 1L, null, null, "admin");
 
         ArgumentCaptor<Usuario> usuarioCaptor = ArgumentCaptor.forClass(Usuario.class);
         verify(usuarioRepository).saveAndFlush(usuarioCaptor.capture());
-        assertThat(passwordEncoder.matches("ContrasenaInicial123",
+        assertThat(passwordEncoder.matches("ContrasenaInicial123!",
                 usuarioCaptor.getValue().getPasswordHash())).isTrue();
 
         ArgumentCaptor<Estudiante> estudianteCaptor = ArgumentCaptor.forClass(Estudiante.class);
-        verify(estudianteRepository).save(estudianteCaptor.capture());
-        assertThat(estudianteCaptor.getValue().getNumeroControl()).isEqualTo("12345678");
+        verify(estudianteRepository).saveAndFlush(estudianteCaptor.capture());
+        assertThat(estudianteCaptor.getValue().getUsuario().getNumeroControl()).isEqualTo("12345678");
         assertThat(estudianteCaptor.getValue().getUsuario()).isSameAs(usuarioCaptor.getValue());
         assertThat(estudianteCaptor.getValue().getCarrera()).isSameAs(carrera);
         verify(auditoriaService).registrar(org.mockito.ArgumentMatchers.eq("admin"),
@@ -116,9 +128,9 @@ class AdminServiceTest {
         usuario.setNumeroControl("12345678");
         when(usuarioRepository.findByNumeroControl("12345678")).thenReturn(Optional.of(usuario));
 
-        adminService.restablecerPassword("12345678", "ContrasenaTemporal123", "admin");
+        adminService.restablecerPassword("12345678", "ContrasenaTemporal123!", "admin");
 
-        assertThat(passwordEncoder.matches("ContrasenaTemporal123", usuario.getPasswordHash())).isTrue();
+        assertThat(passwordEncoder.matches("ContrasenaTemporal123!", usuario.getPasswordHash())).isTrue();
         assertThat(usuario.getDebeCambiarPass()).isEqualTo((byte) 1);
         verify(usuarioRepository).save(usuario);
         verify(auditoriaService).registrar("admin", "ADMINISTRADOR", "RESTABLECER_PASSWORD",
@@ -129,22 +141,41 @@ class AdminServiceTest {
     void creatingGroupConnectsItsMatterPeriodAndOptionalProfessor() {
         Carrera carrera = new Carrera(1L, "ISC", "Ingeniería en Sistemas");
         Materia materia = new Materia(15L, "ISC-201", "Programación", BigDecimal.valueOf(5), carrera);
-        Periodo periodo = new Periodo(2L, "2026A", "Enero-Junio 2026",
-                java.time.LocalDate.of(2026, 1, 1), java.time.LocalDate.of(2026, 6, 30),
-                java.time.LocalDate.of(2026, 5, 31), "S");
-        when(grupoRepository.existsByCodigoGrupoAndMateriaMateriaIdAndPeriodoPeriodoId("SC-801", 15L, 2L))
-                .thenReturn(false);
+        Periodo periodo = new Periodo(2L, "AD2026", "Agosto - Diciembre 2026",
+                java.time.LocalDate.of(2026, 8, 10), java.time.LocalDate.of(2026, 12, 14),
+                java.time.LocalDate.of(2026, 12, 14), "N");
+        Usuario perfilProfesor = new Usuario();
+        perfilProfesor.setNombre("Luis");
+        Profesor profesor = new Profesor();
+        profesor.setNumeroControl("profesor-1");
+        profesor.setUsuario(perfilProfesor);
+        Edificio edificio = new Edificio();
+        edificio.setClave("B2");
+        Aula aula = new Aula();
+        aula.setEdificio(edificio);
+        aula.setNombreAula("B2-1");
+        when(periodoRepository.findByClavePeriodoForUpdate(org.mockito.ArgumentMatchers.anyString()))
+                .thenReturn(Optional.of(periodo));
         when(materiaRepository.findById(15L)).thenReturn(Optional.of(materia));
-        when(periodoRepository.findById(2L)).thenReturn(Optional.of(periodo));
+        when(profesorRepository.findById("profesor-1")).thenReturn(Optional.of(profesor));
+        when(aulaRepository.findByEdificioClaveAndNombreAula("B2", "B2-1"))
+                .thenReturn(Optional.of(aula));
+        when(grupoRepository.findByCodigoGrupoAndMateriaMateriaIdAndPeriodoPeriodoId(
+                "SC-801", 15L, 2L)).thenReturn(Optional.empty());
+        when(grupoRepository.saveAndFlush(org.mockito.ArgumentMatchers.any(Grupo.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
-        adminService.crearGrupoAsignacion("SC-801", 15L, null, 2L, "admin");
+        adminService.crearGrupoAsignacion(
+                "SC-801", 15L, "profesor-1", "TR", "09:00", null, "B2-1", "admin");
 
         ArgumentCaptor<Grupo> grupoCaptor = ArgumentCaptor.forClass(Grupo.class);
-        verify(grupoRepository).save(grupoCaptor.capture());
+        verify(grupoRepository).saveAndFlush(grupoCaptor.capture());
+        verify(horarioClaseRepository, org.mockito.Mockito.times(2))
+                .save(org.mockito.ArgumentMatchers.any());
         assertThat(grupoCaptor.getValue().getCodigoGrupo()).isEqualTo("SC-801");
         assertThat(grupoCaptor.getValue().getMateria()).isSameAs(materia);
         assertThat(grupoCaptor.getValue().getPeriodo()).isSameAs(periodo);
-        assertThat(grupoCaptor.getValue().getProfesor()).isNull();
+        assertThat(grupoCaptor.getValue().getProfesor()).isSameAs(profesor);
         verify(auditoriaService).registrar(org.mockito.ArgumentMatchers.eq("admin"),
                 org.mockito.ArgumentMatchers.eq("ACADEMICO"),
                 org.mockito.ArgumentMatchers.eq("ASIGNACION_GRUPO"),
