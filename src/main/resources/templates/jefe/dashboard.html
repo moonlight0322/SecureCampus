@@ -161,26 +161,20 @@
               </div>
               <div class="row g-2">
                 <div class="col-md-6 mb-3">
-                  <label class="form-label fw-bold">Bloque de inicio</label>
-                  <select name="horaInicio" class="form-select" required>
-                    <option value="07:00">07:00 - 09:00</option>
-                    <option value="09:00">09:00 - 11:00</option>
-                    <option value="11:00">11:00 - 13:00</option>
-                    <option value="13:00">13:00 - 15:00</option>
-                    <option value="15:00">15:00 - 17:00</option>
-                    <option value="17:00">17:00 - 19:00</option>
+                  <label class="form-label fw-bold">Horario</label>
+                  <select name="horaInicio" id="jefeHoraInicio" class="form-select" required>
+                    <option value="07:00">07:00 – 09:00</option>
+                    <option value="09:00">09:00 – 11:00</option>
+                    <option value="11:00">11:00 – 13:00</option>
+                    <option value="13:00">13:00 – 15:00</option>
+                    <option value="15:00">15:00 – 17:00</option>
+                    <option value="17:00">17:00 – 19:00</option>
                   </select>
                 </div>
-                <div class="col-md-6 mb-3">
-                  <label class="form-label fw-bold">Posición de la sesión corta</label>
-                  <select name="horaCorta" class="form-select">
-                    <option value="">No aplica a 4 horas</option>
-                    <option value="INICIO">Primera hora</option>
-                    <option value="FIN">Segunda hora</option>
-                    <option value="LUNES_INICIO">Lunes, primera hora (lunes-miércoles-viernes)</option>
-                    <option value="LUNES_FIN">Lunes, segunda hora (lunes-miércoles-viernes)</option>
-                    <option value="VIERNES_INICIO">Viernes, primera hora (lunes-miércoles-viernes)</option>
-                    <option value="VIERNES_FIN">Viernes, segunda hora (lunes-miércoles-viernes)</option>
+                <div class="col-md-6 mb-3" id="jefeDivHoraCorta">
+                  <label class="form-label fw-bold">Hora de la clase de 1 hora</label>
+                  <select name="horaCorta" id="jefeHoraCorta" class="form-select">
+                    <option value="">— Selecciona distribución primero —</option>
                   </select>
                 </div>
               </div>
@@ -220,5 +214,78 @@
     </div>
 
     <footer th:replace="~{template :: footer}"></footer>
+
+  <script th:inline="none">
+    /* ================================================================
+     * Jefe Dashboard – dinámica del modal "Crear grupo"
+     * Actualiza las opciones de "Hora de la clase de 1 hora" según
+     * la distribución semanal y el bloque horario seleccionados.
+     * Los valores enviados al servidor NO cambian (INICIO, FIN…);
+     * solo mejoran los textos visibles en el selector.
+     * ================================================================ */
+    (function () {
+      var patronSel = document.querySelector('select[name="patronHorario"]');
+      var inicioSel = document.getElementById('jefeHoraInicio');
+      var cortaDiv  = document.getElementById('jefeDivHoraCorta');
+      var cortaSel  = document.getElementById('jefeHoraCorta');
+
+      if (!patronSel || !inicioSel || !cortaDiv || !cortaSel) return;
+
+      function fmt(h) {
+        return (h < 10 ? '0' : '') + h + ':00';
+      }
+
+      function actualizarHoraCorta() {
+        var patron = patronSel.value;
+        var h  = parseInt(inicioSel.value, 10);
+        var h1 = fmt(h);
+        var h2 = fmt(h + 1);
+        var h3 = fmt(h + 2);
+
+        if (patron === 'MW' || patron === 'TR' || patron === 'WF' || patron === '') {
+          cortaDiv.style.display = 'none';
+          cortaSel.required = false;
+          cortaSel.value = '';
+          return;
+        }
+
+        cortaDiv.style.display = '';
+        cortaSel.required = true;
+        cortaSel.innerHTML = '';
+
+        var opciones = [];
+        if (patron === 'MTTR') {
+          opciones = [
+            { v: 'INICIO', t: 'Lunes ' + h1 + '\u2013' + h2 },
+            { v: 'FIN',    t: 'Lunes ' + h2 + '\u2013' + h3 }
+          ];
+        } else if (patron === 'TTRF') {
+          opciones = [
+            { v: 'INICIO', t: 'Viernes ' + h1 + '\u2013' + h2 },
+            { v: 'FIN',    t: 'Viernes ' + h2 + '\u2013' + h3 }
+          ];
+        } else if (patron === 'MWF') {
+          opciones = [
+            { v: 'LUNES_INICIO',   t: 'Lunes '   + h1 + '\u2013' + h2 },
+            { v: 'LUNES_FIN',      t: 'Lunes '   + h2 + '\u2013' + h3 },
+            { v: 'VIERNES_INICIO', t: 'Viernes ' + h1 + '\u2013' + h2 },
+            { v: 'VIERNES_FIN',    t: 'Viernes ' + h2 + '\u2013' + h3 }
+          ];
+        }
+
+        opciones.forEach(function (o) {
+          var opt = document.createElement('option');
+          opt.value = o.v;
+          opt.textContent = o.t;
+          cortaSel.appendChild(opt);
+        });
+      }
+
+      patronSel.addEventListener('change', actualizarHoraCorta);
+      inicioSel.addEventListener('change', actualizarHoraCorta);
+      actualizarHoraCorta();
+    })();
+  </script>
+
   </body>
-</html>
+</html>
