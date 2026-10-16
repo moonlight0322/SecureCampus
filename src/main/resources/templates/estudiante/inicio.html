@@ -1,117 +1,154 @@
 <!doctype html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org" class="h-100">
-    <head th:replace="~{template :: head(#{meta.title.inicio})}"></head>
-    <body class="d-flex flex-column min-vh-100">
-        <nav th:replace="~{template :: navbar}"></nav>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <head th:with="pageTitle=#{estudiante.inicio.pagetitle}">
+            <head th:replace="~{template :: head(${pageTitle})}"></head>
+        </head>
+</head>
+<body class="portal-body">
+    <!-- Navbar global -->
+    <nav th:replace="~{template :: navbar}"></nav>
+    
+    <main>
+        <div class="badge-wrapper">
 
-        <main class="flex-grow-1 py-4 d-flex align-items-center">
-            <div class="container-fluid px-4 page-shell my-auto">
-                <div class="badge-wrapper">
-                    <aside th:replace="~{fragments/components :: studentBadge('inicio', ${estudiante})}"></aside>
-                    <section class="main-sheet">
-                        <div class="mb-4">
-                            <h1
-                                class="h2 fw-bold mb-1"
-                                th:text="#{inicio.heading.title}"
-                            >
-                                Resumen académico
-                            </h1>
-                            <p
-                                class="text-secondary mb-0"
-                                th:text="#{inicio.heading.desc}"
-                            >
-                                Información general sobre tu estatus y avance
-                                escolar.
-                            </p>
-                        </div>
+            <!-- LADO IZQUIERDO: Credencial de Identificación del estudiante -->
+            <aside class="student-id-badge">
+                <div class="badge-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <h4 class="fw-bold mb-1 text-dark" th:text="${estudiante.nombreCompleto}">Nombre completo</h4>
+                <p class="text-muted small mb-2" th:text="${estudiante.numeroControl}">Número de control</p>
+                <hr class="w-100 my-2 text-muted opacity-25">
+                <span class="text-dark small fw-medium" th:text="${estudiante.carrera}">Carrera</span>
+            </aside>
 
-                        <!-- Notificaciones Académicas -->
-                        <div th:if="${notificaciones != null && !notificaciones.isEmpty()}" class="mb-4">
-                            <h5 class="fw-bold mb-2"><i class="bi bi-bell-fill text-warning me-2"></i>Avisos y Notificaciones</h5>
-                            <div class="list-group">
-                                <div th:each="notif : ${notificaciones}" class="list-group-item list-group-item-action flex-column align-items-start">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <h6 class="mb-1 fw-bold text-navy" th:text="${notif.titulo}">Título</h6>
-                                        <small class="text-muted" th:text="${#temporals.format(notif.fechaCreacion, 'dd/MM/yyyy HH:mm')}">Fecha</small>
-                                    </div>
-                                    <p class="mb-1 text-secondary small" th:text="${notif.mensaje}">Mensaje</p>
-                                </div>
+            <!-- LADO DERECHO: Hoja de Contenido Principal -->
+            <section class="main-sheet">
+                
+                <!-- Saludo de Bienvenida -->
+                <div class="mb-4">
+                    <h1 class="h2 fw-bold mb-3" th:text="#{estudiante.welcome.msg}">
+                        Bienvenido/a Nombre
+                    </h1>
+                    
+                    <!-- Botones de Acción Rápida -->
+                    <div class="d-flex gap-3 flex-wrap">
+                        <a th:href="@{/estudiante/horario}" class="btn btn-sky rounded-pill px-4 py-2 fw-medium shadow-sm">
+                            <i class="bi bi-calendar-week me-1"></i> <span th:text="#{estudiante.inicio.btn.schedule}">Ver horario</span>
+                        </a>
+                        <a th:href="@{/estudiante/carga}" class="btn btn-sky rounded-pill px-4 py-2 fw-medium shadow-sm">
+                            <i class="bi bi-journal-text me-1"></i> <span th:text="#{estudiante.inicio.btn.load}">Carga académica</span>
+                        </a>
+                        <a th:href="@{/estudiante/calificaciones}" class="btn btn-sky rounded-pill px-4 py-2 fw-medium shadow-sm">
+                            <i class="bi bi-clipboard-data me-1"></i> <span th:text="#{estudiante.inicio.btn.grades}">Calificaciones</span>
+                        </a>
+                        <a th:href="@{/estudiante/kardex}" class="btn btn-sky rounded-pill px-4 py-2 fw-medium shadow-sm">
+                            <i class="bi bi-journal-text me-1"></i> <span th:text="#{estudiante.inicio.btn.cardex}">Ver cárdex</span>
+                        </a>
+                        <a th:href="@{/estudiante/solicitudes}" class="btn btn-sky rounded-pill px-4 py-2 fw-medium shadow-sm">
+                            <i class="bi bi-journal-text me-1"></i> <span th:text="#{estudiante.inicio.btn.solicitudes}">Ver solicitudes</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Métricas / Resumen Académico -->
+                <div class="row g-3 mb-4">
+                    <!-- Card Promedio General -->
+                    <div class="col-md-6">
+                        <div class="content-card bg-light border-0 p-3 h-100 d-flex align-items-center rounded-3">
+                            <div class="student-feature-icon me-3 text-primary fs-3">
+                                <i class="bi bi-trophy-fill"></i>
+                            </div>
+                            <div>
+                                <span class="small text-muted d-block fw-bold" th:text="#{estudiante.inicio.average.title}">PROMEDIO GENERAL</span>
+                                <strong th:text="${estudiante['promedio'] != null ? #numbers.formatDecimal(estudiante['promedio'], 1, 2) : '0.00'}">0.00</strong>
+                                <small class="text-muted d-block" th:text="#{estudiante.inicio.average.suffix}">de 100 puntos</small>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="row g-3 mb-4">
-                            <!-- Card Promedio General -->
-                            <div class="col-md-6">
-                                <div
-                                    class="content-card bg-light border-0 p-3 h-100 d-flex align-items-center"
-                                >
-                                    <div class="student-feature-icon me-3">
-                                        <i class="bi bi-trophy-fill"></i>
-                                    </div>
-                                    <div>
-                                        <span
-                                            class="small text-muted d-block fw-bold"
-                                            th:text="#{inicio.average.title}"
-                                            >PROMEDIO GENERAL</span
-                                        >
-                                        <strong
-                                            class="h3 fw-bold text-navy mb-0"
-                                            th:text="${#numbers.formatDecimal(estudiante.promedio, 1, 2)}"
-                                            >0.00</strong
-                                        >
-                                        <small
-                                            class="text-muted d-block"
-                                            th:text="#{inicio.average.suffix}"
-                                            >de 100 puntos</small
-                                        >
-                                    </div>
-                                </section>
+                    <!-- Card Materias Inscritas -->
+                    <div class="col-md-6">
+                        <div class="content-card bg-light border-0 p-3 h-100 d-flex align-items-center rounded-3">
+                            <div class="student-feature-icon me-3 text-primary fs-3">
+                                <i class="bi bi-book-half"></i>
                             </div>
-
-                            <!-- Card Materias Inscritas -->
-                            <div class="col-md-6">
-                                <div
-                                    class="content-card bg-light border-0 p-3 h-100 d-flex align-items-center"
-                                >
-                                    <div class="student-feature-icon me-3">
-                                        <i class="bi bi-book-half"></i>
-                                    </div>
-                                    <div>
-                                        <span
-                                            class="small text-muted d-block fw-bold"
-                                            th:text="#{inicio.schedule.summary}"
-                                            >Materias cursando actualmente</span
-                                        >
-                                        <strong
-                                            class="h3 fw-bold text-navy mb-0"
-                                            th:text="${#lists.size(materias)}"
-                                            >0</strong
-                                        >
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Documentos Oficiales en PDF -->
-                        <div class="content-card p-4 border bg-white rounded-3 shadow-sm mb-4">
-                            <h5 class="fw-bold mb-3"><i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i>Descarga de Documentos Oficiales</h5>
-                            <div class="d-flex flex-wrap gap-2">
-                                <a th:href="@{/estudiante/constancia/pdf}" class="btn btn-outline-danger d-inline-flex align-items-center gap-2">
-                                    <i class="bi bi-file-earmark-check"></i>Constancia de Estudios
-                                </a>
-                                <a th:href="@{/estudiante/kardex/pdf}" class="btn btn-outline-primary d-inline-flex align-items-center gap-2">
-                                    <i class="bi bi-journal-bookmark"></i>Kárdex Oficial
-                                </a>
-                                <a th:href="@{/estudiante/horario/pdf}" class="btn btn-outline-success d-inline-flex align-items-center gap-2">
-                                    <i class="bi bi-calendar-event"></i>Horario Escolar
-                                </a>
+                            <div>
+                                <span class="small text-muted d-block fw-bold" th:text="#{estudiante.inicio.schedule.summary}">Materias cursando actualmente</span>
+                                <strong class="h3 fw-bold text-navy mb-0" th:text="${materias != null ? #lists.size(materias) : 0}">0</strong>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </main>
 
-        <footer th:replace="~{template :: footer}"></footer>
-    </body>
+                <!-- Notificaciones Académicas -->
+                <div th:if="${notificaciones != null && !notificaciones.isEmpty()}" class="mb-4">
+                    <h5 class="fw-bold mb-2">
+                        <i class="bi bi-bell-fill text-warning me-2"></i>
+                        <span th:text="#{estudiante.inicio.notifications.title}">Avisos y Notificaciones</span>
+                    </h5>
+                    <div class="list-group">
+                        <div th:each="notif : ${notificaciones}" class="list-group-item list-group-item-action flex-column align-items-start border-0 bg-light mb-2 rounded-3">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1 fw-bold text-navy" th:text="${notif.titulo}">Título</h6>
+                                <small class="text-muted" th:text="${notif.fechaCreacion != null ? #temporals.format(notif.fechaCreacion, 'dd/MM/yyyy HH:mm') : ''}">Fecha</small>
+                            </div>
+                            <p class="mb-1 text-secondary small" th:text="${notif.mensaje}">Mensaje</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección: Clases de Hoy -->
+                <div class="mt-4 mb-4">
+                    <h5 class="fw-bold text-dark mb-3" th:text="#{estudiante.inicio.classes.today}">Clases de hoy</h5>
+                    <div class="table-responsive">
+                        <table class="table align-middle table-bordered border-light bg-white rounded-3 overflow-hidden table-custom-header">
+                            <thead>
+                                <tr>
+                                    <th class="py-3 px-3 text-center" style="width: 25%;" th:text="#{estudiante.inicio.table.hour}">Hora</th>
+                                    <th class="py-3 px-3" style="width: 55%;" th:text="#{estudiante.inicio.table.subject}">Materia</th>
+                                    <th class="py-3 px-3 text-center" style="width: 20%;" th:text="#{estudiante.inicio.table.classroom}">Aula</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="clase : ${clasesHoy}">
+                                    <td class="text-center fw-semibold text-secondary" th:text="${clase.hora}">07:00 - 09:00</td>
+                                    <td class="fw-medium text-dark" th:text="${clase.materia}">Sistemas Operativos</td>
+                                    <td class="text-center text-muted" th:text="${clase.aula}">Lab 3</td>
+                                </tr>
+                                <tr th:if="${clasesHoy == null or clasesHoy.empty}">
+                                    <td colspan="3" class="text-center text-muted py-4" th:text="#{estudiante.inicio.classes.empty}">No hay clases programadas para el día de hoy.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Documentos Oficiales en PDF -->
+                <div class="content-card p-4 border bg-white rounded-3 shadow-sm mb-4">
+                    <h5 class="fw-bold mb-3">
+                        <i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i>
+                        <span th:text="#{estudiante.inicio.documents.title}">Descarga de Documentos Oficiales</span>
+                    </h5>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a th:href="@{/estudiante/constancia/pdf}" class="btn btn-outline-danger d-inline-flex align-items-center gap-2">
+                            <i class="bi bi-file-earmark-check"></i> <span th:text="#{estudiante.inicio.doc.constancia}">Constancia de Estudios</span>
+                        </a>
+                        <a th:href="@{/estudiante/kardex/pdf}" class="btn btn-outline-primary d-inline-flex align-items-center gap-2">
+                            <i class="bi bi-journal-bookmark"></i> <span th:text="#{estudiante.inicio.doc.kardex}">Cárdex Oficial</span>
+                        </a>
+                        <a th:href="@{/estudiante/horario/pdf}" class="btn btn-outline-success d-inline-flex align-items-center gap-2">
+                            <i class="bi bi-calendar-event"></i> <span th:text="#{estudiante.inicio.doc.horario}">Horario Escolar</span>
+                        </a>
+                    </div>
+                </div>
+
+            </section>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{template :: footer}"></footer>
+</body>
 </html>

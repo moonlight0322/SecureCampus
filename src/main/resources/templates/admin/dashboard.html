@@ -1,179 +1,94 @@
 <!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org" class="h-100">
-    <head th:replace="~{template :: head('Panel de Administración y Auditoría | SecureCampus')}"></head>
+    <head th:replace="~{template :: head(#{admin.dashboard.pagetitle})}"></head>
     <body class="d-flex flex-column min-vh-100">
         <nav th:replace="~{template :: navbar}"></nav>
 
         <main class="flex-grow-1 py-4">
-            <div class="container page-shell my-auto">
-                <div th:replace="~{fragments/components :: accountBanner('Administración escolar', ${numeroControl})}"></div>
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        <p class="eyebrow text-uppercase text-orange fw-bold mb-1">MÓDULO DE CONTROL CENTRAL</p>
-                        <h1 class="h2 fw-bold text-navy mb-1">Panel de Administración y Seguridad</h1>
-                        <p class="text-secondary mb-0">Gestión de identidades, control RBAC, asignaciones escolares y bitácora de auditoría.</p>
+            <div class="container-fluid px-4 page-shell my-auto">
+                <section class="profile-banner mb-4" aria-label="Perfil institucional">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="avatar" aria-hidden="true"><i class="bi bi-person-workspace"></i></div>
+                        <div>
+                            <p class="small text-white-50 mb-1">PERFIL INSTITUCIONAL</p>
+                            <h2 class="h4 mb-1 fw-bold">Administración escolar</h2>
+                            <p class="mb-1 text-white-50">
+                                Número de control: <span th:text="${administrativo.numeroControl}">00000000</span>
+                            </p>
+                        </div>
                     </div>
-                    <div class="d-flex gap-2">
+                    <div class="average-score mt-4 mt-md-0">
+                        <span class="small text-white-50 d-block">SESIÓN ACTIVA</span>
+                        <i class="bi bi-shield-check fs-2" aria-hidden="true"></i>
+                        <span class="small text-white-50 d-block">Acceso autenticado</span>
+                    </div>
+                </section>
+
+                <div th:if="${errorOperacion}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <span th:text="${errorOperacion}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+                <div th:if="${param.creado != null}" class="alert alert-success">Usuario creado correctamente.</div>
+                <div th:if="${param.grupoAsignado != null}" class="alert alert-success">Grupo, docente, horario y aula asignados correctamente.</div>
+                <div th:if="${param.inscripcion != null}" class="alert alert-success">Estudiante inscrito; se validó su horario.</div>
+                <div th:if="${param.solicitudProcesada != null}" class="alert alert-success">Trámite procesado correctamente.</div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                    <div>
+                        <p class="eyebrow text-uppercase text-orange fw-bold mb-1" th:text="#{admin.dashboard.eyebrow}">MÓDULO DE CONTROL CENTRAL</p>
+                        <h1 class="h2 fw-bold text-navy mb-1" th:text="#{admin.dashboard.maintitle}">Panel de Administración y Seguridad</h1>
+                        <p class="text-secondary mb-0" th:text="#{admin.dashboard.subtitle}">Gestión de identidades, control RBAC, asignaciones escolares y bitácora de auditoría.</p>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
                         <button type="button" class="btn btn-navy" data-bs-toggle="modal" data-bs-target="#modalNuevoUsuario">
-                            <i class="bi bi-person-plus-fill me-1"></i>Nuevo Usuario
+                            <i class="bi bi-person-plus-fill me-1"></i><span th:text="#{admin.dashboard.btn.newuser}">Nuevo Usuario</span>
                         </button>
                         <button type="button" class="btn btn-orange" data-bs-toggle="modal" data-bs-target="#modalAsignarGrupo">
-                            <i class="bi bi-diagram-3-fill me-1"></i>Asignar Grupo
+                            <i class="bi bi-diagram-3-fill me-1"></i>Crear grupo y asignar docente
+                        </button>
+                        <button type="button" class="btn btn-outline-navy" data-bs-toggle="modal" data-bs-target="#modalInscribirEstudiante">
+                            <i class="bi bi-person-check me-1"></i>Inscribir estudiante
                         </button>
                     </div>
                 </div>
 
-                <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
-                <div th:if="${param.usuarioActualizado != null}" class="alert alert-success" role="status">El estatus de la cuenta se actualizó correctamente.</div>
-                <div th:if="${param.creado != null}" class="alert alert-success">Usuario creado y perfil académico registrado correctamente.</div>
-                <div th:if="${param.passwordRestablecida != null}" class="alert alert-success">Contraseña restablecida. Comparte la contraseña temporal con el usuario por un canal seguro.</div>
-                <div th:if="${param.grupoAsignado != null}" class="alert alert-success">Grupo creado y asignado correctamente.</div>
-                <div th:if="${param.solicitudProcesada != null}" class="alert alert-success" role="status">El trámite o desbloqueo se resolvió correctamente.</div>
-
-                <!-- Nav Tabs del Administrador -->
                 <ul class="nav nav-pills mb-4" id="adminTabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" th:classappend="${activeTab == 'usuarios'} ? ' active'" id="usuarios-tab" data-bs-toggle="pill" data-bs-target="#tab-usuarios" type="button" role="tab" th:attr="aria-selected=${activeTab == 'usuarios'}">
-                            <i class="bi bi-people-fill me-1"></i>Usuarios y Roles
+                        <button class="nav-link active" id="usuarios-tab" data-bs-toggle="pill" data-bs-target="#tab-usuarios" type="button" role="tab" aria-controls="tab-usuarios" aria-selected="true">
+                            <i class="bi bi-people-fill me-1"></i><span th:text="#{admin.dashboard.tab.users}">Usuarios y Roles</span>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" th:classappend="${activeTab == 'solicitudes'} ? ' active'" id="solicitudes-tab" data-bs-toggle="pill" data-bs-target="#tab-solicitudes" type="button" role="tab" th:attr="aria-selected=${activeTab == 'solicitudes'}">
-                            <i class="bi bi-inbox-fill me-1"></i>Trámites y Desbloqueos
+                        <button class="nav-link" id="solicitudes-tab" data-bs-toggle="pill" data-bs-target="#tab-solicitudes" type="button" role="tab" aria-controls="tab-solicitudes" aria-selected="false">
+                            <i class="bi bi-inbox-fill me-1"></i><span th:text="#{admin.dashboard.tab.requests}">Trámites y Desbloqueos</span>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="auditoria-tab" data-bs-toggle="pill" data-bs-target="#tab-auditoria" type="button" role="tab">
-                            <i class="bi bi-shield-lock-fill me-1"></i>Auditoría y Logs
+                        <button class="nav-link" id="auditoria-tab" data-bs-toggle="pill" data-bs-target="#tab-auditoria" type="button" role="tab" aria-controls="tab-auditoria" aria-selected="false">
+                            <i class="bi bi-shield-lock-fill me-1"></i><span th:text="#{admin.dashboard.tab.audit}">Auditoría y Logs</span>
                         </button>
                     </li>
                 </ul>
 
                 <div class="tab-content" id="adminTabsContent">
-                    <!-- TAB 1: USUARIOS -->
-                    <div class="tab-pane fade" th:classappend="${activeTab == 'usuarios'} ? ' show active'" id="tab-usuarios" role="tabpanel">
+                    <div class="tab-pane fade show active" id="tab-usuarios" role="tabpanel" aria-labelledby="usuarios-tab">
                         <div class="card shadow-sm border-0 rounded-3">
                             <div class="card-body p-0 table-responsive">
-                                <table class="table table-hover align-middle mb-0">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>No. Control</th>
-                                            <th>Nombre Completo</th>
-                                            <th>Correo</th>
-                                            <th>Rol Asignado</th>
-                                            <th>Estatus</th>
-                                            <th>Acción</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr th:each="u : ${usuarios}">
-                                            <td><strong th:text="${u.numeroControl}">000000</strong></td>
-                                            <td th:text="${u.nombre + ' ' + u.apellidoPaterno + (u.apellidoMaterno != null ? ' ' + u.apellidoMaterno : '')}">Nombre</td>
-                                            <td th:text="${u.correoInstitucional}">correo</td>
-                                            <td><span class="badge bg-navy" th:text="${u.rol.nombreRol}">ROL</span></td>
-                                            <td>
-                                                <span class="badge" th:classappend="${u.activo == 1 ? 'bg-success' : 'bg-danger'}"
-                                                      th:text="${u.activo == 1 ? 'ACTIVO' : 'INACTIVO'}">ACTIVO</span>
-                                            </td>
-                                            <td>
-                                                <form th:action="@{/admin/usuarios/toggle-estatus}" method="post" class="d-inline">
-                                                    <input type="hidden" name="numeroControl" th:value="${u.numeroControl}" />
-                                                    <button type="submit" class="btn btn-sm" th:classappend="${u.activo == 1 ? 'btn-outline-danger' : 'btn-outline-success'}">
-                                                        <i class="bi" th:classappend="${u.activo == 1 ? 'bi-person-x' : 'bi-person-check'}"></i>
-                                                        <span th:text="${u.activo == 1 ? 'Desactivar' : 'Activar'}"></span>
-                                                    </button>
-                                                </form>
-                                                <button type="button" class="btn btn-sm btn-outline-secondary"
-                                                        data-bs-toggle="modal" data-bs-target="#modalPasswordReset"
-                                                        th:attr="data-control=${u.numeroControl}">
-                                                    <i class="bi bi-key"></i><span class="visually-hidden">Restablecer contraseña</span>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr th:if="${usuarios == null || usuarios.isEmpty()}">
-                                            <td colspan="6" class="text-center text-muted py-4">No hay cuentas registradas.</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                <table th:replace="~{fragments/tables :: tablaAdminUsuarios(${usuarios})}"></table>
                             </div>
                         </div>
                     </div>
-
-                    <!-- TAB 2: SOLICITUDES / TICKETS -->
-                    <div class="tab-pane fade" th:classappend="${activeTab == 'solicitudes'} ? ' show active'" id="tab-solicitudes" role="tabpanel">
+                    <div class="tab-pane fade" id="tab-solicitudes" role="tabpanel" aria-labelledby="solicitudes-tab">
                         <div class="card shadow-sm border-0 rounded-3">
                             <div class="card-body p-0 table-responsive">
-                                <table class="table table-hover align-middle mb-0">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Folio</th>
-                                            <th>Solicitante</th>
-                                            <th>Trámite</th>
-                                            <th>Motivo</th>
-                                            <th>Fecha</th>
-                                            <th>Estatus</th>
-                                            <th>Gestión</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr th:if="${solicitudes == null || solicitudes.isEmpty()}">
-                                            <td colspan="7" class="text-center text-muted py-4">No hay trámites pendientes.</td>
-                                        </tr>
-                                        <tr th:each="sol : ${solicitudes}">
-                                            <td><strong class="text-navy" th:text="${sol.folio}">FOL</strong></td>
-                                            <td th:text="${sol.numeroControl}">000</td>
-                                            <td th:text="${sol.tipoTramite}">TIPO</td>
-                                            <td th:text="${sol.motivo}">MOTIVO</td>
-                                            <td th:text="${#temporals.format(sol.fechaSolicitud, 'dd/MM/yyyy HH:mm')}">FECHA</td>
-                                            <td>
-                                                <span class="badge" 
-                                                      th:classappend="${sol.estatus == 'APROBADA' ? 'bg-success' : (sol.estatus == 'RECHAZADA' ? 'bg-danger' : 'bg-warning text-dark')}"
-                                                      th:text="${sol.estatus}">PENDIENTE</span>
-                                            </td>
-                                            <td>
-                                                <div th:if="${sol.estatus == 'PENDIENTE'}" class="btn-group">
-                                                    <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" th:attr="data-bs-target='#modalAprobar' + ${sol.idSolicitud}">
-                                                        <i class="bi bi-check-lg"></i> Resolver
-                                                    </button>
-                                                </div>
-                                                <span th:if="${sol.estatus != 'PENDIENTE'}" class="small text-muted" th:text="${sol.respuestaAdmin}">Respuesta</span>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                <table th:replace="~{fragments/tables :: tablaAdminSolicitudes(${solicitudes})}"></table>
                             </div>
                         </div>
                     </div>
-
-                    <!-- TAB 3: AUDITORÍA Y LOGS -->
-                    <div class="tab-pane fade" id="tab-auditoria" role="tabpanel">
+                    <div class="tab-pane fade" id="tab-auditoria" role="tabpanel" aria-labelledby="auditoria-tab">
                         <div class="card shadow-sm border-0 rounded-3">
                             <div class="card-body p-0 table-responsive">
-                                <table class="table table-sm table-striped align-middle mb-0" style="font-size: 0.85rem;">
-                                    <thead class="table-dark">
-                                        <tr>
-                                            <th>Fecha y Hora</th>
-                                            <th>Usuario</th>
-                                            <th>Rol</th>
-                                            <th>Operación</th>
-                                            <th>Detalles</th>
-                                            <th>IP Origen</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr th:each="l : ${logs}">
-                                            <td th:text="${#temporals.format(l.fechaHora, 'dd/MM/yyyy HH:mm:ss')}">FECHA</td>
-                                            <td><strong th:text="${l.numeroControl}">USER</strong></td>
-                                            <td th:text="${l.rol}">ROL</td>
-                                            <td><span class="badge bg-secondary" th:text="${l.operacion}">OPERACION</span></td>
-                                            <td th:text="${l.detalles}">DETALLES</td>
-                                            <td th:text="${l.ipOrigen}">IP</td>
-                                        </tr>
-                                        <tr th:if="${logs == null || logs.isEmpty()}">
-                                            <td colspan="6" class="text-center text-muted py-4">Aún no hay eventos de auditoría registrados.</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                <table th:replace="~{fragments/tables :: tablaAdminLogs(${logs})}"></table>
                             </div>
                         </div>
                     </div>
@@ -181,210 +96,11 @@
             </div>
         </main>
 
-        <!-- Modal Nuevo Usuario -->
-        <div class="modal fade" id="modalNuevoUsuario" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <form th:action="@{/admin/usuarios/crear}" method="post">
-                        <div class="modal-header">
-                            <h5 class="modal-title fw-bold">Registrar Cuenta Institucional</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="row g-2 mb-3">
-                                <div class="col-6">
-                                    <label class="form-label">No. Control</label>
-                                    <input name="numeroControl" class="form-control" required pattern="[0-9]+" maxlength="20" />
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label">Rol</label>
-                                    <select name="rolId" class="form-select" required>
-                                        <option value="">-- Selecciona un rol --</option>
-                                        <option th:each="r : ${roles}" th:value="${r.rolId}" th:attr="data-role=${r.nombreRol}" th:text="${r.nombreRol}"></option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Nombre</label>
-                                <input name="nombre" class="form-control" required maxlength="50" />
-                            </div>
-                            <div class="row g-2 mb-3">
-                                <div class="col-6">
-                                    <label class="form-label">Apellido Paterno</label>
-                                    <input name="apellidoPaterno" class="form-control" required maxlength="50" />
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label">Apellido Materno</label>
-                                    <input name="apellidoMaterno" class="form-control" maxlength="50" />
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Correo Institucional</label>
-                                <input name="correoInstitucional" type="email" class="form-control" required maxlength="100" />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Contraseña Inicial</label>
-                                <input name="password" type="password" class="form-control" minlength="12" maxlength="72" autocomplete="new-password" required />
-                                <div class="form-text">Al menos 12 caracteres, hasta 72 bytes en UTF-8. El usuario puede cambiarla desde su cuenta.</div>
-                            </div>
-                            <div id="careerFields" class="d-none">
-                                <div class="mb-3">
-                                    <label class="form-label" for="newUserCareer">Carrera / adscripción</label>
-                                    <select id="newUserCareer" name="carreraId" class="form-select">
-                                        <option value="">-- Selecciona una carrera --</option>
-                                        <option th:each="c : ${carreras}" th:value="${c.carreraId}" th:text="${c.nombre}"></option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div id="professorFields" class="d-none">
-                                <div class="mb-3">
-                                    <label class="form-label" for="tipoContratacion">Tipo de contratación</label>
-                                    <input id="tipoContratacion" name="tipoContratacion" class="form-control" maxlength="20" />
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label" for="cubiculo">Cubículo (opcional)</label>
-                                    <input id="cubiculo" name="cubiculo" class="form-control" maxlength="20" />
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-navy">Crear Usuario</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" id="modalPasswordReset" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <form th:action="@{/admin/usuarios/restablecer-password}" method="post">
-                        <div class="modal-header">
-                            <h5 class="modal-title fw-bold">Restablecer contraseña</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                        </div>
-                        <div class="modal-body">
-                            <input id="resetNumeroControl" type="hidden" name="numeroControl" />
-                            <p>Establece una contraseña temporal para <strong id="resetUsuario"></strong>.</p>
-                            <label class="form-label" for="resetPassword">Contraseña temporal</label>
-                            <input id="resetPassword" type="password" name="password" class="form-control" minlength="12" maxlength="72" autocomplete="new-password" required />
-                            <div class="form-text">Al menos 12 caracteres, hasta 72 bytes en UTF-8; entrégala al usuario por un canal seguro.</div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-navy">Restablecer</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal Asignar Grupo -->
-        <div class="modal fade" id="modalAsignarGrupo" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <form th:action="@{/admin/grupos/asignar}" method="post">
-                        <div class="modal-header">
-                            <h5 class="modal-title fw-bold">Crear y Asignar Grupo</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label class="form-label">Código de Grupo</label>
-                                <input name="codigoGrupo" class="form-control" placeholder="Ej. SC-801" required />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Materia</label>
-                                <select name="materiaId" class="form-select" required>
-                                    <option value="">-- Selecciona una materia --</option>
-                                    <option th:each="m : ${materias}" th:value="${m.materiaId}" th:text="${m.clave + ' - ' + m.nombre}"></option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Profesor Asignado</label>
-                                <select name="profesorControl" class="form-select">
-                                    <option value="">-- Sin profesor asignado --</option>
-                                    <option th:each="p : ${profesores}" th:value="${p.numeroControl}" th:text="${p.numeroControl + ' - ' + p.usuario.nombre + ' ' + p.usuario.apellidoPaterno}"></option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Periodo Escolar</label>
-                                <select name="periodoId" class="form-select" required>
-                                    <option value="">-- Selecciona un periodo --</option>
-                                    <option th:each="pe : ${periodos}" th:value="${pe.periodoId}" th:text="${pe.nombre}"></option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-orange">Guardar Asignación</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modales Dinámicos para Resolver Solicitudes -->
-        <div th:each="sol : ${solicitudes}">
-            <div class="modal fade" th:id="'modalAprobar' + ${sol.idSolicitud}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <form th:action="@{/admin/solicitudes/resolver}" method="post">
-                            <input type="hidden" name="idSolicitud" th:value="${sol.idSolicitud}" />
-                            <div class="modal-header">
-                                <h5 class="modal-title fw-bold" th:text="'Resolver ' + ${sol.folio}">Folio</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body">
-                                <p><strong>Solicitante:</strong> <span th:text="${sol.numeroControl}"></span></p>
-                                <p><strong>Motivo:</strong> <span th:text="${sol.motivo}"></span></p>
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">Resolución</label>
-                                    <select name="estatus" class="form-select" required>
-                                        <option value="APROBADA">Aprobar Solicitud</option>
-                                        <option value="RECHAZADA">Rechazar Solicitud</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">Observaciones / Respuesta oficial</label>
-                                    <textarea name="respuesta" class="form-control" rows="3" maxlength="500" required></textarea>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                <button type="submit" class="btn btn-success">Confirmar Decisión</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div th:replace="~{fragments/components :: modalNuevoUsuario(${roles}, ${carreras})}"></div>
+        <div th:replace="~{fragments/components :: modalAsignarGrupo(${materias}, ${profesores}, ${periodoAsignacion}, ${aulas})}"></div>
+        <div th:replace="~{fragments/components :: modalInscribirEstudiante(${estudiantes}, ${grupos})}"></div>
+        <div th:replace="~{fragments/components :: modalesResolverSolicitudes(${solicitudes})}"></div>
 
         <footer th:replace="~{template :: footer}"></footer>
-        <script>
-            const roleSelect = document.querySelector('#modalNuevoUsuario select[name="rolId"]');
-            const careerFields = document.getElementById('careerFields');
-            const careerSelect = document.getElementById('newUserCareer');
-            const professorFields = document.getElementById('professorFields');
-            const contractInput = document.getElementById('tipoContratacion');
-
-            function updateProfileFields() {
-                const role = roleSelect.selectedOptions[0]?.dataset.role;
-                const needsCareer = role === 'ESTUDIANTE' || role === 'PROFESOR';
-                careerFields.classList.toggle('d-none', !needsCareer);
-                professorFields.classList.toggle('d-none', role !== 'PROFESOR');
-                careerSelect.required = needsCareer;
-                contractInput.required = role === 'PROFESOR';
-            }
-            roleSelect.addEventListener('change', updateProfileFields);
-            updateProfileFields();
-
-            document.getElementById('modalPasswordReset').addEventListener('show.bs.modal', event => {
-                const control = event.relatedTarget.dataset.control;
-                document.getElementById('resetNumeroControl').value = control;
-                document.getElementById('resetUsuario').textContent = control;
-            });
-        </script>
     </body>
 </html>

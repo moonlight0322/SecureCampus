@@ -10,13 +10,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.ds.securecampus.model.Estudiante;
-import com.ds.securecampus.model.MateriaHorario;
+import com.ds.securecampus.model.CalificacionMateria;
 import com.ds.securecampus.model.MateriaKardex;
 import com.ds.securecampus.model.PerfilEstudiante;
+import com.ds.securecampus.model.SolicitudTramite;
+import com.ds.securecampus.model.HorarioSemanalFila;
 import com.ds.securecampus.service.DocumentoPdfService;
 import com.ds.securecampus.service.EstudianteService;
 import com.ds.securecampus.service.NotificacionService;
@@ -70,7 +73,7 @@ public class PortalController {
             return "redirect:/admin";
         }
         if (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_JEFE_DEPARTAMENTO"))) {
-            return "redirect:/jefe";
+            return "redirect:/jefe/dashboard";
         }
         return "rol-no-disponible";
     }
@@ -79,7 +82,8 @@ public class PortalController {
     public String inicioEstudiante(Authentication authentication, Model model) {
         String numControl = authentication.getName();
         model.addAttribute("estudiante", estudianteService.obtenerPerfil(numControl));
-        model.addAttribute("materias", estudianteService.obtenerHorario(numControl));
+        model.addAttribute("materias", estudianteService.obtenerCargaActual(numControl));
+        model.addAttribute("clasesHoy", estudianteService.obtenerClasesHoy(numControl));
         model.addAttribute("notificaciones", notificacionService.obtenerNotificaciones(numControl));
         model.addAttribute("solicitudes", solicitudService.obtenerPorUsuario(numControl));
         return "estudiante/inicio";
@@ -89,16 +93,34 @@ public class PortalController {
     public String horario(Authentication authentication, Model model) {
         String numControl = authentication.getName();
         model.addAttribute("estudiante", estudianteService.obtenerPerfil(numControl));
-        model.addAttribute("materias", estudianteService.obtenerHorario(numControl));
+        model.addAttribute("filasHorario", estudianteService.obtenerHorarioSemanal(numControl));
         return "estudiante/horario";
     }
 
-    @GetMapping("/estudiante/kardex")
+    @GetMapping({"/estudiante/kardex", "/estudiante/cardex"})
     public String kardex(Authentication authentication, Model model) {
         String numControl = authentication.getName();
         model.addAttribute("estudiante", estudianteService.obtenerPerfil(numControl));
         model.addAttribute("materias", estudianteService.obtenerKardex(numControl));
-        return "estudiante/kardex";
+        return "estudiante/cardex";
+    }
+
+    @GetMapping("/estudiante/carga")
+    public String cargaAcademica(Authentication authentication, Model model) {
+        String numeroControl = authentication.getName();
+        model.addAttribute("estudiante", estudianteService.obtenerPerfil(numeroControl));
+        model.addAttribute("materias", estudianteService.obtenerCargaActual(numeroControl));
+        return "estudiante/carga";
+    }
+
+    @GetMapping("/estudiante/calificaciones")
+    public String calificaciones(Authentication authentication, Model model) {
+        String numeroControl = authentication.getName();
+        List<CalificacionMateria> calificaciones =
+                estudianteService.obtenerCalificacionesActuales(numeroControl);
+        model.addAttribute("estudiante", estudianteService.obtenerPerfil(numeroControl));
+        model.addAttribute("calificaciones", calificaciones);
+        return "estudiante/calificaciones";
     }
 
     @GetMapping("/estudiante/solicitudes")
@@ -115,6 +137,23 @@ public class PortalController {
                                  @RequestParam("motivo") String motivo) {
         solicitudService.crearSolicitud(authentication.getName(), tipoTramite, motivo, null);
         return "redirect:/estudiante/solicitudes?creada=true";
+    }
+
+    @GetMapping("/estudiante/solicitudes/{id}/pdf")
+    public ResponseEntity<byte[]> descargarTramiteAprobado(
+            Authentication authentication, @PathVariable Long id) {
+        SolicitudTramite solicitud = solicitudService.obtenerAprobada(id, authentication.getName())
+                .orElse(null);
+        if (solicitud == null) {
+            return ResponseEntity.notFound().build();
+        }
+        PerfilEstudiante perfil = estudianteService.obtenerPerfil(authentication.getName());
+        byte[] pdf = documentoPdfService.generarComprobanteTramite(perfil, solicitud);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"Tramite_" + solicitud.getFolio() + ".pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
     }
 
     // --- Descargas de Documentos PDF Oficiales ---
@@ -157,9 +196,9 @@ public class PortalController {
     public ResponseEntity<byte[]> descargarHorarioPdf(Authentication authentication) {
         String numControl = authentication.getName();
         PerfilEstudiante perfil = estudianteService.obtenerPerfil(numControl);
-        List<MateriaHorario> horarios = estudianteService.obtenerHorario(numControl);
+        List<HorarioSemanalFila> filas = estudianteService.obtenerHorarioSemanal(numControl);
 
-        byte[] pdf = documentoPdfService.generarHorarioPdf(perfil, horarios);
+        byte[] pdf = documentoPdfService.generarHorarioSemanalPdf(perfil, filas);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"Horario_" + numControl + ".pdf\"")
                 .contentType(MediaType.APPLICATION_PDF)

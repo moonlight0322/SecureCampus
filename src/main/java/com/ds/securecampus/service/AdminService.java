@@ -1,8 +1,8 @@
 package com.ds.securecampus.service;
 
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -10,8 +10,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ds.securecampus.model.Carrera;
+import com.ds.securecampus.model.Aula;
+import com.ds.securecampus.model.CargaAlumno;
 import com.ds.securecampus.model.Estudiante;
+import com.ds.securecampus.model.Edificio;
 import com.ds.securecampus.model.Grupo;
+import com.ds.securecampus.model.HorarioClase;
 import com.ds.securecampus.model.LogAuditoria;
 import com.ds.securecampus.model.Materia;
 import com.ds.securecampus.model.Periodo;
@@ -19,8 +23,12 @@ import com.ds.securecampus.model.Profesor;
 import com.ds.securecampus.model.Rol;
 import com.ds.securecampus.model.Usuario;
 import com.ds.securecampus.repository.CarreraRepository;
+import com.ds.securecampus.repository.AulaRepository;
+import com.ds.securecampus.repository.CargaAlumnoRepository;
+import com.ds.securecampus.repository.EdificioRepository;
 import com.ds.securecampus.repository.EstudianteRepository;
 import com.ds.securecampus.repository.GrupoRepository;
+import com.ds.securecampus.repository.HorarioClaseRepository;
 import com.ds.securecampus.repository.LogAuditoriaRepository;
 import com.ds.securecampus.repository.MateriaRepository;
 import com.ds.securecampus.repository.PeriodoRepository;
@@ -41,18 +49,26 @@ public class AdminService {
     private final LogAuditoriaRepository logAuditoriaRepository;
     private final AuditoriaService auditoriaService;
     private final PasswordEncoder passwordEncoder;
+    private final AulaRepository aulaRepository;
+    private final EdificioRepository edificioRepository;
+    private final HorarioClaseRepository horarioClaseRepository;
+    private final CargaAlumnoRepository cargaAlumnoRepository;
 
     public AdminService(UsuarioRepository usuarioRepository,
-                        RolRepository rolRepository,
-                        MateriaRepository materiaRepository,
-                        CarreraRepository carreraRepository,
-                        EstudianteRepository estudianteRepository,
-                        GrupoRepository grupoRepository,
-                        ProfesorRepository profesorRepository,
-                        PeriodoRepository periodoRepository,
-                        LogAuditoriaRepository logAuditoriaRepository,
-                        AuditoriaService auditoriaService,
-                        PasswordEncoder passwordEncoder) {
+            RolRepository rolRepository,
+            MateriaRepository materiaRepository,
+            CarreraRepository carreraRepository,
+            EstudianteRepository estudianteRepository,
+            GrupoRepository grupoRepository,
+            ProfesorRepository profesorRepository,
+            PeriodoRepository periodoRepository,
+            LogAuditoriaRepository logAuditoriaRepository,
+            AuditoriaService auditoriaService,
+            PasswordEncoder passwordEncoder,
+            AulaRepository aulaRepository,
+            EdificioRepository edificioRepository,
+            HorarioClaseRepository horarioClaseRepository,
+            CargaAlumnoRepository cargaAlumnoRepository) {
         this.usuarioRepository = usuarioRepository;
         this.rolRepository = rolRepository;
         this.materiaRepository = materiaRepository;
@@ -64,6 +80,10 @@ public class AdminService {
         this.logAuditoriaRepository = logAuditoriaRepository;
         this.auditoriaService = auditoriaService;
         this.passwordEncoder = passwordEncoder;
+        this.aulaRepository = aulaRepository;
+        this.edificioRepository = edificioRepository;
+        this.horarioClaseRepository = horarioClaseRepository;
+        this.cargaAlumnoRepository = cargaAlumnoRepository;
     }
 
     @Transactional(readOnly = true)
@@ -89,23 +109,25 @@ public class AdminService {
         usuario.setActivo(nuevo);
         usuarioRepository.save(usuario);
         auditoriaService.registrar(adminUser, "ADMINISTRADOR", "MODIFICAR_ESTATUS_USUARIO",
-                "Usuario " + numeroControl + " estatus cambiado a " + (nuevo == 1 ? "ACTIVO" : "INACTIVO"), "127.0.0.1");
+                "Usuario " + numeroControl + " estatus cambiado a " + (nuevo == 1 ? "ACTIVO" : "INACTIVO"),
+                "127.0.0.1");
     }
 
     @Transactional
-    public void crearUsuario(String numeroControl, String password, String nombre, String apePat, 
-                             String apeMat, String correo, Long rolId, Long carreraId,
-                             String tipoContratacion, String cubiculo, String adminUser) {
+    public void crearUsuario(String numeroControl, String password, String nombre, String apePat,
+            String apeMat, String correo, Long rolId, Long carreraId,
+            String tipoContratacion, String cubiculo, String adminUser) {
         if (numeroControl == null || numeroControl.isBlank()
                 || !numeroControl.matches("\\d+")
                 || numeroControl.length() > 20
-                || password == null || password.length() < 12
-                || password.getBytes(StandardCharsets.UTF_8).length > 72
+                || !PoliticaContrasena.esValida(password)
                 || nombre == null || nombre.isBlank() || nombre.length() > 50
                 || apePat == null || apePat.isBlank() || apePat.length() > 50
                 || apeMat != null && apeMat.length() > 50
                 || correo == null || correo.isBlank() || correo.length() > 100) {
-            throw new IllegalArgumentException("Revisa los campos obligatorios, sus longitudes y la contraseña (12 a 72 bytes).");
+            throw new IllegalArgumentException(
+                    "Revisa los campos obligatorios, sus longitudes y los requisitos de contraseña: "
+                            + PoliticaContrasena.requisitos());
         }
         if (usuarioRepository.findByNumeroControl(numeroControl).isPresent()) {
             throw new IllegalArgumentException("El número de control ya se encuentra registrado.");
@@ -129,34 +151,39 @@ public class AdminService {
         u.setFechaCreacion(LocalDate.now());
         usuarioRepository.saveAndFlush(u);
 
-        String nombreRol = rol.getNombreRol().toUpperCase();
+        String nombreRol = rol.getNombreRol() != null ? rol.getNombreRol().trim().toUpperCase() : "";
         if ("ESTUDIANTE".equals(nombreRol)) {
+            if (carreraId == null) {
+                throw new IllegalArgumentException("Debe seleccionar una carrera para el estudiante.");
+            }
             Carrera carrera = carreraParaPerfil(carreraId);
             Estudiante estudiante = new Estudiante();
-            estudiante.setNumeroControl(numeroControl);
             estudiante.setUsuario(u);
             estudiante.setCarrera(carrera);
             estudiante.setFechaIngreso(LocalDate.now());
             estudiante.setPromedio(BigDecimal.ZERO);
             estudiante.setPagoReinscripcion("N");
             estudiante.setTieneAdeudos("N");
-            estudianteRepository.save(estudiante);
+            estudianteRepository.saveAndFlush(estudiante);
         } else if ("PROFESOR".equals(nombreRol)) {
+            if (carreraId == null) {
+                throw new IllegalArgumentException("Debe seleccionar una adscripción para el profesor.");
+            }
             Carrera carrera = carreraParaPerfil(carreraId);
             if (tipoContratacion == null || tipoContratacion.isBlank() || tipoContratacion.length() > 20
                     || cubiculo != null && cubiculo.length() > 20) {
-                throw new IllegalArgumentException("Revisa el tipo de contratación y el cubículo (máximo 20 caracteres).");
+                throw new IllegalArgumentException(
+                        "Revisa el tipo de contratación y el cubículo (máximo 20 caracteres).");
             }
             Profesor profesor = new Profesor();
-            profesor.setNumeroControl(numeroControl);
             profesor.setUsuario(u);
             profesor.setCarreraAdscripcion(carrera);
             profesor.setTipoContratacion(tipoContratacion);
             profesor.setCubiculo(cubiculo);
-            profesorRepository.save(profesor);
+            profesorRepository.saveAndFlush(profesor);
         }
 
-        auditoriaService.registrar(adminUser, "ADMINISTRADOR", "ALTA_USUARIO", 
+        auditoriaService.registrar(adminUser, "ADMINISTRADOR", "ALTA_USUARIO",
                 "Nuevo usuario registrado: " + numeroControl + " (" + rol.getNombreRol() + ")", "127.0.0.1");
     }
 
@@ -170,9 +197,8 @@ public class AdminService {
 
     @Transactional
     public void restablecerPassword(String numeroControl, String password, String adminUser) {
-        if (password == null || password.length() < 12
-                || password.getBytes(StandardCharsets.UTF_8).length > 72) {
-            throw new IllegalArgumentException("La contraseña temporal debe tener de 12 a 72 bytes.");
+        if (!PoliticaContrasena.esValida(password)) {
+            throw new IllegalArgumentException(PoliticaContrasena.requisitos());
         }
         Usuario usuario = usuarioRepository.findByNumeroControl(numeroControl)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado."));
@@ -200,62 +226,229 @@ public class AdminService {
     }
 
     @Transactional(readOnly = true)
+    public Usuario obtenerUsuario(String numeroControl) {
+        return usuarioRepository.findByNumeroControl(numeroControl)
+                .orElseThrow(() -> new IllegalArgumentException("No se encontró el perfil de la cuenta autenticada."));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Estudiante> listarEstudiantes() {
+        return estudianteRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Grupo> listarGruposPeriodoActual() {
+        Periodo periodo = periodoCalculado(LocalDate.now());
+        return grupoRepository.findByPeriodoClavePeriodo(periodo.getClavePeriodo()).stream()
+                .filter(grupo -> grupo.getHorarios() != null && !grupo.getHorarios().isEmpty())
+                .toList();
+    }
+
+    public List<String> listarNombresAulas() {
+        List<String> aulas = new java.util.ArrayList<>();
+        mapaAulas().forEach((edificio, cantidad) -> {
+            for (int numero = 1; numero <= cantidad; numero++) {
+                aulas.add(edificio + "-" + numero);
+            }
+        });
+        return List.copyOf(aulas);
+    }
+
+    @Transactional(readOnly = true)
     public List<Periodo> listarPeriodos() {
         return periodoRepository.findAll();
     }
 
-    @Transactional
-    public void altaMateria(String clave, String nombre, Integer creditos, Long carreraId, String jefeUser) {
-        if (clave == null || clave.isBlank() || clave.length() > 20
-                || nombre == null || nombre.isBlank() || nombre.length() > 100
-                || creditos == null || creditos < 1 || creditos > 10) {
-            throw new IllegalArgumentException("Indica clave, nombre y entre 1 y 10 créditos para la materia.");
-        }
-        if (materiaRepository.existsByClave(clave)) {
-            throw new IllegalArgumentException("La clave de materia ya existe.");
-        }
-        Carrera carrera = carreraRepository.findById(carreraId)
-                .orElseThrow(() -> new IllegalArgumentException("Carrera no encontrada."));
-
-        Materia m = new Materia();
-        m.setClave(clave);
-        m.setNombre(nombre);
-        m.setCreditos(BigDecimal.valueOf(creditos.longValue()));
-        m.setCarrera(carrera);
-        materiaRepository.save(m);
-
-        auditoriaService.registrar(jefeUser, "JEFE_DEPARTAMENTO", "ALTA_MATERIA", 
-                "Nueva materia: " + clave + " - " + nombre, "127.0.0.1");
+    @Transactional(readOnly = true)
+    public String periodoAsignacionActual(LocalDate fecha) {
+        return periodoCalculado(fecha).getNombre();
     }
 
-    @Transactional
-    public void crearGrupoAsignacion(String codigoGrupo, Long materiaId, String profesorControl, Long periodoId, String operadorUser) {
+    @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
+    public void crearGrupoAsignacion(String codigoGrupo, Long materiaId, String profesorControl,
+            String patronHorario, String horaInicio, String horaCorta, String aulaNombre,
+            String operadorUser) {
         if (codigoGrupo == null || codigoGrupo.isBlank() || codigoGrupo.length() > 20) {
             throw new IllegalArgumentException("El código de grupo es obligatorio.");
         }
-        if (grupoRepository.existsByCodigoGrupoAndMateriaMateriaIdAndPeriodoPeriodoId(
-                codigoGrupo, materiaId, periodoId)) {
-            throw new IllegalArgumentException("Ya existe ese grupo para la materia y el periodo seleccionados.");
-        }
+        Periodo calculado = periodoCalculado(LocalDate.now());
+        Periodo periodo = periodoRepository.findByClavePeriodoForUpdate(calculado.getClavePeriodo())
+                .orElseGet(() -> periodoRepository.saveAndFlush(calculado));
         Materia materia = materiaRepository.findById(materiaId)
                 .orElseThrow(() -> new IllegalArgumentException("Materia no encontrada."));
-        Periodo periodo = periodoRepository.findById(periodoId)
-                .orElseThrow(() -> new IllegalArgumentException("Periodo no encontrado."));
-        Profesor profesor = null;
-        if (profesorControl != null && !profesorControl.isBlank()) {
-            profesor = profesorRepository.findById(profesorControl)
-                    .orElseThrow(() -> new IllegalArgumentException("El profesor seleccionado no existe."));
+        if (profesorControl == null || profesorControl.isBlank()) {
+            throw new IllegalArgumentException("Selecciona un docente para el grupo.");
+        }
+        Profesor profesor = profesorRepository.findById(profesorControl)
+                .orElseThrow(() -> new IllegalArgumentException("El profesor seleccionado no existe."));
+
+        List<SesionClase> sesiones = HorarioAsignacion.crear(patronHorario, horaInicio, horaCorta);
+        Aula aula = obtenerOCrearAula(aulaNombre);
+        validarDisponibilidad(sesiones, aula, profesor, periodo.getPeriodoId());
+
+        Grupo grupo = grupoRepository.findByCodigoGrupoAndMateriaMateriaIdAndPeriodoPeriodoId(
+                codigoGrupo, materiaId, periodo.getPeriodoId()).orElseGet(() -> {
+                    Grupo nuevo = new Grupo();
+                    nuevo.setCodigoGrupo(codigoGrupo);
+                    nuevo.setMateria(materia);
+                    nuevo.setPeriodo(periodo);
+                    return nuevo;
+                });
+        boolean grupoExistente = grupo.getGrupoId() != null;
+        if (grupoExistente && !grupo.getHorarios().isEmpty()) {
+            throw new IllegalArgumentException("Ese grupo ya tiene horario. Usa otro código para crear una sección distinta.");
+        }
+        if (grupoExistente) {
+            for (CargaAlumno carga : cargaAlumnoRepository.findByGrupoGrupoId(grupo.getGrupoId())) {
+                for (SesionClase sesion : sesiones) {
+                    if (horarioClaseRepository.existeConflictoEstudiante(
+                            carga.getEstudiante().getNumeroControl(), grupo.getGrupoId(),
+                            periodo.getPeriodoId(), sesion.dia(),
+                            sesion.horaInicio(), sesion.horaFin())) {
+                        throw new IllegalArgumentException("El horario propuesto se cruza con otra materia de un estudiante ya inscrito.");
+                    }
+                }
+            }
+        }
+        grupo.setProfesor(profesor);
+        grupo = grupoRepository.saveAndFlush(grupo);
+        for (SesionClase sesion : sesiones) {
+            HorarioClase horario = new HorarioClase();
+            horario.setGrupo(grupo);
+            horario.setAula(aula);
+            horario.setDiaSemana(sesion.dia());
+            horario.setHoraInicio(sesion.horaInicio());
+            horario.setHoraFin(sesion.horaFin());
+            horarioClaseRepository.save(horario);
         }
 
-        Grupo g = new Grupo();
-        g.setCodigoGrupo(codigoGrupo);
-        g.setMateria(materia);
-        g.setProfesor(profesor);
-        g.setPeriodo(periodo);
-        grupoRepository.save(g);
+        auditoriaService.registrar(operadorUser, "ACADEMICO",
+                grupoExistente ? "HORARIO_GRUPO_COMPLETADO" : "ASIGNACION_GRUPO",
+                "Grupo " + codigoGrupo + " asignado a materia " + materia.getNombre() +
+                        " y docente " + profesor.getUsuario().getNombre(),
+                "127.0.0.1");
+    }
 
-        auditoriaService.registrar(operadorUser, "ACADEMICO", "ASIGNACION_GRUPO", 
-                "Grupo " + codigoGrupo + " asignado a materia " + materia.getNombre() + 
-                (profesor != null ? " y docente " + profesor.getUsuario().getNombre() : " sin docente"), "127.0.0.1");
+    @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
+    public void inscribirEstudiante(Long grupoId, String numeroControl, String operadorUser) {
+        Long periodoId = grupoRepository.findPeriodoIdByGrupoIdForUpdate(grupoId)
+                .orElseThrow(() -> new IllegalArgumentException("El grupo seleccionado no existe."));
+        periodoRepository.findByIdForUpdate(periodoId)
+                .orElseThrow(() -> new IllegalArgumentException("No se encontró el periodo del grupo."));
+        Grupo grupo = grupoRepository.findById(grupoId)
+                .orElseThrow(() -> new IllegalArgumentException("El grupo seleccionado no existe."));
+        Estudiante estudiante = estudianteRepository.findById(numeroControl)
+                .orElseThrow(() -> new IllegalArgumentException("El número de control no corresponde a un estudiante."));
+        if (cargaAlumnoRepository.existsByEstudianteNumeroControlAndGrupoGrupoId(numeroControl, grupoId)) {
+            throw new IllegalArgumentException("El estudiante ya está inscrito en este grupo.");
+        }
+
+        List<HorarioClase> horarios = horarioClaseRepository.findByGrupoGrupoId(grupoId);
+        if (horarios.isEmpty()) {
+            throw new IllegalArgumentException("No se puede inscribir en un grupo que no tenga horario y aula.");
+        }
+        for (HorarioClase horario : horarios) {
+            boolean conflicto = horarioClaseRepository.existeConflictoEstudiante(numeroControl, grupoId,
+                    grupo.getPeriodo().getPeriodoId(), horario.getDiaSemana(),
+                    horario.getHoraInicio(), horario.getHoraFin());
+            if (conflicto) {
+                throw new IllegalArgumentException("El estudiante ya tiene una clase que coincide con el horario solicitado.");
+            }
+        }
+        CargaAlumno carga = new CargaAlumno();
+        carga.setEstudiante(estudiante);
+        carga.setGrupo(grupo);
+        cargaAlumnoRepository.save(carga);
+        auditoriaService.registrar(operadorUser, "ADMINISTRADOR", "INSCRIPCION_ESTUDIANTE",
+                "Estudiante " + numeroControl + " inscrito en grupo " + grupo.getCodigoGrupo(), "127.0.0.1");
+    }
+
+    private void validarDisponibilidad(List<SesionClase> sesiones, Aula aula, Profesor profesor, Long periodoId) {
+        for (SesionClase sesion : sesiones) {
+            if (horarioClaseRepository.existeConflictoAula(aula.getEdificio().getClave(),
+                    aula.getNombreAula(), sesion.dia(), periodoId,
+                    sesion.horaInicio(), sesion.horaFin())) {
+                throw new IllegalArgumentException("El aula ya está ocupada en uno de los bloques seleccionados.");
+            }
+            if (profesor != null && horarioClaseRepository.existeConflictoProfesor(
+                    profesor.getNumeroControl(), sesion.dia(), periodoId,
+                    sesion.horaInicio(), sesion.horaFin())) {
+                throw new IllegalArgumentException("El docente ya tiene una clase que coincide con ese horario.");
+            }
+        }
+    }
+
+    private Aula obtenerOCrearAula(String nombreAula) {
+        if (nombreAula == null || !nombreAula.matches("^(B2|T|U|E|M|P|Q|CC|Y|Z)-([1-9]|1[0-6])$")) {
+            throw new IllegalArgumentException("Selecciona un aula válida del catálogo institucional.");
+        }
+        String edificioClave = nombreAula.substring(0, nombreAula.lastIndexOf('-'));
+        int numero = Integer.parseInt(nombreAula.substring(nombreAula.lastIndexOf('-') + 1));
+        Integer maximo = mapaAulas().get(edificioClave);
+        if (maximo == null || numero > maximo) {
+            throw new IllegalArgumentException("El número de salón no existe en el edificio seleccionado.");
+        }
+        return aulaRepository.findByEdificioClaveAndNombreAula(edificioClave, nombreAula)
+                .orElseGet(() -> {
+                    Edificio edificio = edificioRepository.findByClave(edificioClave).orElseGet(() -> {
+                        Edificio nuevo = new Edificio();
+                        nuevo.setClave(edificioClave);
+                        nuevo.setNombre("Edificio " + edificioClave);
+                        return edificioRepository.saveAndFlush(nuevo);
+                    });
+                    Aula nueva = new Aula();
+                    nueva.setEdificio(edificio);
+                    nueva.setNombreAula(nombreAula);
+                    return aulaRepository.saveAndFlush(nueva);
+                });
+    }
+
+    private java.util.Map<String, Integer> mapaAulas() {
+        return java.util.Map.of("B2", 8, "T", 16, "U", 6, "E", 6, "M", 8,
+                "P", 8, "Q", 8, "CC", 4, "Y", 3, "Z", 2);
+    }
+
+    private Periodo periodoCalculado(LocalDate fecha) {
+        int anio = fecha.getYear();
+        LocalDate inicioPrimavera = LocalDate.of(anio, Month.JANUARY, 18);
+        LocalDate finPrimavera = inicioPrimavera.plusWeeks(18).minusDays(1);
+        LocalDate inicioVerano = inicioPrimavera.plusWeeks(20);
+        LocalDate finVerano = inicioVerano.plusWeeks(7).minusDays(1);
+        LocalDate inicioAsignacionVerano = inicioVerano.minusWeeks(1);
+        LocalDate inicioOtono = LocalDate.of(anio, Month.AUGUST, 10);
+        LocalDate finOtono = inicioOtono.plusWeeks(18).minusDays(1);
+
+        if (!fecha.isBefore(inicioAsignacionVerano) && !fecha.isAfter(finVerano)) {
+            return nuevoPeriodo("VER" + anio, "Verano " + anio, inicioVerano, finVerano);
+        }
+        if (!fecha.isBefore(inicioPrimavera) && !fecha.isAfter(inicioAsignacionVerano.minusDays(1))) {
+            return nuevoPeriodo("EJ" + anio, "Enero - Junio " + anio,
+                    inicioPrimavera, finPrimavera);
+        }
+        if (!fecha.isBefore(inicioOtono) && !fecha.isAfter(finOtono)) {
+            return nuevoPeriodo("AD" + anio, "Agosto - Diciembre " + anio, inicioOtono, finOtono);
+        }
+        if (fecha.isAfter(finVerano) && fecha.isBefore(inicioOtono)) {
+            return nuevoPeriodo("AD" + anio, "Agosto - Diciembre " + anio, inicioOtono, finOtono);
+        }
+
+        int anioPrimavera = fecha.isAfter(finOtono) || fecha.getMonthValue() == Month.DECEMBER.getValue()
+                ? anio + 1
+                : anio;
+        LocalDate inicioProximaPrimavera = LocalDate.of(anioPrimavera, Month.JANUARY, 18);
+        LocalDate finProximaPrimavera = inicioProximaPrimavera.plusWeeks(18).minusDays(1);
+        return nuevoPeriodo("EJ" + anioPrimavera, "Enero - Junio " + anioPrimavera,
+                inicioProximaPrimavera, finProximaPrimavera);
+    }
+
+    private Periodo nuevoPeriodo(String clave, String nombre, LocalDate inicio, LocalDate fin) {
+        Periodo periodo = new Periodo();
+        periodo.setClavePeriodo(clave);
+        periodo.setNombre(nombre);
+        periodo.setFechaInicio(inicio);
+        periodo.setFechaFin(fin);
+        periodo.setLimiteCapturaCalificaciones(fin);
+        periodo.setCapturaActiva("N");
+        return periodo;
     }
 }

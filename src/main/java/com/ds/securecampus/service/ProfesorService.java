@@ -2,37 +2,41 @@ package com.ds.securecampus.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.ds.securecampus.model.CargaAlumno;
 import com.ds.securecampus.model.Grupo;
-import com.ds.securecampus.model.HorarioClase;
-import com.ds.securecampus.model.MateriaHorario;
 import com.ds.securecampus.model.Periodo;
+import com.ds.securecampus.model.Profesor;
 import com.ds.securecampus.repository.CargaAlumnoRepository;
 import com.ds.securecampus.repository.GrupoRepository;
+import com.ds.securecampus.repository.ProfesorRepository;
+import com.ds.securecampus.repository.SolicitudTramiteRepository;
 
 @Service
 public class ProfesorService {
     private final GrupoRepository grupoRepository;
     private final CargaAlumnoRepository cargaAlumnoRepository;
+    private final ProfesorRepository profesorRepository;
     private final AuditoriaService auditoriaService;
     private final NotificacionService notificacionService;
+    private final SolicitudTramiteRepository solicitudRepository;
 
     public ProfesorService(GrupoRepository grupoRepository,
                            CargaAlumnoRepository cargaAlumnoRepository,
+                           ProfesorRepository profesorRepository,
                            AuditoriaService auditoriaService,
-                           NotificacionService notificacionService) {
+                           NotificacionService notificacionService,
+                           SolicitudTramiteRepository solicitudRepository) {
         this.grupoRepository = grupoRepository;
         this.cargaAlumnoRepository = cargaAlumnoRepository;
+        this.profesorRepository = profesorRepository;
         this.auditoriaService = auditoriaService;
         this.notificacionService = notificacionService;
+        this.solicitudRepository = solicitudRepository;
     }
 
     @Transactional(readOnly = true)
@@ -41,75 +45,53 @@ public class ProfesorService {
     }
 
     @Transactional(readOnly = true)
+    public Profesor obtenerProfesor(String numeroControl) {
+        return profesorRepository.findByNumeroControl(numeroControl)
+                .orElseThrow(() -> new IllegalArgumentException("Perfil de profesor no encontrado."));
+    }
+
+    @Transactional(readOnly = true)
+    public Grupo obtenerGrupo(Long grupoId) {
+        return grupoRepository.findById(grupoId).orElseThrow(() -> new IllegalArgumentException("Grupo no encontrado"));
+    }
+
+    @Transactional(readOnly = true)
     public Grupo obtenerGrupoProfesor(Long grupoId, String profesorControl) {
-        return grupoRepository.findByGrupoIdAndProfesorNumeroControl(grupoId, profesorControl)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Grupo no encontrado."));
+        Grupo grupo = obtenerGrupo(grupoId);
+        validarProfesorAsignado(grupo, profesorControl);
+        return grupo;
     }
 
     @Transactional(readOnly = true)
-    public List<CargaAlumno> obtenerAlumnosGrupoProfesor(Long grupoId, String profesorControl) {
-        return cargaAlumnoRepository.findByGrupoGrupoIdAndGrupoProfesorNumeroControl(grupoId, profesorControl);
-    }
-
-    @Transactional(readOnly = true)
-    public List<MateriaHorario> obtenerHorarioProfesor(String profesorControl) {
-        List<MateriaHorario> horario = new ArrayList<>();
-        for (Grupo grupo : grupoRepository.findByProfesorNumeroControl(profesorControl)) {
-            for (HorarioClase clase : grupo.getHorarios()) {
-                String dia = switch (clase.getDiaSemana()) {
-                    case 1 -> "Lunes";
-                    case 2 -> "Martes";
-                    case 3 -> "Miércoles";
-                    case 4 -> "Jueves";
-                    case 5 -> "Viernes";
-                    case 6 -> "Sábado";
-                    default -> "Día no definido";
-                };
-                horario.add(new MateriaHorario(
-                        grupo.getMateria().getNombre(),
-                        grupo.getMateria().getClave(),
-                        grupo.getCodigoGrupo(),
-                        clase.getAula().getNombreAula(),
-                        dia + " " + clase.getHoraInicio() + " - " + clase.getHoraFin(),
-                        grupo.getProfesor().getUsuario().getNombre() + " "
-                                + grupo.getProfesor().getUsuario().getApellidoPaterno(),
-                        grupo.getPeriodo().getNombre()));
-            }
-        }
-        return horario;
+    public List<CargaAlumno> obtenerAlumnosGrupo(Long grupoId) {
+        return cargaAlumnoRepository.findByGrupoGrupoId(grupoId);
     }
 
     @Transactional(readOnly = true)
     public boolean puedeCapturar(Grupo grupo) {
-        if (grupo == null || grupo.getPeriodo() == null) return false;
+        if (grupo == null || grupo.getPeriodo() == null || grupo.getGrupoId() == null) return false;
         Periodo per = grupo.getPeriodo();
-        // Solo permite edición si captura_activa es 'S'
-        return "S".equalsIgnoreCase(per.getCapturaActiva());
+        return "S".equalsIgnoreCase(per.getCapturaActiva())
+                || solicitudRepository.existsByGrupoIdAndTipoTramiteIgnoreCaseAndEstatusIgnoreCase(
+                        grupo.getGrupoId(), "DESBLOQUEO_CAPTURA", "APROBADA");
     }
 
     @Transactional
-    public void guardarCalificacion(Long grupoId, Long cargaId, BigDecimal p1, BigDecimal p2, String profesorControl) {
+    public void guardarCalificacion(Long cargaId, BigDecimal p1, BigDecimal p2, String profesorControl) {
         CargaAlumno carga = cargaAlumnoRepository.findById(cargaId)
                 .orElseThrow(() -> new IllegalArgumentException("Carga no encontrada"));
 
         Grupo grupo = carga.getGrupo();
-        if (!grupoId.equals(grupo.getGrupoId())
-                || grupo.getProfesor() == null
-                || !profesorControl.equals(grupo.getProfesor().getNumeroControl())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Grupo o carga no encontrados.");
-        }
+        validarProfesorAsignado(grupo, profesorControl);
         if (!puedeCapturar(grupo)) {
             throw new IllegalStateException("El periodo de captura se encuentra cerrado para este grupo. Solicite desbloqueo al administrador.");
         }
 
-        if (p1 == null || p2 == null) {
-            throw new IllegalArgumentException("Captura las dos calificaciones parciales antes de guardar.");
-        }
         // Validación de rango 0 a 100
-        if (p1.compareTo(BigDecimal.ZERO) < 0 || p1.compareTo(new BigDecimal("100")) > 0) {
+        if (p1 != null && (p1.compareTo(BigDecimal.ZERO) < 0 || p1.compareTo(new BigDecimal("100")) > 0)) {
             throw new IllegalArgumentException("La calificación parcial 1 debe estar entre 0 y 100.");
         }
-        if (p2.compareTo(BigDecimal.ZERO) < 0 || p2.compareTo(new BigDecimal("100")) > 0) {
+        if (p2 != null && (p2.compareTo(BigDecimal.ZERO) < 0 || p2.compareTo(new BigDecimal("100")) > 0)) {
             throw new IllegalArgumentException("La calificación parcial 2 debe estar entre 0 y 100.");
         }
 
@@ -117,12 +99,17 @@ public class ProfesorService {
         carga.setCalificacionParcial2(p2);
 
         // Promedio automático
-        BigDecimal finalScore = p1.add(p2).divide(new BigDecimal("2"), 2, RoundingMode.HALF_UP);
-        carga.setCalificacionFinal(finalScore);
-        if (finalScore.compareTo(new BigDecimal("70")) >= 0) {
-            carga.setEstatus("APROBADA");
+        if (p1 != null && p2 != null) {
+            BigDecimal finalScore = p1.add(p2).divide(new BigDecimal("2"), 2, RoundingMode.HALF_UP);
+            carga.setCalificacionFinal(finalScore);
+            if (finalScore.compareTo(new BigDecimal("70")) >= 0) {
+                carga.setEstatus("APROBADA");
+            } else {
+                carga.setEstatus("REPROBADA");
+            }
         } else {
-            carga.setEstatus("REPROBADA");
+            carga.setCalificacionFinal(null);
+            carga.setEstatus("CURSANDO");
         }
 
         cargaAlumnoRepository.save(carga);
@@ -135,5 +122,12 @@ public class ProfesorService {
         // Notificar al estudiante sobre la publicación/actualización de notas
         notificacionService.enviar(alumnoControl, "Calificaciones Actualizadas", 
                 "Tu profesor ha publicado nuevas calificaciones en la materia: " + grupo.getMateria().getNombre());
+    }
+
+    private void validarProfesorAsignado(Grupo grupo, String profesorControl) {
+        if (grupo.getProfesor() == null
+                || !profesorControl.equals(grupo.getProfesor().getNumeroControl())) {
+            throw new IllegalArgumentException("El grupo no está asignado a este profesor.");
+        }
     }
 }

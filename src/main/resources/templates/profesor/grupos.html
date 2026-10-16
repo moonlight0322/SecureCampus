@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <head th:with="pageTitle=#{profesor.grupos.title}">
+        <head th:replace="~{template :: head(${pageTitle})}"></head>
+    </head>
+<body class="portal-body">
+    <!-- Navbar global -->
+    <nav th:replace="~{template :: navbar}"></nav>
+    
+    <main>
+        <div class="badge-wrapper">
+
+            <!-- LADO IZQUIERDO: Credencial de Identificación del Profesor -->
+            <aside class="teacher-id-badge">
+                <div class="badge-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <h4 class="fw-bold mb-1 text-dark" th:text="${profesor.usuario.nombre + ' ' + profesor.usuario.apellidoPaterno}">Nombre completo</h4>
+                <p class="text-muted small mb-2" th:text="${profesor.numeroControl}">Número de empleado</p>
+                <hr class="w-100 my-2 text-muted opacity-25">
+                <span class="text-dark small fw-medium" th:text="${profesor.carreraAdscripcion.nombre}">Adscripción</span>
+            </aside>
+
+            <!-- LADO DERECHO: Hoja de Contenido Principal (Grupos) -->
+            <section class="teacher-main-sheet">
+                <div class="mb-4">
+                    <a th:href="@{/profesor}" class="btn btn-outline-secondary btn-sm rounded-pill mb-2 px-3">
+                        <i class="bi bi-arrow-left me-1"></i> <span th:text="#{profesor.grupos.btn.back}">Regresar</span>
+                    </a>
+                    <h1 class="h2 fw-bold mb-0" th:text="#{profesor.grupos.heading}">Grupos</h1>
+                </div>
+
+                <!-- Cuadrícula de Tarjetas de Grupos -->
+                <div class="row g-4">
+                    <div class="col-md-4" th:each="grupo : ${listaGrupos}">
+                        <div class="group-card h-100 d-flex flex-column justify-content-between text-center">
+                            <div>
+                                <!-- Nombre del Grupo -->
+                                <h5 class="fw-bold text-dark mb-1" th:text="${grupo.codigoGrupo}">Grupo</h5>
+                                <!-- Materia -->
+                                <p class="text-secondary small mb-4" th:text="${grupo.materia.nombre}">Materia</p>
+                            </div>
+
+                            <div>
+                                <!-- Horario y Aula alineados -->
+                                <div class="d-flex justify-content-between text-muted small mb-3 px-1">
+                                    <span th:text="${grupo.periodo.nombre}">Periodo</span>
+                                </div>
+                                <!-- Botón Detalles -->
+                                <a th:href="@{/profesor/grupo/{id}(id=${grupo.grupoId})}" class="btn btn-sky w-100 btn-sm py-2">
+                                    <span th:text="#{profesor.grupos.btn.details}">Detalles</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mensaje por si no hay grupos -->
+                <div th:if="${listaGrupos == null or listaGrupos.empty}" class="text-center text-muted py-5">
+                    <p th:text="#{profesor.grupos.empty}">No tienes grupos asignados actualmente.</p>
+                </div>
+
+            </section>
+
+        </div>
+    </main>
+    <footer th:replace="~{template :: footer}"></footer>
+</body>
+</html>

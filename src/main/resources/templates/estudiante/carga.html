@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{template :: head(#{estudiante.carga.pagetitle})}"></head>
+<body class="portal-body">
+    <nav th:replace="~{template :: navbar}"></nav>
+    <main>
+        <div class="badge-wrapper">
+            <aside class="student-id-badge">
+                <div class="badge-avatar"><i class="bi bi-person-fill"></i></div>
+                <h4 class="fw-bold mb-1 text-dark" th:text="${estudiante.nombreCompleto}">Nombre completo</h4>
+                <p class="text-muted small mb-2" th:text="${estudiante.numeroControl}">Número de control</p>
+                <hr class="w-100 my-2 text-muted opacity-25">
+                <span class="text-dark small fw-medium" th:text="${estudiante.carrera}">Carrera</span>
+            </aside>
+            <section class="main-sheet">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <h1 class="h3 fw-bold mb-0" th:text="#{estudiante.carga.maintitle}">Carga académica</h1>
+                    <a th:href="@{/estudiante}" class="btn btn-outline-secondary btn-sm rounded-pill px-3"
+                       th:text="#{estudiante.horario.btn.back}">Volver al inicio</a>
+                </div>
+                <div th:if="${#lists.isEmpty(materias)}" class="text-center text-muted py-4"
+                     th:text="#{estudiante.carga.empty}">No hay materias asignadas en el periodo actual.</div>
+                <div th:unless="${#lists.isEmpty(materias)}" class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th th:text="#{table.col.materia}">Materia</th>
+                                <th th:text="#{table.col.grupo}">Grupo</th>
+                                <th th:text="#{table.col.docente}">Docente</th>
+                                <th th:text="#{table.col.periodo}">Periodo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="materia : ${materias}">
+                                <td><strong th:text="${materia.materia}">Materia</strong>
+                                    <small class="d-block text-secondary" th:text="${materia.clave}">Clave</small></td>
+                                <td th:text="${materia.grupo}">Grupo</td>
+                                <td th:text="${materia.profesor}">Docente</td>
+                                <td th:text="${materia.periodo}">Periodo</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+    <footer th:replace="~{template :: footer}"></footer>
+</body>
+</html>

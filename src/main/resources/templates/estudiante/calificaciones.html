@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{template :: head(#{estudiante.calificaciones.pagetitle})}"></head>
+<body class="portal-body">
+    <nav th:replace="~{template :: navbar}"></nav>
+    <main>
+        <div class="badge-wrapper">
+            <aside class="student-id-badge">
+                <div class="badge-avatar"><i class="bi bi-person-fill"></i></div>
+                <h4 class="fw-bold mb-1 text-dark" th:text="${estudiante.nombreCompleto}">Nombre completo</h4>
+                <p class="text-muted small mb-2" th:text="${estudiante.numeroControl}">Número de control</p>
+                <hr class="w-100 my-2 text-muted opacity-25">
+                <span class="text-dark small fw-medium" th:text="${estudiante.carrera}">Carrera</span>
+            </aside>
+            <section class="main-sheet">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <h1 class="h3 fw-bold mb-0" th:text="#{estudiante.calificaciones.maintitle}">Calificaciones por unidad</h1>
+                    <a th:href="@{/estudiante}" class="btn btn-outline-secondary btn-sm rounded-pill px-3"
+                       th:text="#{estudiante.horario.btn.back}">Volver al inicio</a>
+                </div>
+                <p class="text-muted" th:text="#{estudiante.calificaciones.note}">
+                    Las calificaciones se muestran conforme son capturadas por el docente.
+                </p>
+                <div th:if="${#lists.isEmpty(calificaciones)}" class="text-center text-muted py-4"
+                     th:text="#{estudiante.calificaciones.empty}">No hay calificaciones del periodo actual.</div>
+                <div th:unless="${#lists.isEmpty(calificaciones)}" class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th th:text="#{table.col.materia}">Materia</th>
+                                <th th:text="#{table.col.grupo}">Grupo</th>
+                                <th th:text="#{table.col.periodo}">Periodo</th>
+                                <th th:text="#{estudiante.calificaciones.unit1}">Unidad 1</th>
+                                <th th:text="#{estudiante.calificaciones.unit2}">Unidad 2</th>
+                                <th th:text="#{table.col.calificacion}">Calificación final</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="cal : ${calificaciones}">
+                                <td><strong th:text="${cal.materia}">Materia</strong>
+                                    <small class="d-block text-secondary" th:text="${cal.clave}">Clave</small></td>
+                                <td th:text="${cal.grupo}">Grupo</td>
+                                <td th:text="${cal.periodo}">Periodo</td>
+                                <td th:text="${cal.unidad1 != null ? cal.unidad1 : ''}"></td>
+                                <td th:text="${cal.unidad2 != null ? cal.unidad2 : ''}"></td>
+                                <td th:text="${cal.finalCurso != null ? cal.finalCurso : ''}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+    <footer th:replace="~{template :: footer}"></footer>
+</body>
+</html>

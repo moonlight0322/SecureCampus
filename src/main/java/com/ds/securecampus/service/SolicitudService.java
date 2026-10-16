@@ -2,6 +2,7 @@ package com.ds.securecampus.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -23,6 +24,12 @@ public class SolicitudService {
     @Transactional(readOnly = true)
     public List<SolicitudTramite> obtenerPorUsuario(String numeroControl) {
         return solicitudRepository.findByNumeroControlOrderByFechaSolicitudDesc(numeroControl);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<SolicitudTramite> obtenerAprobada(Long idSolicitud, String numeroControl) {
+        return solicitudRepository.findByIdSolicitudAndNumeroControlAndEstatusIgnoreCase(
+                idSolicitud, numeroControl, "APROBADA");
     }
 
     @Transactional(readOnly = true)

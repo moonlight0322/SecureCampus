@@ -93,7 +93,7 @@ class SchemaAlignmentRepositoryTests {
                         .param("numeroControl", "00280691")
                         .param("password", "incorrecta"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login?error=true"));
+                        .andExpect(redirectedUrl("/login?error=true"));
     }
 
     @Test
@@ -173,6 +173,7 @@ class SchemaAlignmentRepositoryTests {
         CargaAlumno carga = new CargaAlumno();
         carga.setEstudiante(estudiante);
         carga.setGrupo(grupo);
+        carga.setCalificacionParcial1(new BigDecimal("88.00"));
         carga.setEstatus("CURSANDO");
         carga.setOportunidad("PRIMERA");
         entityManager.persist(carga);
@@ -203,6 +204,28 @@ class SchemaAlignmentRepositoryTests {
             assertThat(materiaHorario.getGrupo()).isEqualTo("A1");
             assertThat(materiaHorario.getHorario()).isEqualTo("Lunes 08:00 - 10:00");
             assertThat(materiaHorario.getSalon()).isEqualTo("A-101");
+        });
+
+        var cargaActual = cargaAlumnoRepository.buscarCargaActual("12345678", LocalDate.of(2026, 10, 11));
+        assertThat(cargaActual).singleElement().satisfies(materiaCarga -> {
+            assertThat(materiaCarga.materia()).isEqualTo("Programación");
+            assertThat(materiaCarga.profesor()).isEqualTo("Por asignar");
+        });
+
+        var horarioSemanal = cargaAlumnoRepository.buscarHorarioSemanal(
+                "12345678", LocalDate.of(2026, 10, 11));
+        assertThat(horarioSemanal).singleElement().satisfies(clase -> {
+            assertThat(clase.diaSemana()).isEqualTo((byte) 1);
+            assertThat(clase.horaInicio()).isEqualTo("08:00");
+            assertThat(clase.salon()).isEqualTo("A-101");
+        });
+
+        var calificaciones = cargaAlumnoRepository.buscarCalificacionesActuales(
+                "12345678", LocalDate.of(2026, 10, 11));
+        assertThat(calificaciones).singleElement().satisfies(calificacion -> {
+            assertThat(calificacion.unidad1()).isEqualByComparingTo("88.00");
+            assertThat(calificacion.unidad2()).isNull();
+            assertThat(calificacion.finalCurso()).isNull();
         });
 
         var historial = kardexRepository.buscarKardex("12345678");

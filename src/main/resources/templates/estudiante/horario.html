@@ -1,48 +1,73 @@
 <!doctype html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org" class="h-100">
-    <head th:replace="~{template :: head(#{meta.title.horario})}"></head>
-    <body class="d-flex flex-column min-vh-100">
-        <nav th:replace="~{template :: navbar}"></nav>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:with="pageTitle=#{estudiante.horario.pagetitle}">
+        <head th:replace="~{template :: head(${pageTitle})}"></head>
+    </head>
+<body class="portal-body">
+    <!-- Navbar global -->
+    <nav th:replace="~{template :: navbar}"></nav>
+    
+    <main>
+        <div class="badge-wrapper">
 
-        <main class="flex-grow-1 py-4 d-flex align-items-center">
-            <div class="container-fluid px-4 page-shell my-auto">
-                <div class="badge-wrapper">
-                    <aside th:replace="~{fragments/components :: studentBadge('horario', ${estudiante})}"></aside>
-                    <section class="main-sheet">
-                        <div
-                            th:replace="~{fragments/components :: pageTitle(#{schedule.heading.title})}"
-                        ></div>
-
-                        <div
-                            th:if="${#lists.isEmpty(materias)}"
-                            th:replace="~{fragments/components :: emptyState('calendar2-x', #{schedule.empty})}"
-                        ></div>
-
-                        <div
-                            th:if="${!#lists.isEmpty(materias)}"
-                            class="table-responsive table-card rounded-3 border"
-                        >
-                            <table
-                                th:replace="~{fragments/tables :: tablaHorario(${materias})}"
-                            ></table>
-                        </div>
-
-                        <div class="mt-auto pt-3">
-                            <a
-                                class="btn btn-link link-navy ps-0"
-                                th:href="@{/estudiante}"
-                            >
-                                <i class="bi bi-arrow-left me-1"></i
-                                ><span th:text="#{schedule.back}"
-                                    >Volver al inicio</span
-                                >
-                            </a>
-                        </div>
-                    </section>
+            <!-- LADO IZQUIERDO: Credencial de Identificación del estudiante -->
+            <aside class="student-id-badge">
+                <div class="badge-avatar">
+                    <i class="bi bi-person-fill"></i>
                 </div>
-            </div>
-        </main>
+                <h4 class="fw-bold mb-1 text-dark" th:text="${estudiante.nombreCompleto}">Nombre completo</h4>
+                <p class="text-muted small mb-2" th:text="${estudiante.numeroControl}">Número de control</p>
+                <hr class="w-100 my-2 text-muted opacity-25">
+                <span class="text-dark small fw-medium" th:text="${estudiante.carrera}">Carrera</span>
+            </aside>
 
-        <footer th:replace="~{template :: footer}"></footer>
-    </body>
+            <!-- LADO DERECHO: Hoja de Contenido Principal -->
+            <section class="main-sheet">
+                
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="h3 fw-bold mb-0 text-dark" th:text="#{estudiante.horario.maintitle}">Horario escolar</h1>
+                    <a th:href="@{/estudiante}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                        <i class="bi bi-arrow-left me-1"></i> <span th:text="#{estudiante.horario.btn.back}">Volver al inicio</span>
+                    </a>
+                </div>
+
+                <!-- Tabla de Horario -->
+                <div class="mt-3">
+                    <div th:if="${#lists.isEmpty(filasHorario)}" class="text-center text-muted py-4" th:text="#{estudiante.horario.empty}">
+                        No hay clases registradas en el horario actual.
+                    </div>
+
+                    <div th:unless="${#lists.isEmpty(filasHorario)}" class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle text-center">
+                            <thead class="table-light">
+                                <tr>
+                                    <th th:text="#{estudiante.horario.table.time}">Hora</th>
+                                    <th th:text="#{estudiante.horario.table.monday}">Lunes</th>
+                                    <th th:text="#{estudiante.horario.table.tuesday}">Martes</th>
+                                    <th th:text="#{estudiante.horario.table.wednesday}">Miércoles</th>
+                                    <th th:text="#{estudiante.horario.table.thursday}">Jueves</th>
+                                    <th th:text="#{estudiante.horario.table.friday}">Viernes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="fila : ${filasHorario}">
+                                    <th scope="row" class="text-nowrap" th:text="${fila.horario}">08:00 - 10:00</th>
+                                    <td class="text-start" style="white-space: pre-line" th:text="${fila.lunes}"></td>
+                                    <td class="text-start" style="white-space: pre-line" th:text="${fila.martes}"></td>
+                                    <td class="text-start" style="white-space: pre-line" th:text="${fila.miercoles}"></td>
+                                    <td class="text-start" style="white-space: pre-line" th:text="${fila.jueves}"></td>
+                                    <td class="text-start" style="white-space: pre-line" th:text="${fila.viernes}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </section>
+
+        </div>
+    </main>
+
+    <footer th:replace="~{template :: footer}"></footer>
+</body>
 </html>

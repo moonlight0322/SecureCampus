@@ -978,6 +978,11 @@ h6,
     background-color: rgba(16, 43, 78, 0.08);
 }
 
+.role-badge {
+    background-color: var(--navy);
+    color: #fff !important;
+}
+
 .text-navy {
     color: var(--navy);
 }

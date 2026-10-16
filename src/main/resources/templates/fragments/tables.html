@@ -2,9 +2,7 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
     <body>
         <!-- =========================================================
-         TABLA: HORARIO
-         Uso:
-         <div th:replace="~{fragments/tables :: tablaHorario(${materias})}"></div>
+         TABLA DE HORARIO: tablaHorario
          ========================================================= -->
         <div
             th:fragment="tablaHorario(materias)"
@@ -14,71 +12,32 @@
             <table class="table table-hover align-middle">
                 <thead>
                     <tr>
-                        <th scope="col" th:text="#{table.col.materia}">
-                            Materia
-                        </th>
+                        <th scope="col" th:text="#{table.col.materia}">Materia</th>
                         <th scope="col" th:text="#{table.col.grupo}">Grupo</th>
-                        <th scope="col" th:text="#{table.col.horario}">
-                            Horario
-                        </th>
+                        <th scope="col" th:text="#{table.col.horario}">Horario</th>
                         <th scope="col" th:text="#{table.col.salon}">Salón</th>
-                        <th scope="col" th:text="#{table.col.docente}">
-                            Docente
-                        </th>
-                        <th scope="col" th:text="#{table.col.periodo}">
-                            Periodo
-                        </th>
+                        <th scope="col" th:text="#{table.col.docente}">Docente</th>
+                        <th scope="col" th:text="#{table.col.periodo}">Periodo</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="m : ${materias}">
                         <td th:attr="data-label=#{table.col.materia}">
-                            <strong th:text="${m.materia}">Materia</strong
-                            ><small
-                                class="d-block text-secondary"
-                                th:text="${m.clave}"
-                                >Clave</small
-                            >
+                            <strong th:text="${m['materia']}">Materia</strong>
+                            <small class="d-block text-secondary" th:text="${m['clave']}">Clave</small>
                         </td>
-                        <td
-                            th:attr="data-label=#{table.col.grupo}"
-                            th:text="${m.grupo}"
-                        >
-                            Grupo
-                        </td>
-                        <td
-                            th:attr="data-label=#{table.col.horario}"
-                            th:text="${m.horario}"
-                        >
-                            Horario
-                        </td>
-                        <td
-                            th:attr="data-label=#{table.col.salon}"
-                            th:text="${m.salon}"
-                        >
-                            Salón
-                        </td>
-                        <td
-                            th:attr="data-label=#{table.col.docente}"
-                            th:text="${m.profesor}"
-                        >
-                            Docente
-                        </td>
-                        <td
-                            th:attr="data-label=#{table.col.periodo}"
-                            th:text="${m.periodo}"
-                        >
-                            Periodo
-                        </td>
+                        <td th:attr="data-label=#{table.col.grupo}" th:text="${m['grupo']}">Grupo</td>
+                        <td th:attr="data-label=#{table.col.horario}" th:text="${m['horario']}">Horario</td>
+                        <td th:attr="data-label=#{table.col.salon}" th:text="${m['salon']}">Salón</td>
+                        <td th:attr="data-label=#{table.col.docente}" th:text="${m['profesor']}">Docente</td>
+                        <td th:attr="data-label=#{table.col.periodo}" th:text="${m['periodo']}">Periodo</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
         <!-- =========================================================
-         TABLA: KÁRDEX
-         Uso:
-         <div th:replace="~{fragments/tables :: tablaKardex(${materias})}"></div>
+         TABLA DE CÁRDEX: tablaKardex
          ========================================================= -->
         <div
             th:fragment="tablaKardex(materias)"
@@ -88,61 +47,279 @@
             <table class="table table-hover align-middle">
                 <thead>
                     <tr>
-                        <th scope="col" th:text="#{table.col.materia}">
-                            Materia
-                        </th>
-                        <th scope="col" th:text="#{table.col.periodo}">
-                            Periodo
-                        </th>
-                        <th scope="col" th:text="#{table.col.calificacion}">
-                            Calificación
-                        </th>
-                        <th scope="col" th:text="#{table.col.estatus}">
-                            Estatus
-                        </th>
-                        <th scope="col" th:text="#{table.col.oportunidad}">
-                            Oportunidad
-                        </th>
+                        <th scope="col" th:text="#{table.col.materia}">Materia</th>
+                        <th scope="col" th:text="#{table.col.periodo}">Periodo</th>
+                        <th scope="col" th:text="#{table.col.calificacion}">Calificación</th>
+                        <th scope="col" th:text="#{table.col.estatus}">Estatus</th>
+                        <th scope="col" th:text="#{table.col.oportunidad}">Oportunidad</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="m : ${materias}">
                         <td th:attr="data-label=#{table.col.materia}">
-                            <strong th:text="${m.materia}">Materia</strong
-                            ><small
-                                class="d-block text-secondary"
-                                th:text="${m.clave}"
-                                >Clave</small
-                            >
+                            <strong th:text="${m['materia']}">Materia</strong>
+                            <small class="d-block text-secondary" th:text="${m['clave']}">Clave</small>
                         </td>
-                        <td
-                            th:attr="data-label=#{table.col.periodo}"
-                            th:text="${m.periodo}"
-                        >
-                            Periodo
-                        </td>
-                        <td
-                            th:attr="data-label=#{table.col.calificacion}"
-                            th:replace="~{fragments/components :: calificacion(${m.calificacion})}"
-                        >
-                            —
+                        <td th:attr="data-label=#{table.col.periodo}" th:text="${m['periodo']}">Periodo</td>
+                        <td th:attr="data-label=#{table.col.calificacion}">
+                            <span th:replace="~{fragments/components :: calificacion(${m['calificacion']})}">—</span>
                         </td>
                         <td th:attr="data-label=#{table.col.estatus}">
-                            <span
-                                class="badge rounded-pill text-bg-light status-badge"
-                                th:text="${m.estatus}"
-                                >Estatus</span
-                            >
+                            <span class="badge rounded-pill text-bg-light status-badge" th:text="${m['estatus']}">Estatus</span>
                         </td>
-                        <td
-                            th:attr="data-label=#{table.col.oportunidad}"
-                            th:replace="~{fragments/components :: opportunityBadge(${m.oportunidad})}"
-                        >
-                            Primera oportunidad
+                        <td th:attr="data-label=#{table.col.oportunidad}">
+                            <span th:replace="~{fragments/components :: opportunityBadge(${m['oportunidad']})}">Primera oportunidad</span>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
+
+        <!-- Tabla solicitudes -->
+        <table th:fragment="tablaSolicitudes(solicitudes)" class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th th:text="#{estudiante.solicitudes.table.folio}">Folio</th>
+                    <th th:text="#{estudiante.solicitudes.table.type}">Trámite</th>
+                    <th th:text="#{estudiante.solicitudes.table.reason}">Motivo</th>
+                    <th th:text="#{estudiante.solicitudes.table.date}">Fecha</th>
+                    <th th:text="#{estudiante.solicitudes.table.status}">Estatus</th>
+                    <th th:text="#{estudiante.solicitudes.table.response}">Respuesta</th>
+                    <th th:text="#{estudiante.solicitudes.table.document}">Documento</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${solicitudes == null || solicitudes.isEmpty()}">
+                    <td colspan="7" class="text-center text-muted py-4" th:text="#{estudiante.solicitudes.table.empty}">No tienes trámites o solicitudes registradas.</td>
+                </tr>
+                <tr th:each="sol : ${solicitudes}">
+                    <td><strong class="text-navy" th:text="${sol.folio}">FOL-000</strong></td>
+                    <td th:text="${sol.tipoTramite}">Tipo</td>
+                    <td th:text="${sol.motivo}">Motivo</td>
+                    <td th:text="${#temporals.format(sol.fechaSolicitud, 'dd/MM/yyyy HH:mm')}">Fecha</td>
+                    <td>
+                        <span class="badge" 
+                              th:classappend="${sol.estatus == 'APROBADA' ? 'bg-success' : (sol.estatus == 'RECHAZADA' ? 'bg-danger' : 'bg-warning text-dark')}"
+                              th:text="${sol.estatus}">PENDIENTE</span>
+                    </td>
+                    <td class="small">
+                        <span th:if="${sol.respuestaAdmin != null && sol.respuestaAdmin != ''}" th:text="${sol.respuestaAdmin}">Respuesta</span>
+                        <span th:if="${sol.respuestaAdmin == null || sol.respuestaAdmin == ''}" th:text="#{estudiante.solicitudes.status.review}">En revisión</span>
+                    </td>
+                    <td>
+                        <a th:if="${sol.estatus == 'APROBADA'}"
+                           th:href="@{/estudiante/solicitudes/{id}/pdf(id=${sol.idSolicitud})}"
+                           class="btn btn-sm btn-outline-danger text-nowrap">
+                            <i class="bi bi-file-earmark-pdf"></i>
+                            <span th:text="#{estudiante.solicitudes.table.download}">Descargar PDF</span>
+                        </a>
+                        <span th:unless="${sol.estatus == 'APROBADA'}" class="text-muted">—</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Tabla Profesor Horario Hoy Inicio -->
+        <table th:fragment="tablaClasesProfesor(clasesHoy)" class="table align-middle table-bordered border-light bg-white rounded-3 overflow-hidden table-custom-header">
+            <thead>
+                <tr>
+                    <th class="text-center py-3" style="width: 25%;" th:text="#{teacher.table.time}">Hora</th>
+                    <th class="text-center py-3" style="width: 20%;" th:text="#{teacher.table.group}">Grupo</th>
+                    <th class="py-3 px-3" style="width: 35%;" th:text="#{teacher.table.subject}">Materia</th>
+                    <th class="text-center py-3" style="width: 20%;" th:text="#{teacher.table.classroom}">Aula</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="clase : ${clasesHoy}">
+                    <td class="text-center fw-semibold text-secondary" th:text="${clase['hora']}">08:00 - 10:00</td>
+                    <td class="text-center"><span class="badge bg-light text-dark border px-2 py-1" th:text="${clase['grupo']}">5SC1</span></td>
+                    <td class="fw-medium px-3" th:text="${clase['materia']}">Sistemas Operativos</td>
+                    <td class="text-center text-muted" th:text="${clase['aula']}">Lab 3</td>
+                </tr>
+                <tr th:if="${clasesHoy == null or clasesHoy.empty}">
+                    <td colspan="4" class="text-center text-muted py-4" th:text="#{profesor.inicio.classes.empty}">No hay clases programadas para hoy.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Tabla de Usuarios y Roles -->
+        <table th:fragment="tablaAdminUsuarios(usuarios)" class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th th:text="#{admin.dashboard.table.users.control}">No. Control</th>
+                    <th th:text="#{admin.dashboard.table.users.name}">Nombre Completo</th>
+                    <th th:text="#{admin.dashboard.table.users.email}">Correo</th>
+                    <th th:text="#{admin.dashboard.table.users.role}">Rol Asignado</th>
+                    <th th:text="#{admin.dashboard.table.users.status}">Estatus</th>
+                    <th th:text="#{admin.dashboard.table.users.action}">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${usuarios == null || usuarios.isEmpty()}">
+                    <td colspan="6" class="text-center text-muted py-4" th:text="#{admin.dashboard.table.users.empty}">No hay usuarios registrados.</td>
+                </tr>
+                <tr th:each="u : ${usuarios}">
+                    <td><strong th:text="${u.numeroControl}">000000</strong></td>
+                    <td th:text="${u.nombre + ' ' + u.apellidoPaterno + (u.apellidoMaterno != null ? ' ' + u.apellidoMaterno : '')}">Nombre</td>
+                    <td th:text="${u.correoInstitucional}">correo</td>
+                    <td><span class="badge role-badge" th:text="${u.rol.nombreRol}">ROL</span></td>
+                    <td>
+                        <span class="badge bg-success" th:if="${u.activo == 1}" th:text="#{admin.dashboard.status.active}">Activo</span>
+                        <span class="badge bg-secondary" th:if="${u.activo != 1}" th:text="#{admin.dashboard.status.inactive}">Inactivo</span>
+                    </td>
+                    <td>
+                        <form th:action="@{/admin/usuarios/toggle-estatus}" method="post" class="d-inline">
+                            <input type="hidden" name="numeroControl" th:value="${u.numeroControl}" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                    th:if="${u.activo == 1}">
+                                <i class="bi bi-person-x"></i>
+                                <span th:text="#{admin.dashboard.btn.deactivate}">Desactivar</span>
+                            </button>
+                            <button type="submit" class="btn btn-sm btn-outline-success"
+                                    th:unless="${u.activo == 1}">
+                                <i class="bi bi-person-check"></i>
+                                <span th:text="#{admin.dashboard.btn.activate}">Activar</span>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <!-- Tabla de Solicitudes y Trámites -->
+        <table th:fragment="tablaAdminSolicitudes(solicitudes)" class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th th:text="#{admin.dashboard.table.requests.folio}">Folio</th>
+                    <th th:text="#{admin.dashboard.table.requests.requester}">Solicitante</th>
+                    <th th:text="#{admin.dashboard.table.requests.type}">Trámite</th>
+                    <th th:text="#{admin.dashboard.table.requests.reason}">Motivo</th>
+                    <th th:text="#{admin.dashboard.table.requests.date}">Fecha</th>
+                    <th th:text="#{admin.dashboard.table.requests.status}">Estatus</th>
+                    <th th:text="#{admin.dashboard.table.requests.action}">Gestión</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${solicitudes == null || solicitudes.isEmpty()}">
+                    <td colspan="7" class="text-center text-muted py-4" th:text="#{admin.dashboard.table.requests.empty}">No hay trámites pendientes.</td>
+                </tr>
+                <tr th:each="sol : ${solicitudes}">
+                    <td><strong class="text-navy" th:text="${sol.folio}">FOL</strong></td>
+                    <td th:text="${sol.numeroControl}">000</td>
+                    <td th:text="${sol.tipoTramite}">TIPO</td>
+                    <td th:text="${sol.motivo}">MOTIVO</td>
+                    <td th:text="${#temporals.format(sol.fechaSolicitud, 'dd/MM/yyyy HH:mm')}">FECHA</td>
+                    <td>
+                        <span class="badge" 
+                              th:classappend="${sol.estatus == 'APROBADA' ? 'bg-success' : (sol.estatus == 'RECHAZADA' ? 'bg-danger' : 'bg-warning text-dark')}"
+                              th:text="${sol.estatus}">PENDIENTE</span>
+                    </td>
+                    <td>
+                        <div th:if="${sol.estatus == 'PENDIENTE'}" class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" th:attr="data-bs-target='#modalAprobar' + ${sol.idSolicitud}">
+                                <i class="bi bi-check-lg"></i> <span th:text="#{admin.dashboard.btn.resolve}">Resolver</span>
+                            </button>
+                        </div>
+                        <span th:if="${sol.estatus != 'PENDIENTE'}" class="small text-muted" th:text="${sol.respuestaAdmin}">Respuesta</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <!-- Tabla de Auditoría y Logs -->
+        <table th:fragment="tablaAdminLogs(logs)" class="table table-sm table-striped align-middle mb-0" style="font-size: 0.85rem;">
+            <thead class="table-dark">
+                <tr>
+                    <th th:text="#{admin.dashboard.table.logs.date}">Fecha y Hora</th>
+                    <th th:text="#{admin.dashboard.table.logs.user}">Usuario</th>
+                    <th th:text="#{admin.dashboard.table.logs.role}">Rol</th>
+                    <th th:text="#{admin.dashboard.table.logs.operation}">Operación</th>
+                    <th th:text="#{admin.dashboard.table.logs.details}">Detalles</th>
+                    <th th:text="#{admin.dashboard.table.logs.ip}">IP Origen</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${logs == null || logs.isEmpty()}">
+                    <td colspan="6" class="text-center text-muted py-4" th:text="#{admin.dashboard.table.logs.empty}">No hay registros de auditoría.</td>
+                </tr>
+                <tr th:each="l : ${logs}">
+                    <td th:text="${#temporals.format(l.fechaHora, 'dd/MM/yyyy HH:mm:ss')}">FECHA</td>
+                    <td><strong th:text="${l.numeroControl}">USER</strong></td>
+                    <td th:text="${l.rol}">ROL</td>
+                    <td><span class="badge bg-secondary" th:text="${l.operacion}">OPERACION</span></td>
+                    <td th:text="${l.detalles}">DETALLES</td>
+                    <td th:text="${l.ipOrigen}">IP</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Catálogo de Materias - Jefe de Departamento -->
+        <table th:fragment="tablaJefeMaterias(materias)" class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th th:text="#{jefe.dashboard.table.key}">Clave</th>
+                    <th th:text="#{jefe.dashboard.table.name}">Nombre de la Asignatura</th>
+                    <th th:text="#{jefe.dashboard.table.credits}">Créditos SATCA</th>
+                    <th th:text="#{jefe.dashboard.table.career}">Carrera Asociada</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${materias == null || materias.isEmpty()}">
+                    <td colspan="4" class="text-center text-muted py-4" th:text="#{jefe.dashboard.table.empty}">No hay asignaturas registradas en la retícula.</td>
+                </tr>
+                <tr th:each="m : ${materias}">
+                    <td><strong class="text-navy" th:text="${m.clave}">CLAVE</strong></td>
+                    <td th:text="${m.nombre}">Materia</td>
+                    <td><span class="badge bg-light text-dark border" th:text="|${m.creditos} #{jefe.dashboard.credits.unit}|">5 créditos</span></td>
+                    <td th:text="${m.carrera.nombre}">Carrera</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Tabla de Captura de Calificaciones - Profesor -->
+        <table th:fragment="tablaCapturaCalificaciones(alumnos, grupo, puedeEditar)" class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th th:text="#{teacher.table.student.control}">No. Control</th>
+                    <th th:text="#{teacher.table.student.name}">Nombre del Estudiante</th>
+                    <th class="text-center">Unidad 1</th>
+                    <th class="text-center">Unidad 2</th>
+                    <th class="text-center">Final</th>
+                    <th class="text-center">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${alumnos == null || alumnos.isEmpty()}">
+                    <td colspan="6" class="text-center text-muted py-4" th:text="#{teacher.table.student.empty}">No hay estudiantes inscritos en este grupo.</td>
+                </tr>
+                <tr th:each="alumno : ${alumnos}">
+                    <td><strong th:text="${alumno.estudiante.numeroControl}">000000</strong></td>
+                    <td th:text="${alumno.estudiante.usuario.nombre + ' ' + alumno.estudiante.usuario.apellidoPaterno + (alumno.estudiante.usuario.apellidoMaterno != null ? ' ' + alumno.estudiante.usuario.apellidoMaterno : '')}">Nombre del Alumno</td>
+                    <td class="text-center" style="width: 125px;">
+                        <input type="number" name="p1" th:attr="form=${'calificar-' + alumno.cargaId}"
+                               class="form-control form-control-sm text-center"
+                               th:value="${alumno.calificacionParcial1}" min="0" max="100" step="0.01"
+                               th:disabled="${!puedeEditar}" aria-label="Calificación de unidad 1" />
+                    </td>
+                    <td class="text-center" style="width: 125px;">
+                        <input type="number" name="p2" th:attr="form=${'calificar-' + alumno.cargaId}"
+                               class="form-control form-control-sm text-center"
+                               th:value="${alumno.calificacionParcial2}" min="0" max="100" step="0.01"
+                               th:disabled="${!puedeEditar}" aria-label="Calificación de unidad 2" />
+                    </td>
+                    <td class="text-center" th:text="${alumno.calificacionFinal != null ? alumno.calificacionFinal : '—'}">—</td>
+                    <td class="text-center">
+                        <form th:id="'calificar-' + ${alumno.cargaId}"
+                              th:action="@{/profesor/grupo/{id}/calificar(id=${grupo.grupoId})}" method="post">
+                            <input type="hidden" name="cargaId" th:value="${alumno.cargaId}" />
+                            <button type="submit" class="btn btn-sm btn-primary" th:disabled="${!puedeEditar}">
+                                <i class="bi bi-save me-1"></i>Guardar
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
     </body>
 </html>

@@ -10,6 +10,10 @@ import com.ds.securecampus.model.Usuario;
 
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, String> {
+    @Override
+    @EntityGraph(attributePaths = "rol")
+    java.util.List<Usuario> findAll();
+
     @EntityGraph(attributePaths = "rol")
     Optional<Usuario> findByNumeroControl(String numeroControl);
 
