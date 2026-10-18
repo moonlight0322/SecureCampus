@@ -53,6 +53,7 @@ public class AdminService {
     private final EdificioRepository edificioRepository;
     private final HorarioClaseRepository horarioClaseRepository;
     private final CargaAlumnoRepository cargaAlumnoRepository;
+    private final LoginAttemptService loginAttemptService;
 
     public AdminService(UsuarioRepository usuarioRepository,
             RolRepository rolRepository,
@@ -68,7 +69,8 @@ public class AdminService {
             AulaRepository aulaRepository,
             EdificioRepository edificioRepository,
             HorarioClaseRepository horarioClaseRepository,
-            CargaAlumnoRepository cargaAlumnoRepository) {
+            CargaAlumnoRepository cargaAlumnoRepository,
+            LoginAttemptService loginAttemptService) {
         this.usuarioRepository = usuarioRepository;
         this.rolRepository = rolRepository;
         this.materiaRepository = materiaRepository;
@@ -84,6 +86,7 @@ public class AdminService {
         this.edificioRepository = edificioRepository;
         this.horarioClaseRepository = horarioClaseRepository;
         this.cargaAlumnoRepository = cargaAlumnoRepository;
+        this.loginAttemptService = loginAttemptService;
     }
 
     @Transactional(readOnly = true)
@@ -450,5 +453,152 @@ public class AdminService {
         periodo.setLimiteCapturaCalificaciones(fin);
         periodo.setCapturaActiva("N");
         return periodo;
+    }
+
+    @Transactional
+    public void alternarPagoReinscripcion(String numeroControl, String adminUser) {
+        Estudiante estudiante = estudianteRepository.findById(numeroControl)
+                .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado."));
+        String actual = estudiante.getPagoReinscripcion();
+        String nuevo = "S".equalsIgnoreCase(actual) ? "N" : "S";
+        estudiante.setPagoReinscripcion(nuevo);
+        estudianteRepository.save(estudiante);
+        auditoriaService.registrar(adminUser, "ADMINISTRADOR", "MODIFICAR_PAGO_REINSCRIPCION",
+                "Estatus de inscripción del alumno " + numeroControl + " cambiado a " + ("S".equals(nuevo) ? "INSCRITO (HABILITADO)" : "PENDIENTE (NO INSCRITO)"),
+                "127.0.0.1");
+    }
+
+    @Transactional
+    public void desbloquearCuenta(String numeroControl, String adminUser) {
+        Usuario usuario = usuarioRepository.findByNumeroControl(numeroControl)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado."));
+        usuario.setActivo((byte) 1);
+        usuarioRepository.save(usuario);
+        loginAttemptService.desbloquear(numeroControl);
+        auditoriaService.registrar(adminUser, "ADMINISTRADOR", "DESBLOQUEO_CUENTA",
+                "Cuenta desbloqueada y reactivada para usuario " + numeroControl, "127.0.0.1");
+    }
+
+    @Transactional
+    public void quitarEstudianteDeGrupo(Long grupoId, String numeroControl, String operadorUser) {
+        CargaAlumno carga = cargaAlumnoRepository.findByGrupoGrupoId(grupoId).stream()
+                .filter(c -> c.getEstudiante().getNumeroControl().equals(numeroControl))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("El estudiante no está inscrito en este grupo."));
+        cargaAlumnoRepository.delete(carga);
+        auditoriaService.registrar(operadorUser, "ACADEMICO", "BAJA_ESTUDIANTE_GRUPO",
+                "Estudiante " + numeroControl + " desinscrito del grupo ID " + grupoId, "127.0.0.1");
+    }
+
+    @Transactional
+    public void cambiarProfesorGrupo(Long grupoId, String nuevoProfesorControl, String operadorUser) {
+        Grupo grupo = grupoRepository.findById(grupoId)
+                .orElseThrow(() -> new IllegalArgumentException("Grupo no encontrado."));
+        Profesor nuevoProfesor = null;
+        if (nuevoProfesorControl != null && !nuevoProfesorControl.isBlank() && !"0".equals(nuevoProfesorControl)) {
+            nuevoProfesor = profesorRepository.findById(nuevoProfesorControl)
+                    .orElseThrow(() -> new IllegalArgumentException("Profesor no encontrado."));
+            List<HorarioClase> horarios = horarioClaseRepository.findByGrupoGrupoId(grupoId);
+            for (HorarioClase h : horarios) {
+                if (horarioClaseRepository.existeConflictoProfesor(nuevoProfesorControl, h.getDiaSemana(),
+                        grupo.getPeriodo().getPeriodoId(), h.getHoraInicio(), h.getHoraFin())) {
+                    throw new IllegalArgumentException("El docente seleccionado ya tiene una clase asignada en ese mismo horario.");
+                }
+            }
+        }
+        grupo.setProfesor(nuevoProfesor);
+        grupoRepository.save(grupo);
+        auditoriaService.registrar(operadorUser, "ACADEMICO", "CAMBIO_DOCENTE_GRUPO",
+                "Grupo " + grupo.getCodigoGrupo() + ": docente actualizado a " + (nuevoProfesor != null ? nuevoProfesorControl : "Sin asignar"),
+                "127.0.0.1");
+    }
+
+    @Transactional
+    public void cerrarGrupo(Long grupoId, String operadorUser) {
+        Grupo grupo = grupoRepository.findById(grupoId)
+                .orElseThrow(() -> new IllegalArgumentException("Grupo no encontrado."));
+        List<CargaAlumno> alumnos = cargaAlumnoRepository.findByGrupoGrupoId(grupoId);
+        cargaAlumnoRepository.deleteAll(alumnos);
+        List<HorarioClase> horarios = horarioClaseRepository.findByGrupoGrupoId(grupoId);
+        horarioClaseRepository.deleteAll(horarios);
+        grupoRepository.delete(grupo);
+        auditoriaService.registrar(operadorUser, "ACADEMICO", "CIERRE_GRUPO",
+                "Grupo cerrado: " + grupo.getCodigoGrupo() + " (" + alumnos.size() + " estudiantes desinscritos)",
+                "127.0.0.1");
+    }
+
+    @Transactional
+    public int inscribirMultiplesEstudiantes(Long grupoId, List<String> numerosControl, String operadorUser) {
+        if (numerosControl == null || numerosControl.isEmpty()) return 0;
+        int count = 0;
+        for (String nc : numerosControl) {
+            if (nc != null && !nc.isBlank()) {
+                try {
+                    inscribirEstudiante(grupoId, nc.trim(), operadorUser);
+                    count++;
+                } catch (Exception ignored) {
+                    // Ignora choque o duplicado individual para procesar el lote
+                }
+            }
+        }
+        return count;
+    }
+
+    @Transactional(readOnly = true)
+    public Estudiante obtenerEstudiante(String numeroControl) {
+        return estudianteRepository.findById(numeroControl)
+                .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado."));
+    }
+
+    @Transactional(readOnly = true)
+    public List<CargaAlumno> obtenerCargasEstudiantePeriodoActual(String numeroControl) {
+        Periodo periodo = periodoCalculado(LocalDate.now());
+        return cargaAlumnoRepository.findAll().stream()
+                .filter(c -> c.getEstudiante().getNumeroControl().equals(numeroControl)
+                        && c.getGrupo().getPeriodo().getClavePeriodo().equals(periodo.getClavePeriodo()))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<com.ds.securecampus.model.EstadisticaGrupo> obtenerEstadisticasTodosGrupos() {
+        Periodo periodo = periodoCalculado(LocalDate.now());
+        List<Grupo> grupos = grupoRepository.findByPeriodoClavePeriodo(periodo.getClavePeriodo());
+        List<com.ds.securecampus.model.EstadisticaGrupo> stats = new java.util.ArrayList<>();
+        for (Grupo g : grupos) {
+            List<CargaAlumno> cargas = cargaAlumnoRepository.findByGrupoGrupoId(g.getGrupoId());
+            int total = cargas.size();
+            int aprobados = 0;
+            int reprobados = 0;
+            int cursando = 0;
+            double suma = 0;
+            int conNota = 0;
+            for (CargaAlumno c : cargas) {
+                if ("APROBADA".equalsIgnoreCase(c.getEstatus())) aprobados++;
+                else if ("REPROBADA".equalsIgnoreCase(c.getEstatus())) reprobados++;
+                else cursando++;
+
+                if (c.getCalificacionFinal() != null) {
+                    suma += c.getCalificacionFinal().doubleValue();
+                    conNota++;
+                }
+            }
+            double prom = conNota > 0 ? Math.round((suma / conNota) * 100.0) / 100.0 : 0.0;
+            String profName = g.getProfesor() != null && g.getProfesor().getUsuario() != null
+                    ? g.getProfesor().getUsuario().getNombre() + " " + g.getProfesor().getUsuario().getApellidoPaterno()
+                    : "Sin docente asignado";
+            stats.add(new com.ds.securecampus.model.EstadisticaGrupo(
+                    g.getGrupoId(),
+                    g.getCodigoGrupo(),
+                    g.getMateria().getNombre(),
+                    profName,
+                    total,
+                    35, // Cupo estimado estándar por salón
+                    aprobados,
+                    reprobados,
+                    cursando,
+                    prom
+            ));
+        }
+        return stats;
     }
 }
