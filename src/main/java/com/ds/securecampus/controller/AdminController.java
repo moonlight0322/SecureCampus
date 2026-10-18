@@ -17,6 +17,7 @@ import com.ds.securecampus.model.LogAuditoria;
 import com.ds.securecampus.model.SolicitudTramite;
 import com.ds.securecampus.model.Usuario;
 import com.ds.securecampus.service.AdminService;
+import com.ds.securecampus.service.LoginAttemptService;
 import com.ds.securecampus.service.SolicitudService;
 
 @Controller
@@ -24,10 +25,12 @@ import com.ds.securecampus.service.SolicitudService;
 public class AdminController {
     private final AdminService adminService;
     private final SolicitudService solicitudService;
+    private final LoginAttemptService loginAttemptService;
 
-    public AdminController(AdminService adminService, SolicitudService solicitudService) {
+    public AdminController(AdminService adminService, SolicitudService solicitudService, LoginAttemptService loginAttemptService) {
         this.adminService = adminService;
         this.solicitudService = solicitudService;
+        this.loginAttemptService = loginAttemptService;
     }
 
     @GetMapping("")
@@ -41,6 +44,7 @@ public class AdminController {
         model.addAttribute("roles", adminService.listarRoles());
         model.addAttribute("logs", logs);
         model.addAttribute("solicitudes", solicitudes);
+        model.addAttribute("loginAttemptService", loginAttemptService);
         model.addAttribute("materias", adminService.listarMaterias());
         model.addAttribute("profesores", adminService.listarProfesores());
         model.addAttribute("carreras", adminService.listarCarreras());
@@ -129,5 +133,27 @@ public class AdminController {
                                     Authentication authentication) {
         solicitudService.resolverSolicitud(idSolicitud, estatus, respuesta, authentication.getName());
         return "redirect:/admin?solicitudProcesada=true";
+    }
+
+    @PostMapping("/usuarios/restablecer-password")
+    public String restablecerPassword(@RequestParam("numeroControl") String numeroControl,
+                                      @RequestParam("password") String password,
+                                      Authentication authentication) {
+        adminService.restablecerPassword(numeroControl, password, authentication.getName());
+        return "redirect:/admin?passwordRestablecido=true";
+    }
+
+    @PostMapping("/usuarios/desbloquear")
+    public String desbloquearCuenta(@RequestParam("numeroControl") String numeroControl,
+                                    Authentication authentication) {
+        adminService.desbloquearCuenta(numeroControl, authentication.getName());
+        return "redirect:/admin?cuentaDesbloqueada=true";
+    }
+
+    @PostMapping("/estudiantes/toggle-inscripcion")
+    public String toggleInscripcion(@RequestParam("numeroControl") String numeroControl,
+                                    Authentication authentication) {
+        adminService.alternarPagoReinscripcion(numeroControl, authentication.getName());
+        return "redirect:/admin?inscripcionActualizada=true";
     }
 }

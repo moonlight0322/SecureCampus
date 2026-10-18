@@ -143,51 +143,90 @@
         </table>
 
         <!-- Tabla de Usuarios y Roles -->
-        <table th:fragment="tablaAdminUsuarios(usuarios)" class="table table-hover align-middle mb-0">
+        <table th:fragment="tablaAdminUsuarios(usuarios)" class="table table-hover align-middle mb-0" id="tablaUsuariosAdmin">
             <thead class="table-light">
                 <tr>
                     <th th:text="#{admin.dashboard.table.users.control}">No. Control</th>
                     <th th:text="#{admin.dashboard.table.users.name}">Nombre Completo</th>
                     <th th:text="#{admin.dashboard.table.users.email}">Correo</th>
                     <th th:text="#{admin.dashboard.table.users.role}">Rol Asignado</th>
+                    <th>Carrera</th>
                     <th th:text="#{admin.dashboard.table.users.status}">Estatus</th>
-                    <th th:text="#{admin.dashboard.table.users.action}">Acción</th>
+                    <th>Inscripción (Constancia)</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 <tr th:if="${usuarios == null || usuarios.isEmpty()}">
-                    <td colspan="6" class="text-center text-muted py-4" th:text="#{admin.dashboard.table.users.empty}">No hay usuarios registrados.</td>
+                    <td colspan="8" class="text-center text-muted py-4" th:text="#{admin.dashboard.table.users.empty}">No hay usuarios registrados.</td>
                 </tr>
-                <tr th:each="u : ${usuarios}">
+                <tr th:each="u : ${usuarios}"
+                    th:attr="data-nc=${u.numeroControl},
+                             data-nombre=${u.nombre + ' ' + u.apellidoPaterno + (u.apellidoMaterno != null ? ' ' + u.apellidoMaterno : '')},
+                             data-rol=${u.rol.nombreRol},
+                             data-carrera=${u.estudiante != null ? u.estudiante.carrera.nombre : (u.profesor != null ? u.profesor.carreraAdscripcion.nombre : 'N/A')},
+                             data-activo=${u.activo == 1 ? 'ACTIVO' : 'INACTIVO'},
+                             data-bloqueado=${loginAttemptService != null && loginAttemptService.isBlocked(u.numeroControl) ? 'BLOQUEADO' : 'NORMAL'},
+                             data-inscrito=${u.estudiante != null ? (u.estudiante.pagoReinscripcion == 'S' ? 'INSCRITO' : 'NO_INSCRITO') : 'NO_APLICA'}">
                     <td><strong th:text="${u.numeroControl}">000000</strong></td>
                     <td th:text="${u.nombre + ' ' + u.apellidoPaterno + (u.apellidoMaterno != null ? ' ' + u.apellidoMaterno : '')}">Nombre</td>
                     <td th:text="${u.correoInstitucional}">correo</td>
                     <td><span class="badge role-badge" th:text="${u.rol.nombreRol}">ROL</span></td>
+                    <td class="small" th:text="${u.estudiante != null ? u.estudiante.carrera.nombre : (u.profesor != null ? u.profesor.carreraAdscripcion.nombre : '—')}">—</td>
                     <td>
-                        <span class="badge bg-success" th:if="${u.activo == 1}" th:text="#{admin.dashboard.status.active}">Activo</span>
-                        <span class="badge bg-secondary" th:if="${u.activo != 1}" th:text="#{admin.dashboard.status.inactive}">Inactivo</span>
+                        <span class="badge bg-danger mb-1 d-block" th:if="${loginAttemptService != null && loginAttemptService.isBlocked(u.numeroControl)}">
+                            <i class="bi bi-shield-slash me-1"></i>Bloqueado
+                        </span>
+                        <span class="badge bg-success" th:if="${u.activo == 1}">Activo</span>
+                        <span class="badge bg-secondary" th:if="${u.activo != 1}">Inactivo</span>
                     </td>
                     <td>
-                        <form th:action="@{/admin/usuarios/toggle-estatus}" method="post" class="d-inline">
-                            <input type="hidden" name="numeroControl" th:value="${u.numeroControl}" />
-                            <button type="submit" class="btn btn-sm btn-outline-danger"
-                                    th:if="${u.activo == 1}">
-                                <i class="bi bi-person-x"></i>
-                                <span th:text="#{admin.dashboard.btn.deactivate}">Desactivar</span>
+                        <div th:if="${u.estudiante != null}">
+                            <form th:action="@{/admin/estudiantes/toggle-inscripcion}" method="post" class="d-inline">
+                                <input type="hidden" name="numeroControl" th:value="${u.numeroControl}" />
+                                <button type="submit" class="btn btn-sm"
+                                        th:classappend="${u.estudiante.pagoReinscripcion == 'S' ? 'btn-success' : 'btn-outline-secondary'}"
+                                        th:title="${u.estudiante.pagoReinscripcion == 'S' ? 'Inscrito / Pago validado. Permite descargar constancia. Clic para revocar.' : 'No inscrito. Bloquea constancias. Clic para validar inscripción.'}">
+                                    <i class="bi" th:classappend="${u.estudiante.pagoReinscripcion == 'S' ? 'bi-check-circle-fill' : 'bi-dash-circle'}"></i>
+                                    <span th:text="${u.estudiante.pagoReinscripcion == 'S' ? 'Inscrito' : 'No inscrito'}">Inscrito</span>
+                                </button>
+                            </form>
+                        </div>
+                        <span th:unless="${u.estudiante != null}" class="text-muted small">—</span>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1 flex-wrap">
+                            <form th:action="@{/admin/usuarios/toggle-estatus}" method="post" class="d-inline">
+                                <input type="hidden" name="numeroControl" th:value="${u.numeroControl}" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        th:if="${u.activo == 1}" title="Desactivar usuario">
+                                    <i class="bi bi-person-x"></i>
+                                </button>
+                                <button type="submit" class="btn btn-sm btn-outline-success"
+                                        th:unless="${u.activo == 1}" title="Activar usuario">
+                                    <i class="bi bi-person-check"></i>
+                                </button>
+                            </form>
+                            <form th:if="${u.activo != 1 || (loginAttemptService != null && loginAttemptService.isBlocked(u.numeroControl))}"
+                                  th:action="@{/admin/usuarios/desbloquear}" method="post" class="d-inline">
+                                <input type="hidden" name="numeroControl" th:value="${u.numeroControl}" />
+                                <button type="submit" class="btn btn-sm btn-warning text-dark" title="Desbloquear y reactivar cuenta">
+                                    <i class="bi bi-unlock-fill"></i>
+                                </button>
+                            </form>
+                            <button type="button" class="btn btn-sm btn-outline-primary btn-restablecer-pass"
+                                    th:attr="data-nc=${u.numeroControl}, data-nombre=${u.nombre + ' ' + u.apellidoPaterno}"
+                                    title="Restablecer contraseña">
+                                <i class="bi bi-key-fill"></i>
                             </button>
-                            <button type="submit" class="btn btn-sm btn-outline-success"
-                                    th:unless="${u.activo == 1}">
-                                <i class="bi bi-person-check"></i>
-                                <span th:text="#{admin.dashboard.btn.activate}">Activar</span>
-                            </button>
-                        </form>
+                        </div>
                     </td>
                 </tr>
             </tbody>
         </table>
         
         <!-- Tabla de Solicitudes y Trámites -->
-        <table th:fragment="tablaAdminSolicitudes(solicitudes)" class="table table-hover align-middle mb-0">
+        <table th:fragment="tablaAdminSolicitudes(solicitudes)" class="table table-hover align-middle mb-0" id="tablaSolicitudesAdmin">
             <thead class="table-light">
                 <tr>
                     <th th:text="#{admin.dashboard.table.requests.folio}">Folio</th>
@@ -203,7 +242,12 @@
                 <tr th:if="${solicitudes == null || solicitudes.isEmpty()}">
                     <td colspan="7" class="text-center text-muted py-4" th:text="#{admin.dashboard.table.requests.empty}">No hay trámites pendientes.</td>
                 </tr>
-                <tr th:each="sol : ${solicitudes}">
+                <tr th:each="sol : ${solicitudes}"
+                    th:attr="data-folio=${sol.folio},
+                             data-solicitante=${sol.numeroControl},
+                             data-tipo=${sol.tipoTramite},
+                             data-motivo=${sol.motivo},
+                             data-estatus=${sol.estatus}">
                     <td><strong class="text-navy" th:text="${sol.folio}">FOL</strong></td>
                     <td th:text="${sol.numeroControl}">000</td>
                     <td th:text="${sol.tipoTramite}">TIPO</td>
@@ -227,7 +271,7 @@
         </table>
         
         <!-- Tabla de Auditoría y Logs -->
-        <table th:fragment="tablaAdminLogs(logs)" class="table table-sm table-striped align-middle mb-0" style="font-size: 0.85rem;">
+        <table th:fragment="tablaAdminLogs(logs)" class="table table-sm table-striped align-middle mb-0" id="tablaLogsAdmin" style="font-size: 0.85rem;">
             <thead class="table-dark">
                 <tr>
                     <th th:text="#{admin.dashboard.table.logs.date}">Fecha y Hora</th>
@@ -242,7 +286,12 @@
                 <tr th:if="${logs == null || logs.isEmpty()}">
                     <td colspan="6" class="text-center text-muted py-4" th:text="#{admin.dashboard.table.logs.empty}">No hay registros de auditoría.</td>
                 </tr>
-                <tr th:each="l : ${logs}">
+                <tr th:each="l : ${logs}"
+                    th:attr="data-usuario=${l.numeroControl},
+                             data-rol=${l.rol},
+                             data-operacion=${l.operacion},
+                             data-detalles=${l.detalles},
+                             data-ip=${l.ipOrigen}">
                     <td th:text="${#temporals.format(l.fechaHora, 'dd/MM/yyyy HH:mm:ss')}">FECHA</td>
                     <td><strong th:text="${l.numeroControl}">USER</strong></td>
                     <td th:text="${l.rol}">ROL</td>
