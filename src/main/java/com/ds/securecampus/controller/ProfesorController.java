@@ -107,4 +107,20 @@ public class ProfesorController {
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdf);
     }
+
+    @GetMapping("/horario")
+    public String horarioProfesor(Authentication authentication, Model model) {
+        String numControl = authentication.getName();
+        model.addAttribute("profesor", profesorService.obtenerProfesor(numControl));
+        model.addAttribute("filasHorario", profesorService.obtenerHorarioSemanalProfesor(numControl));
+        return "profesor/horario";
+    }
+
+    @GetMapping("/estadisticas")
+    public String estadisticasProfesor(Authentication authentication, Model model) {
+        String numControl = authentication.getName();
+        model.addAttribute("profesor", profesorService.obtenerProfesor(numControl));
+        model.addAttribute("estadisticas", profesorService.obtenerEstadisticasGrupos(numControl));
+        return "profesor/estadisticas";
+    }
 }

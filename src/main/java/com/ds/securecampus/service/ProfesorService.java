@@ -24,19 +24,22 @@ public class ProfesorService {
     private final AuditoriaService auditoriaService;
     private final NotificacionService notificacionService;
     private final SolicitudTramiteRepository solicitudRepository;
+    private final com.ds.securecampus.repository.HorarioClaseRepository horarioClaseRepository;
 
     public ProfesorService(GrupoRepository grupoRepository,
                            CargaAlumnoRepository cargaAlumnoRepository,
                            ProfesorRepository profesorRepository,
                            AuditoriaService auditoriaService,
                            NotificacionService notificacionService,
-                           SolicitudTramiteRepository solicitudRepository) {
+                           SolicitudTramiteRepository solicitudRepository,
+                           com.ds.securecampus.repository.HorarioClaseRepository horarioClaseRepository) {
         this.grupoRepository = grupoRepository;
         this.cargaAlumnoRepository = cargaAlumnoRepository;
         this.profesorRepository = profesorRepository;
         this.auditoriaService = auditoriaService;
         this.notificacionService = notificacionService;
         this.solicitudRepository = solicitudRepository;
+        this.horarioClaseRepository = horarioClaseRepository;
     }
 
     @Transactional(readOnly = true)
@@ -133,5 +136,69 @@ public class ProfesorService {
                 || !profesorControl.equals(grupo.getProfesor().getNumeroControl())) {
             throw new IllegalArgumentException("El grupo no está asignado a este profesor.");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<com.ds.securecampus.model.HorarioSemanalFila> obtenerHorarioSemanalProfesor(String numeroControl) {
+        List<Grupo> grupos = grupoRepository.findByProfesorNumeroControl(numeroControl);
+        java.util.Map<java.time.LocalTime, com.ds.securecampus.model.HorarioSemanalFila> filas = new java.util.TreeMap<>();
+        for (Grupo g : grupos) {
+            List<com.ds.securecampus.model.HorarioClase> horarios = horarioClaseRepository.findByGrupoGrupoId(g.getGrupoId());
+            for (com.ds.securecampus.model.HorarioClase h : horarios) {
+                java.time.LocalTime inicio = java.time.LocalTime.parse(h.getHoraInicio());
+                java.time.LocalTime fin = java.time.LocalTime.parse(h.getHoraFin());
+                for (java.time.LocalTime hora = inicio; hora.isBefore(fin); hora = hora.plusHours(1)) {
+                    java.time.LocalTime sig = hora.plusHours(1);
+                    String tramo = hora + " - " + sig;
+                    com.ds.securecampus.model.HorarioSemanalFila fila = filas.computeIfAbsent(hora, ignored -> new com.ds.securecampus.model.HorarioSemanalFila(tramo));
+                    String aulaNombre = h.getAula() != null ? h.getAula().getNombreAula() : "Por asignar";
+                    String detalle = g.getCodigoGrupo() + " · " + g.getMateria().getNombre() + " (" + aulaNombre + ")";
+                    fila.agregarClase(h.getDiaSemana(), detalle);
+                }
+            }
+        }
+        return List.copyOf(filas.values());
+    }
+
+    @Transactional(readOnly = true)
+    public List<com.ds.securecampus.model.EstadisticaGrupo> obtenerEstadisticasGrupos(String numeroControl) {
+        List<Grupo> grupos = grupoRepository.findByProfesorNumeroControl(numeroControl);
+        List<com.ds.securecampus.model.EstadisticaGrupo> stats = new java.util.ArrayList<>();
+        for (Grupo g : grupos) {
+            List<CargaAlumno> cargas = cargaAlumnoRepository.findByGrupoGrupoId(g.getGrupoId());
+            int total = cargas.size();
+            int aprobados = 0;
+            int reprobados = 0;
+            int cursando = 0;
+            double suma = 0;
+            int conNota = 0;
+            for (CargaAlumno c : cargas) {
+                if ("APROBADA".equalsIgnoreCase(c.getEstatus())) aprobados++;
+                else if ("REPROBADA".equalsIgnoreCase(c.getEstatus())) reprobados++;
+                else cursando++;
+
+                if (c.getCalificacionFinal() != null) {
+                    suma += c.getCalificacionFinal().doubleValue();
+                    conNota++;
+                }
+            }
+            double prom = conNota > 0 ? Math.round((suma / conNota) * 100.0) / 100.0 : 0.0;
+            String profName = g.getProfesor() != null && g.getProfesor().getUsuario() != null
+                    ? g.getProfesor().getUsuario().getNombre() + " " + g.getProfesor().getUsuario().getApellidoPaterno()
+                    : "Docente";
+            stats.add(new com.ds.securecampus.model.EstadisticaGrupo(
+                    g.getGrupoId(),
+                    g.getCodigoGrupo(),
+                    g.getMateria().getNombre(),
+                    profName,
+                    total,
+                    35,
+                    aprobados,
+                    reprobados,
+                    cursando,
+                    prom
+            ));
+        }
+        return stats;
     }
 }

@@ -1,43 +1,83 @@
 <!doctype html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org" class="h-100">
-    <head th:replace="~{template :: head('Horario docente | SecureCampus')}"></head>
-    <body class="d-flex flex-column min-vh-100">
-        <nav th:replace="~{template :: navbar}"></nav>
-        <main class="flex-grow-1 py-4">
-            <div class="container page-shell">
-                <div th:replace="~{fragments/components :: accountBanner('Profesor', ${profesorControl})}"></div>
-                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <head th:replace="~{template :: head('Mi Horario Docente | SecureCampus')}"></head>
+</head>
+<body class="portal-body">
+    <nav th:replace="~{template :: navbar}"></nav>
+    
+    <main>
+        <div class="badge-wrapper">
+
+            <!-- LADO IZQUIERDO: Credencial del Profesor con Correo y Navegación -->
+            <aside class="teacher-id-badge">
+                <div class="badge-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <h4 class="fw-bold mb-1 text-dark" th:text="${profesor.usuario.nombre + ' ' + profesor.usuario.apellidoPaterno}">Nombre completo</h4>
+                <p class="text-muted small mb-1" th:text="${profesor.numeroControl}">Número de empleado</p>
+                <p class="text-muted small mb-2"><i class="bi bi-envelope me-1"></i><span th:text="${profesor.usuario.correoInstitucional}">correo</span></p>
+                <hr class="w-100 my-2 text-muted opacity-25">
+                <span class="text-dark small fw-medium d-block mb-3" th:text="${profesor.carreraAdscripcion.nombre}">Adscripción</span>
+
+                <div class="d-grid gap-2 w-100">
+                    <a th:href="@{/profesor/grupos}" class="btn btn-outline-secondary btn-sm rounded-pill text-start">
+                        <i class="bi bi-collection me-2"></i>Mis grupos
+                    </a>
+                    <a th:href="@{/profesor/horario}" class="btn btn-sky btn-sm rounded-pill text-start active">
+                        <i class="bi bi-calendar3 me-2"></i>Mi horario
+                    </a>
+                    <a th:href="@{/profesor/estadisticas}" class="btn btn-outline-secondary btn-sm rounded-pill text-start">
+                        <i class="bi bi-graph-up me-2"></i>Estadísticas
+                    </a>
+                </div>
+            </aside>
+
+            <!-- LADO DERECHO: Grilla Semanal de Horario del Profesor -->
+            <section class="main-sheet">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
                     <div>
-                        <p class="eyebrow text-uppercase text-orange fw-bold mb-1">MÓDULO DE DOCENCIA</p>
-                        <h1 class="h2 fw-bold text-navy mb-1">Mi horario</h1>
-                        <p class="text-secondary mb-0">Horario de las materias y grupos que tienes asignados.</p>
+                        <h1 class="h3 fw-bold text-navy mb-1">Horario Semanal Docente</h1>
+                        <p class="text-secondary mb-0">Sesiones de clase programadas para tus grupos del semestre en curso.</p>
                     </div>
-                    <a th:href="@{/profesor}" class="btn btn-outline-navy"><i class="bi bi-arrow-left me-1"></i>Volver a mis grupos</a>
+                    <a th:href="@{/profesor/grupos}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                        <i class="bi bi-arrow-left me-1"></i>Regresar
+                    </a>
                 </div>
-                <div th:if="${#lists.isEmpty(horario)}" class="alert alert-info">
-                    <i class="bi bi-info-circle me-2"></i>No hay horarios capturados para tus grupos asignados.
+
+                <div th:if="${#lists.isEmpty(filasHorario)}" class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>No tienes clases programadas con horario y aula en el periodo escolar vigente.
                 </div>
-                <div th:unless="${#lists.isEmpty(horario)}" class="card border-0 shadow-sm rounded-3">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr><th>Materia</th><th>Clave</th><th>Grupo</th><th>Horario</th><th>Aula</th><th>Periodo</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr th:each="clase : ${horario}">
-                                    <td class="fw-semibold" th:text="${clase.materia}">Materia</td>
-                                    <td th:text="${clase.clave}">Clave</td>
-                                    <td th:text="${clase.grupo}">Grupo</td>
-                                    <td th:text="${clase.horario}">Horario</td>
-                                    <td th:text="${clase.salon}">Aula</td>
-                                    <td th:text="${clase.periodo}">Periodo</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+
+                <div th:unless="${#lists.isEmpty(filasHorario)}" class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle text-center">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Hora</th>
+                                <th>Lunes</th>
+                                <th>Martes</th>
+                                <th>Miércoles</th>
+                                <th>Jueves</th>
+                                <th>Viernes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="fila : ${filasHorario}">
+                                <th scope="row" class="text-nowrap" th:text="${fila.horario}">08:00 - 09:00</th>
+                                <td class="text-start" style="white-space: pre-line" th:text="${fila.lunes}"></td>
+                                <td class="text-start" style="white-space: pre-line" th:text="${fila.martes}"></td>
+                                <td class="text-start" style="white-space: pre-line" th:text="${fila.miercoles}"></td>
+                                <td class="text-start" style="white-space: pre-line" th:text="${fila.jueves}"></td>
+                                <td class="text-start" style="white-space: pre-line" th:text="${fila.viernes}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-        </main>
-        <footer th:replace="~{template :: footer}"></footer>
-    </body>
+
+            </section>
+        </div>
+    </main>
+
+    <footer th:replace="~{template :: footer}"></footer>
+</body>
 </html>

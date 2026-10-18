@@ -16,9 +16,22 @@
                     <i class="bi bi-person-fill"></i>
                 </div>
                 <h4 class="fw-bold mb-1 text-dark" th:text="${profesor.usuario.nombre + ' ' + profesor.usuario.apellidoPaterno}">Nombre completo</h4>
-                <p class="text-muted small mb-2" th:text="${profesor.numeroControl}">Número de empleado</p>
+                <p class="text-muted small mb-1" th:text="${profesor.numeroControl}">Número de empleado</p>
+                <p class="text-muted small mb-2"><i class="bi bi-envelope me-1"></i><span th:text="${profesor.usuario.correoInstitucional}">correo</span></p>
                 <hr class="w-100 my-2 text-muted opacity-25">
-                <span class="text-dark small fw-medium" th:text="${profesor.carreraAdscripcion.nombre}">Adscripción</span>
+                <span class="text-dark small fw-medium d-block mb-3" th:text="${profesor.carreraAdscripcion.nombre}">Adscripción</span>
+
+                <div class="d-grid gap-2 w-100">
+                    <a th:href="@{/profesor/grupos}" class="btn btn-sky btn-sm rounded-pill text-start active">
+                        <i class="bi bi-collection me-2"></i>Mis grupos
+                    </a>
+                    <a th:href="@{/profesor/horario}" class="btn btn-outline-secondary btn-sm rounded-pill text-start">
+                        <i class="bi bi-calendar3 me-2"></i>Mi horario
+                    </a>
+                    <a th:href="@{/profesor/estadisticas}" class="btn btn-outline-secondary btn-sm rounded-pill text-start">
+                        <i class="bi bi-graph-up me-2"></i>Estadísticas
+                    </a>
+                </div>
             </aside>
 
             <!-- LADO DERECHO: Hoja de Contenido Principal -->
@@ -36,9 +49,19 @@
                                 <span th:text="#{profesor.grupo.label.period}">Periodo:</span> <strong th:text="${grupo.periodo.nombre}"></strong>
                             </p>
                         </div>
-                        <a th:href="@{'/profesor/grupo/' + ${grupo.grupoId} + '/pdf'}" class="btn btn-outline-danger btn-sm">
-                            <i class="bi bi-file-earmark-pdf-fill me-1"></i><span th:text="#{profesor.grupo.btn.pdf}">Descargar Lista Oficial PDF</span>
-                        </a>
+                        <div class="d-flex gap-2">
+                            <a th:href="@{'/profesor/grupo/' + ${grupo.grupoId} + '/pdf'}" class="btn btn-outline-danger btn-sm">
+                                <i class="bi bi-file-earmark-pdf-fill me-1"></i><span th:text="#{profesor.grupo.btn.pdf}">Descargar Lista Oficial PDF</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buscador de alumnos dentro del grupo -->
+                <div class="mb-3">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
+                        <input type="text" id="filtroAlumnosGrupo" class="form-control border-start-0" placeholder="Buscar estudiante por nombre o no. control en este grupo...">
                     </div>
                 </div>
 
@@ -95,6 +118,18 @@
                 }
             });
         });
+
+        // Filtrado en vivo de estudiantes en el grupo
+        const filtroInput = document.getElementById('filtroAlumnosGrupo');
+        if (filtroInput) {
+            filtroInput.addEventListener('input', function() {
+                const q = this.value.toLowerCase().trim();
+                document.querySelectorAll('table tbody tr').forEach(row => {
+                    const texto = row.textContent.toLowerCase();
+                    row.style.display = texto.includes(q) ? '' : 'none';
+                });
+            });
+        }
     </script>
 </body>
 </html>

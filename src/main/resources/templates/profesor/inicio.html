@@ -16,9 +16,22 @@
                     <i class="bi bi-person-fill"></i>
                 </div>
                 <h4 class="fw-bold mb-1 text-dark" th:text="${profesor.usuario.nombre + ' ' + profesor.usuario.apellidoPaterno}">Nombre completo</h4>
-                <p class="text-muted small mb-2" th:text="${profesor.numeroControl}">Número de empleado</p>
+                <p class="text-muted small mb-1" th:text="${profesor.numeroControl}">Número de empleado</p>
+                <p class="text-muted small mb-2"><i class="bi bi-envelope me-1"></i><span th:text="${profesor.usuario.correoInstitucional}">correo</span></p>
                 <hr class="w-100 my-2 text-muted opacity-25">
-                <span class="text-dark small fw-medium" th:text="${profesor.carreraAdscripcion.nombre}">Adscripción</span>
+                <span class="text-dark small fw-medium d-block mb-3" th:text="${profesor.carreraAdscripcion.nombre}">Adscripción</span>
+
+                <div class="d-grid gap-2 w-100">
+                    <a th:href="@{/profesor/grupos}" class="btn btn-outline-secondary btn-sm rounded-pill text-start">
+                        <i class="bi bi-collection me-2"></i>Mis grupos
+                    </a>
+                    <a th:href="@{/profesor/horario}" class="btn btn-outline-secondary btn-sm rounded-pill text-start">
+                        <i class="bi bi-calendar3 me-2"></i>Mi horario
+                    </a>
+                    <a th:href="@{/profesor/estadisticas}" class="btn btn-outline-secondary btn-sm rounded-pill text-start">
+                        <i class="bi bi-graph-up me-2"></i>Estadísticas
+                    </a>
+                </div>
             </aside>
 
             <!-- LADO DERECHO: Hoja de Contenido Principal -->
@@ -27,12 +40,18 @@
                 <!-- Saludo de Bienvenida e Indicador -->
                 <div class="mb-4">
                     <h1 class="h2 fw-bold mb-3 text-navy" th:text="#{teacher.welcome.msg}">
-                        Bienvenido/a Nombre
+                        Bienvenido/a Docente
                     </h1>
                     
                     <div class="d-flex gap-3 flex-wrap">
                         <a th:href="@{/profesor/grupos}" class="btn btn-sky rounded-pill px-4 py-2 fw-medium shadow-sm">
                             <i class="bi bi-collection me-1"></i> <span th:text="#{profesor.inicio.btn.groups}">Ver grupos asignados</span>
+                        </a>
+                        <a th:href="@{/profesor/horario}" class="btn btn-sky rounded-pill px-4 py-2 fw-medium shadow-sm">
+                            <i class="bi bi-calendar3 me-1"></i> Ver mi horario
+                        </a>
+                        <a th:href="@{/profesor/estadisticas}" class="btn btn-sky rounded-pill px-4 py-2 fw-medium shadow-sm">
+                            <i class="bi bi-graph-up me-1"></i> Estadísticas de grupos
                         </a>
                     </div>
                 </div>

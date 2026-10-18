@@ -57,6 +57,26 @@
         </a>
 
         <div class="d-flex align-items-center gap-2 ms-auto">
+          <!-- Botón Campanita de Notificaciones -->
+          <button
+            type="button"
+            class="btn btn-outline-light btn-sm position-relative d-inline-flex align-items-center justify-content-center p-2 rounded-circle"
+            data-bs-toggle="modal"
+            data-bs-target="#modalNotificacionesFlotante"
+            title="Avisos y notificaciones"
+            style="width: 36px; height: 36px"
+          >
+            <i class="bi bi-bell-fill"></i>
+            <span
+              th:if="${totalNotificacionesNoLeidas != null and totalNotificacionesNoLeidas > 0}"
+              class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light"
+              style="font-size: 0.65rem;"
+              th:text="${totalNotificacionesNoLeidas}"
+            >
+              1
+            </span>
+          </button>
+
           <a
             class="btn btn-outline-light btn-sm"
             th:href="@{/cuenta/contrasena}"
@@ -84,6 +104,114 @@
         </div>
       </div>
     </nav>
+
+    <!-- Modal Emergente de Notificaciones (Accesible desde la campanita) -->
+    <div
+      class="modal fade"
+      id="modalNotificacionesFlotante"
+      tabindex="-1"
+      aria-labelledby="modalNotificacionesLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0 rounded-4">
+          <div class="modal-header bg-navy text-white">
+            <h5 class="modal-title fw-bold" id="modalNotificacionesLabel">
+              <i class="bi bi-bell-fill text-warning me-2"></i>Notificaciones y Avisos
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Cerrar"
+            ></button>
+          </div>
+          <div class="modal-body p-3">
+            <div
+              th:if="${notificacionesGlobales == null or notificacionesGlobales.empty}"
+              class="text-center text-muted py-4"
+            >
+              <i class="bi bi-bell-slash fs-1 d-block mb-2 text-secondary opacity-50"></i>
+              <span>No tienes avisos ni notificaciones pendientes.</span>
+            </div>
+
+            <div
+              th:unless="${notificacionesGlobales == null or notificacionesGlobales.empty}"
+              class="d-flex flex-column gap-2"
+            >
+              <div
+                th:each="notif : ${notificacionesGlobales}"
+                class="card border border-light-subtle rounded-3 shadow-xs p-3 position-relative"
+                th:classappend="${notif.leida == 0 ? 'bg-light border-start border-4 border-warning' : 'bg-white opacity-75'}"
+              >
+                <div class="d-flex justify-content-between align-items-start mb-1">
+                  <h6
+                    class="fw-bold mb-0 text-navy"
+                    style="font-size: 0.95rem"
+                    th:text="${notif.titulo}"
+                  >
+                    Título del aviso
+                  </h6>
+                  <form
+                    th:action="@{/notificaciones/{id}/eliminar(id=${notif.idNotificacion})}"
+                    method="post"
+                    class="m-0"
+                  >
+                    <button
+                      type="submit"
+                      class="btn btn-sm btn-link text-muted p-0 ms-2"
+                      title="Eliminar notificación"
+                      style="line-height: 1"
+                    >
+                      <i class="bi bi-x-lg text-danger fs-6"></i>
+                    </button>
+                  </form>
+                </div>
+                <p
+                  class="small text-secondary mb-2"
+                  th:text="${notif.mensaje}"
+                  style="white-space: pre-wrap;"
+                >
+                  Mensaje
+                </p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <small
+                    class="text-muted"
+                    style="font-size: 0.75rem"
+                    th:text="${#temporals.format(notif.fechaCreacion, 'dd/MM/yyyy HH:mm')}"
+                  >
+                    Fecha
+                  </small>
+                  <form
+                    th:if="${notif.leida == 0}"
+                    th:action="@{/notificaciones/{id}/marcar-leida(id=${notif.idNotificacion})}"
+                    method="post"
+                    class="m-0"
+                  >
+                    <button
+                      type="submit"
+                      class="btn btn-link p-0 text-decoration-none text-primary"
+                      style="font-size: 0.75rem"
+                    >
+                      <i class="bi bi-check2-all me-1"></i>Marcar leída
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer bg-light py-2">
+            <button
+              type="button"
+              class="btn btn-sm btn-secondary rounded-pill px-3"
+              data-bs-dismiss="modal"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Main Workspace -->
     <main class="flex-grow-1 py-4">

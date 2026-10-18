@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <head th:replace="~{template :: head('Estadísticas Docentes | SecureCampus')}"></head>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body class="portal-body">
+    <nav th:replace="~{template :: navbar}"></nav>
+    
+    <main>
+        <div class="badge-wrapper">
+
+            <!-- LADO IZQUIERDO: Credencial del Profesor con Correo y Navegación -->
+            <aside class="teacher-id-badge">
+                <div class="badge-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <h4 class="fw-bold mb-1 text-dark" th:text="${profesor.usuario.nombre + ' ' + profesor.usuario.apellidoPaterno}">Nombre completo</h4>
+                <p class="text-muted small mb-1" th:text="${profesor.numeroControl}">Número de empleado</p>
+                <p class="text-muted small mb-2"><i class="bi bi-envelope me-1"></i><span th:text="${profesor.usuario.correoInstitucional}">correo</span></p>
+                <hr class="w-100 my-2 text-muted opacity-25">
+                <span class="text-dark small fw-medium d-block mb-3" th:text="${profesor.carreraAdscripcion.nombre}">Adscripción</span>
+
+                <div class="d-grid gap-2 w-100">
+                    <a th:href="@{/profesor/grupos}" class="btn btn-outline-secondary btn-sm rounded-pill text-start">
+                        <i class="bi bi-collection me-2"></i>Mis grupos
+                    </a>
+                    <a th:href="@{/profesor/horario}" class="btn btn-outline-secondary btn-sm rounded-pill text-start">
+                        <i class="bi bi-calendar3 me-2"></i>Mi horario
+                    </a>
+                    <a th:href="@{/profesor/estadisticas}" class="btn btn-sky btn-sm rounded-pill text-start active">
+                        <i class="bi bi-graph-up me-2"></i>Estadísticas
+                    </a>
+                </div>
+            </aside>
+
+            <!-- LADO DERECHO: Estadísticas y Gráficas -->
+            <section class="main-sheet">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <div>
+                        <h1 class="h3 fw-bold text-navy mb-1">Rendimiento Académico y Estadísticas</h1>
+                        <p class="text-secondary mb-0">Visualiza el aprovechamiento y avance de calificaciones en tus grupos asignados.</p>
+                    </div>
+                    <a th:href="@{/profesor/grupos}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                        <i class="bi bi-arrow-left me-1"></i>Regresar
+                    </a>
+                </div>
+
+                <div th:if="${estadisticas == null or estadisticas.empty}" class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>No tienes grupos con estudiantes asignados actualmente para calcular estadísticas.
+                </div>
+
+                <div th:unless="${estadisticas == null or estadisticas.empty}">
+                    <!-- Tarjetas de Resumen General -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3">
+                            <div class="content-card bg-light border-0 p-3 rounded-3 text-center">
+                                <span class="small text-muted d-block fw-bold">TOTAL GRUPOS</span>
+                                <h3 class="fw-bold text-navy mb-0" th:text="${#lists.size(estadisticas)}">0</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="content-card bg-light border-0 p-3 rounded-3 text-center">
+                                <span class="small text-muted d-block fw-bold">TOTAL ALUMNOS</span>
+                                <h3 class="fw-bold text-navy mb-0" id="totalAlumnosCard">0</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="content-card bg-light border-0 p-3 rounded-3 text-center">
+                                <span class="small text-muted d-block fw-bold">APROBADOS</span>
+                                <h3 class="fw-bold text-success mb-0" id="totalAprobadosCard">0</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="content-card bg-light border-0 p-3 rounded-3 text-center">
+                                <span class="small text-muted d-block fw-bold">REPROBADOS</span>
+                                <h3 class="fw-bold text-danger mb-0" id="totalReprobadosCard">0</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gráficos de Estadísticas -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <div class="card shadow-sm border-0 rounded-3 p-3">
+                                <h6 class="fw-bold text-navy mb-3"><i class="bi bi-pie-chart-fill text-orange me-2"></i>Estatus General de Alumnos</h6>
+                                <div style="max-height: 280px;" class="d-flex justify-content-center">
+                                    <canvas id="chartEstatusGeneral"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card shadow-sm border-0 rounded-3 p-3">
+                                <h6 class="fw-bold text-navy mb-3"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Promedio General por Grupo</h6>
+                                <div style="max-height: 280px;">
+                                    <canvas id="chartPromediosGrupo"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabla Detallada por Grupo -->
+                    <div class="card shadow-sm border-0 rounded-3">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="card-title fw-bold text-navy mb-0">Detalle de Estadísticas por Grupo</h5>
+                        </div>
+                        <div class="card-body p-0 table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Asignatura</th>
+                                        <th class="text-center">Alumnos</th>
+                                        <th class="text-center">Aprobados</th>
+                                        <th class="text-center">Reprobados</th>
+                                        <th class="text-center">En curso</th>
+                                        <th class="text-center">Promedio</th>
+                                        <th class="text-center">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="st : ${estadisticas}">
+                                        <td><strong class="text-navy" th:text="${st.codigoGrupo}">GRP</strong></td>
+                                        <td th:text="${st.materiaNombre}">Materia</td>
+                                        <td class="text-center" th:text="${st.totalAlumnos}">0</td>
+                                        <td class="text-center text-success fw-bold" th:text="${st.aprobados}">0</td>
+                                        <td class="text-center text-danger fw-bold" th:text="${st.reprobados}">0</td>
+                                        <td class="text-center text-secondary" th:text="${st.cursando}">0</td>
+                                        <td class="text-center fw-bold" th:text="${st.promedioGeneral}">0.0</td>
+                                        <td class="text-center">
+                                            <a th:href="@{/profesor/grupo/{id}(id=${st.grupoId})}" class="btn btn-sm btn-outline-primary">
+                                                Ver lista
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <footer th:replace="~{template :: footer}"></footer>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const stats = /*[[${estadisticas}]]*/ [];
+        
+        if (stats && stats.length > 0) {
+            let totalAlumnos = 0;
+            let totalAprobados = 0;
+            let totalReprobados = 0;
+            let totalCursando = 0;
+
+            const codigos = [];
+            const promedios = [];
+
+            stats.forEach(s => {
+                totalAlumnos += s.totalAlumnos;
+                totalAprobados += s.aprobados;
+                totalReprobados += s.reprobados;
+                totalCursando += s.cursando;
+                codigos.push(s.codigoGrupo);
+                promedios.push(s.promedioGeneral);
+            });
+
+            document.getElementById('totalAlumnosCard').textContent = totalAlumnos;
+            document.getElementById('totalAprobadosCard').textContent = totalAprobados;
+            document.getElementById('totalReprobadosCard').textContent = totalReprobados;
+
+            // Chart Doughnut
+            new Chart(document.getElementById('chartEstatusGeneral'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Aprobados', 'Reprobados', 'En curso'],
+                    datasets: [{
+                        data: [totalAprobados, totalReprobados, totalCursando],
+                        backgroundColor: ['#198754', '#dc3545', '#6c757d']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Chart Bar
+            new Chart(document.getElementById('chartPromediosGrupo'), {
+                type: 'bar',
+                data: {
+                    labels: codigos,
+                    datasets: [{
+                        label: 'Promedio general',
+                        data: promedios,
+                        backgroundColor: '#0d6efd'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+        /*]]>*/
+    </script>
+</body>
+</html>
