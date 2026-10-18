@@ -32,4 +32,19 @@ public class NotificacionService {
         notif.setLeida(0);
         notificacionRepository.save(notif);
     }
+
+    @Transactional
+    public void marcarLeida(Long idNotificacion, String numeroControl) {
+        notificacionRepository.findById(idNotificacion).ifPresent(n -> {
+            if (n.getNumeroControl().equals(numeroControl)) {
+                n.setLeida(1);
+                notificacionRepository.save(n);
+            }
+        });
+    }
+
+    @Transactional
+    public void eliminar(Long idNotificacion, String numeroControl) {
+        notificacionRepository.deleteByIdNotificacionAndNumeroControl(idNotificacion, numeroControl);
+    }
 }

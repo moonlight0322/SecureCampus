@@ -49,4 +49,7 @@ public class Grupo {
 
     @OneToMany(mappedBy = "grupo")
     private List<HorarioClase> horarios = new ArrayList<>();
+
+    @OneToMany(mappedBy = "grupo")
+    private List<CargaAlumno> cargasAlumnos = new ArrayList<>();
 }

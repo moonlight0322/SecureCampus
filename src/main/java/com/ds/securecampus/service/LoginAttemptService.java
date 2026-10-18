@@ -65,4 +65,10 @@ public class LoginAttemptService {
         long seconds = java.time.Duration.between(LocalDateTime.now(), info.lockExpiry).getSeconds();
         return (int) Math.max(1, (seconds + 59) / 60);
     }
+
+    public void desbloquear(String key) {
+        if (key != null) {
+            attemptsCache.remove(key);
+        }
+    }
 }
