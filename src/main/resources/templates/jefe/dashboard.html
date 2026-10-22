@@ -1,90 +1,170 @@
 <!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org" class="h-100">
-    <head th:with="pageTitle=#{jefe.dashboard.pagetitle}">
-        <head th:replace="~{template :: head(${pageTitle})}"></head>
-    </head>
-    <body class="d-flex flex-column min-vh-100 portal-body">
-        <nav th:replace="~{template :: navbar}"></nav>
+  <head th:with="pageTitle=#{jefe.dashboard.pagetitle}">
+    <head th:replace="~{template :: head(${pageTitle})}"></head>
+  </head>
+  <body class="d-flex flex-column min-vh-100 portal-body">
+    <nav th:replace="~{template :: navbar}"></nav>
 
-        <main class="flex-grow-1 py-4 d-flex align-items-center">
-            <div class="container-fluid px-4 page-shell my-auto w-100">
-                <div class="binder-wrapper">
-                    
-                    <!-- LADO IZQUIERDO: Portada del Binder (Expediente del Jefe de Departamento) -->
-                    <div class="binder-sidebar">
-                        <div class="binder-tabs">
-                            <a th:href="@{/jefe/dashboard}" class="binder-tab tab-yellow active" th:title="#{jefe.dashboard.tab.title}">
-                                <i class="bi bi-folder-fill"></i>
-                                <span class="tab-label" th:text="#{jefe.dashboard.tab.label}">Expediente</span>
-                            </a>
-                        </div>
-
-                        <div class="folder-cover">
-                            <div class="folder-content d-flex flex-column h-100">
-                                <div class="student-avatar-box mb-3">
-                                    <i class="bi bi-person-workspace"></i>
-                                </div>
-                                <h3 class="student-name mb-1" th:text="${jefeDepartamento.nombre}">Nombre del Jefe</h3>
-                                <p class="student-control text-muted mb-2">
-                                    <i class="bi bi-shield-lock-fill me-1"></i>
-                                    <span class="text-black" th:text="${jefeDepartamento.empleadoId}">No. Empleado</span>
-                                </p>
-                                <span class="text-black w-100 text-truncate mb-3" style="font-size: 0.8rem" th:text="${jefeDepartamento.departamento}">Departamento</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- LADO DERECHO: Lienzo de Contenido Ejecutivo -->
-                    <div class="binder-content-sheet">
-                        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-                            <div>
-                                <p class="eyebrow text-uppercase text-orange fw-bold mb-1" th:text="#{jefe.dashboard.eyebrow}">COORDINACIÓN Y PLANES DE ESTUDIO</p>
-                                <h1 class="h2 fw-bold text-navy mb-1" th:text="#{jefe.dashboard.maintitle}">Gestión Académica de Carreras y Materias</h1>
-                                <p class="text-secondary mb-0" th:text="#{jefe.dashboard.subtitle}">Alta de asignaturas curriculares y asignación de docentes a la plantilla escolar.</p>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <button type="button" class="btn btn-navy" data-bs-toggle="modal" data-bs-target="#modalAltaMateria">
-                                    <i class="bi bi-journal-plus me-1"></i><span th:text="#{jefe.dashboard.btn.newsubject}">Alta de Materia</span>
-                                </button>
-                                <button type="button" class="btn btn-orange" data-bs-toggle="modal" data-bs-target="#modalAsignarGrupo">
-                                    <i class="bi bi-person-video3 me-1"></i><span th:text="#{jefe.dashboard.btn.assigngroup}">Asignar a Grupo</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div th:if="${param.materiaCreada != null}" class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="bi bi-check-circle-fill me-2"></i>
-                            <span th:text="#{jefe.dashboard.alert.success.subject}">Asignatura incorporada exitosamente a la retícula curricular.</span>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                        <div th:if="${param.asignado != null}" class="alert alert-info alert-dismissible fade show" role="alert">
-                            <i class="bi bi-check-circle-fill me-2"></i>
-                            <span th:text="#{jefe.dashboard.alert.success.assigned}">Docente y asignatura asignados al grupo satisfactoriamente.</span>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-
-                        <!-- Catálogo de Materias -->
-                        <div class="card shadow-sm border-0 rounded-3">
-                            <div class="card-header bg-white py-3">
-                                <h5 class="card-title fw-bold text-navy mb-0">
-                                    <i class="bi bi-book-half text-orange me-2"></i><span th:text="#{jefe.dashboard.card.title}">Oferta Académica de Materias</span>
-                                </h5>
-                            </div>
-                            <div class="card-body p-0 table-responsive">
-                                <table th:replace="~{fragments/tables :: tablaJefeMaterias(${materias})}"></table>
-                            </div>
-                        </div>
-
-                    </div>
-
-                </div>
+    <main class="flex-grow-1 py-4 d-flex align-items-center">
+      <div class="container-fluid px-4 page-shell my-auto w-100">
+        <div class="binder-wrapper">
+          <!-- LADO IZQUIERDO: Portada del Binder (Expediente del Jefe de Departamento) -->
+          <div class="binder-sidebar">
+            <div class="binder-tabs">
+              <a
+                th:href="@{/jefe/dashboard}"
+                class="binder-tab tab-yellow active"
+                th:title="#{jefe.dashboard.tab.title}"
+              >
+                <i class="bi bi-folder-fill"></i>
+                <span class="tab-label" th:text="#{jefe.dashboard.tab.label}"
+                  >Expediente</span
+                >
+              </a>
             </div>
-        </main>
 
-        <!-- Modales -->
-        <div th:replace="~{fragments/components :: modalAltaMateria(${carreras})}"></div>
-        <div th:replace="~{fragments/components :: modalAsignarGrupo(${materias}, ${profesores}, ${periodos})}"></div>
+            <div class="folder-cover">
+              <div class="folder-content d-flex flex-column h-100">
+                <div class="student-avatar-box mb-3">
+                  <i class="bi bi-person-workspace"></i>
+                </div>
+                <h3
+                  class="student-name mb-1"
+                  th:text="${jefeDepartamento != null && jefeDepartamento.nombre != null ? jefeDepartamento.nombre : 'Jefe de Departamento'}"
+                >
+                  Nombre del Jefe
+                </h3>
+                <p class="student-control text-muted mb-2">
+                  <i class="bi bi-shield-lock-fill me-1"></i>
+                  <span class="text-black" th:text="${jefeControl}"
+                    >No. Empleado</span
+                  >
+                </p>
+                <span
+                  class="text-black w-100 text-truncate mb-3"
+                  style="font-size: 0.8rem"
+                  th:text="${jefeDepartamento != null && jefeDepartamento.departamento != null ? jefeDepartamento.departamento : 'Departamento Académico'}"
+                  >Departamento</span
+                >
+              </div>
+            </div>
+          </div>
 
-        <footer th:replace="~{template :: footer}"></footer>
-    </body>
+          <!-- LADO DERECHO: Lienzo de Contenido Ejecutivo -->
+          <div class="binder-content-sheet">
+            <div
+              class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2"
+            >
+              <div>
+                <p
+                  class="eyebrow text-uppercase text-orange fw-bold mb-1"
+                  th:text="#{jefe.dashboard.eyebrow}"
+                >
+                  COORDINACIÓN Y PLANES DE ESTUDIO
+                </p>
+                <h1
+                  class="h2 fw-bold text-navy mb-1"
+                  th:text="#{jefe.dashboard.maintitle}"
+                >
+                  Gestión Académica de Carreras y Materias
+                </h1>
+                <p
+                  class="text-secondary mb-0"
+                  th:text="#{jefe.dashboard.subtitle}"
+                >
+                  Alta de asignaturas curriculares y asignación de docentes a la
+                  plantilla escolar.
+                </p>
+              </div>
+              <div class="d-flex gap-2">
+                <button
+                  type="button"
+                  class="btn btn-navy"
+                  data-bs-toggle="modal"
+                  data-bs-target="#modalAltaMateria"
+                >
+                  <i class="bi bi-journal-plus me-1"></i
+                  ><span th:text="#{jefe.dashboard.btn.newsubject}"
+                    >Alta de Materia</span
+                  >
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-orange"
+                  data-bs-toggle="modal"
+                  data-bs-target="#modalAsignarGrupo"
+                >
+                  <i class="bi bi-person-video3 me-1"></i
+                  ><span th:text="#{jefe.dashboard.btn.assigngroup}"
+                    >Asignar a Grupo</span
+                  >
+                </button>
+              </div>
+            </div>
+
+            <div
+              th:if="${param.materiaCreada != null}"
+              class="alert alert-success alert-dismissible fade show"
+              role="alert"
+            >
+              <i class="bi bi-check-circle-fill me-2"></i>
+              <span th:text="#{jefe.dashboard.alert.success.subject}"
+                >Asignatura incorporada exitosamente a la retícula
+                curricular.</span
+              >
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+              ></button>
+            </div>
+            <div
+              th:if="${param.asignado != null}"
+              class="alert alert-info alert-dismissible fade show"
+              role="alert"
+            >
+              <i class="bi bi-check-circle-fill me-2"></i>
+              <span th:text="#{jefe.dashboard.alert.success.assigned}"
+                >Docente y asignatura asignados al grupo
+                satisfactoriamente.</span
+              >
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+              ></button>
+            </div>
+
+            <!-- Catálogo de Materias -->
+            <div class="card shadow-sm border-0 rounded-3">
+              <div class="card-header bg-white py-3">
+                <h5 class="card-title fw-bold text-navy mb-0">
+                  <i class="bi bi-book-half text-orange me-2"></i
+                  ><span th:text="#{jefe.dashboard.card.title}"
+                    >Oferta Académica de Materias</span
+                  >
+                </h5>
+              </div>
+              <div class="card-body p-0 table-responsive">
+                <table
+                  th:replace="~{fragments/tables :: tablaJefeMaterias(${materias})}"
+                ></table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Modales -->
+    <div
+      th:replace="~{fragments/components :: modalAltaMateria(${carreras})}"
+    ></div>
+    <div
+      th:replace="~{fragments/components :: modalAsignarGrupo(${materias}, ${profesores}, ${periodos})}"
+    ></div>
+
+    <footer th:replace="~{template :: footer}"></footer>
+  </body>
 </html>

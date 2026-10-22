@@ -390,7 +390,7 @@
         <div th:fragment="modalAsignarGrupo(materias, profesores, periodos)" class="modal fade" id="modalAsignarGrupo" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form th:action="@{/admin/grupos/asignar}" method="post">
+                    <form th:action="@{/jefe/grupos/asignar}" method="post">
                         <div class="modal-header">
                             <h5 class="modal-title fw-bold" th:text="#{admin.dashboard.modal.group.title}">Crear y Asignar Grupo</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -416,7 +416,10 @@
                             <div class="mb-3">
                                 <label class="form-label" th:text="#{admin.dashboard.modal.group.period}">Periodo Escolar</label>
                                 <select name="periodoId" class="form-select" required>
-                                    <option th:each="pe : ${periodos}" th:value="${pe['periodoId']}" th:text="${pe['nombre']}"></option>
+                                    <option value="" disabled selected>-- Seleccione un periodo --</option>
+                                    <option th:each="pe : ${periodos}" 
+                                            th:value="${pe.periodoId}" 
+                                            th:text="${pe.nombre} + ' (' + ${pe.clavePeriodo} + ')'"></option>
                                 </select>
                             </div>
                         </div>
@@ -429,6 +432,7 @@
             </div>
         </div>
 
+        <!-- MODAL 3: ALTA DE MATERIA                       --> 
         <div th:fragment="modalAltaMateria(carreras)" class="modal fade" id="modalAltaMateria" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -453,7 +457,7 @@
                             <div class="mb-3">
                                 <label class="form-label fw-bold" th:text="#{jefe.dashboard.modal.subject.career}">Carrera</label>
                                 <select name="carreraId" class="form-select" required>
-                                    <option th:each="c : ${carreras}" th:value="${c.idCarrera}" th:text="${c.nombre}"></option>
+                                    <option th:each="c : ${carreras}" th:value="${c.carreraId != null ? c.carreraId : c.idCarrera}" th:text="${c.nombre}"></option>
                                 </select>
                             </div>
                         </div>
@@ -612,6 +616,19 @@
                     bootstrap.Modal.getInstance(el).hide();
                 }
             </script>
-        
+        </th:block>
+
+        <!-- =========================================================
+         ENLACE / BOTÓN DE CAMBIAR CONTRASEÑA: botonCambiarPassword
+         Propósito: Permitir al usuario acceder a la vista de cambio de contraseña
+         desde cualquier rol.
+         Se invoca así:
+         <div th:replace="~{fragments/components :: botonCambiarPassword}"></div>
+         ========================================================= -->
+        <div th:fragment="botonCambiarPassword" class="my-3">
+            <a th:href="@{/cambiar-password}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="bi bi-key-fill me-1"></i> Cambiar Contraseña
+            </a>
+        </div>
     </body>
 </html>

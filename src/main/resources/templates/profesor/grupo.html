@@ -1,100 +1,167 @@
 <!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head th:with="pageTitle=#{profesor.grupo.pagetitle}">
+  <head th:with="pageTitle=#{profesor.grupo.pagetitle}">
     <head th:replace="~{template :: head(${pageTitle})}"></head>
-</head>
-<body class="portal-body">
+  </head>
+  <body class="portal-body">
     <!-- Navbar global -->
     <nav th:replace="~{template :: navbar}"></nav>
-    
+
     <main>
-        <div class="badge-wrapper">
+      <div class="badge-wrapper">
+        <!-- LADO IZQUIERDO: Credencial de Identificación del Profesor -->
+        <aside class="teacher-id-badge">
+          <div class="badge-avatar">
+            <i class="bi bi-person-fill"></i>
+          </div>
+          <h4 class="fw-bold mb-1 text-dark" th:text="${profesor.nombre}">
+            Nombre completo
+          </h4>
+          <p class="text-muted small mb-2" th:text="${profesor.numeroEmpleado}">
+            Número de empleado
+          </p>
+          <hr class="w-100 my-2 text-muted opacity-25" />
+          <span
+            class="text-dark small fw-medium"
+            th:text="${profesor.departamento}"
+            >Departamento</span
+          >
+        </aside>
 
-            <!-- LADO IZQUIERDO: Credencial de Identificación del Profesor -->
-            <aside class="teacher-id-badge">
-                <div class="badge-avatar">
-                    <i class="bi bi-person-fill"></i>
-                </div>
-                <h4 class="fw-bold mb-1 text-dark" th:text="${profesor.nombre}">Nombre completo</h4>
-                <p class="text-muted small mb-2" th:text="${profesor.numeroEmpleado}">Número de empleado</p>
-                <hr class="w-100 my-2 text-muted opacity-25">
-                <span class="text-dark small fw-medium" th:text="${profesor.departamento}">Departamento</span>
-            </aside>
+        <!-- LADO DERECHO: Hoja de Contenido Principal -->
+        <section class="main-sheet">
+          <div class="mb-3">
+            <a
+              th:href="@{/profesor/grupos}"
+              class="btn btn-outline-secondary btn-sm rounded-pill mb-2 px-3"
+            >
+              <i class="bi bi-arrow-left me-1"></i>
+              <span th:text="#{profesor.grupo.btn.back}"
+                >Volver a mis grupos</span
+              >
+            </a>
+            <div
+              class="d-flex justify-content-between align-items-start flex-wrap gap-2"
+            >
+              <div>
+                <h1
+                  class="h2 fw-bold text-navy mb-1"
+                  th:text="${grupo.materia.nombre}"
+                >
+                  Materia
+                </h1>
+                <p class="text-secondary mb-0">
+                  <span th:text="#{profesor.grupo.label.group}">Grupo:</span>
+                  <strong th:text="${grupo.codigoGrupo}"></strong> ·
+                  <span th:text="#{profesor.grupo.label.period}">Periodo:</span>
+                  <strong th:text="${grupo.periodo.nombre}"></strong>
+                </p>
+              </div>
+              <a
+                th:href="@{'/profesor/grupo/' + ${grupo.grupoId} + '/pdf'}"
+                class="btn btn-outline-danger btn-sm"
+              >
+                <i class="bi bi-file-earmark-pdf-fill me-1"></i
+                ><span th:text="#{profesor.grupo.btn.pdf}"
+                  >Descargar Lista Oficial PDF</span
+                >
+              </a>
+            </div>
+          </div>
 
-            <!-- LADO DERECHO: Hoja de Contenido Principal -->
-            <section class="main-sheet">
-                
-                <div class="mb-3">
-                    <a th:href="@{/profesor/grupos}" class="btn btn-outline-secondary btn-sm rounded-pill mb-2 px-3">
-                        <i class="bi bi-arrow-left me-1"></i> <span th:text="#{profesor.grupo.btn.back}">Volver a mis grupos</span>
-                    </a>
-                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-                        <div>
-                            <h1 class="h2 fw-bold text-navy mb-1" th:text="${grupo.materia.nombre}">Materia</h1>
-                            <p class="text-secondary mb-0">
-                                <span th:text="#{profesor.grupo.label.group}">Grupo:</span> <strong th:text="${grupo.codigoGrupo}"></strong> · 
-                                <span th:text="#{profesor.grupo.label.period}">Periodo:</span> <strong th:text="${grupo.periodo.nombre}"></strong>
-                            </p>
-                        </div>
-                        <a th:href="@{'/profesor/grupo/' + ${grupo.grupoId} + '/pdf'}" class="btn btn-outline-danger btn-sm">
-                            <i class="bi bi-file-earmark-pdf-fill me-1"></i><span th:text="#{profesor.grupo.btn.pdf}">Descargar Lista Oficial PDF</span>
-                        </a>
-                    </div>
-                </div>
+          <!-- Avisos de Estado de Captura y Acciones -->
+          <div
+            th:if="${param.guardado != null}"
+            class="alert alert-success alert-dismissible fade show"
+            role="alert"
+          >
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <span th:text="#{profesor.grupo.alert.saved}"
+              >Calificación guardada y promedio recalculado con éxito. Se
+              notificó al estudiante.</span
+            >
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+            ></button>
+          </div>
 
-                <!-- Avisos de Estado de Captura y Acciones -->
-                <div th:if="${param.guardado != null}" class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="bi bi-check-circle-fill me-2"></i>
-                    <span th:text="#{profesor.grupo.alert.saved}">Calificación guardada y promedio recalculado con éxito. Se notificó al estudiante.</span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                
-                <div th:if="${param.solicitudEnviada != null}" class="alert alert-info alert-dismissible fade show" role="alert">
-                    <i class="bi bi-send-check-fill me-2"></i>
-                    <span th:text="#{profesor.grupo.alert.requested}">Solicitud de desbloqueo formal enviada al Administrador escolar.</span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
+          <div
+            th:if="${param.solicitudEnviada != null}"
+            class="alert alert-info alert-dismissible fade show"
+            role="alert"
+          >
+            <i class="bi bi-send-check-fill me-2"></i>
+            <span th:text="#{profesor.grupo.alert.requested}"
+              >Solicitud de desbloqueo formal enviada al Administrador
+              escolar.</span
+            >
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+            ></button>
+          </div>
 
-                <div th:if="${!puedeEditar}" class="alert alert-warning d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <div>
-                        <i class="bi bi-lock-fill fs-5 me-2"></i>
-                        <strong th:text="#{profesor.grupo.locked.title}">Captura Cerrada:</strong> 
-                        <span th:text="#{profesor.grupo.locked.desc}">El límite de captura para este periodo ha concluido. La edición de notas está bloqueada.</span>
-                    </div>
-                    <button type="button" class="btn btn-warning btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalDesbloqueo">
-                        <i class="bi bi-shield-lock me-1"></i><span th:text="#{profesor.grupo.btn.unlock}">Solicitar Desbloqueo a Admin</span>
-                    </button>
-                </div>
+          <div
+            th:if="${!puedeEditar}"
+            class="alert alert-warning d-flex justify-content-between align-items-center flex-wrap gap-2"
+          >
+            <div>
+              <i class="bi bi-lock-fill fs-5 me-2"></i>
+              <strong th:text="#{profesor.grupo.locked.title}"
+                >Captura Cerrada:</strong
+              >
+              <span th:text="#{profesor.grupo.locked.desc}"
+                >El límite de captura para este periodo ha concluido. La edición
+                de notas está bloqueada.</span
+              >
+            </div>
+            <button
+              type="button"
+              class="btn btn-warning btn-sm fw-bold"
+              data-bs-toggle="modal"
+              data-bs-target="#modalDesbloqueo"
+            >
+              <i class="bi bi-shield-lock me-1"></i
+              ><span th:text="#{profesor.grupo.btn.unlock}"
+                >Solicitar Desbloqueo a Admin</span
+              >
+            </button>
+          </div>
 
-                <!-- Tabla Web de Captura con Cálculo Automático -->
-                <div class="card shadow-sm border-0 rounded-3 mt-3">
-                    <div class="card-body p-0 table-responsive">
-                        <table th:replace="~{fragments/tables :: tablaCapturaCalificaciones(${alumnos}, ${grupo}, ${puedeEditar})}"></table>
-                    </div>
-                </div>
-
-            </section>
-
-        </div>
+          <!-- Tabla Web de Captura con Cálculo Automático -->
+          <div class="card shadow-sm border-0 rounded-3 mt-3">
+            <div class="card-body p-0 table-responsive">
+              <table
+                th:replace="~{fragments/tables :: tablaCapturaCalificaciones(${alumnos}, ${grupo}, ${puedeEditar})}"
+              ></table>
+            </div>
+          </div>
+        </section>
+      </div>
     </main>
 
     <!-- Modal Desbloqueo -->
-    <div th:replace="~{fragments/components :: modalDesbloqueo(${grupo})}"></div>
+    <div
+      th:replace="~{fragments/components :: modalDesbloqueo(${grupo})}"
+    ></div>
 
     <footer th:replace="~{template :: footer}"></footer>
 
     <script>
-        // Alerta visual en tiempo real para notas fuera de rango
-        document.querySelectorAll('.grade-input').forEach(input => {
-            input.addEventListener('input', function() {
-                const val = parseFloat(this.value);
-                if (val < 0 || val > 100) {
-                    this.classList.add('is-invalid');
-                } else {
-                    this.classList.remove('is-invalid');
-                }
-            });
+      // Alerta visual en tiempo real para notas fuera de rango
+      document.querySelectorAll(".grade-input").forEach((input) => {
+        input.addEventListener("input", function () {
+          const val = parseFloat(this.value);
+          if (val < 0 || val > 100) {
+            this.classList.add("is-invalid");
+          } else {
+            this.classList.remove("is-invalid");
+          }
         });
+      });
     </script>
-</body>
+  </body>
 </html>

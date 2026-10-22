@@ -1,55 +1,104 @@
 <!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head th:with="pageTitle=#{profesor.inicio.pagetitle}">
+  <head th:with="pageTitle=#{profesor.inicio.pagetitle}">
     <head th:replace="~{template :: head(${pageTitle})}"></head>
-</head>
-<body class="portal-body">
+  </head>
+  <body class="portal-body">
     <!-- Navbar global -->
     <nav th:replace="~{template :: navbar}"></nav>
-    
+
     <main>
-        <div class="badge-wrapper">
+      <div class="badge-wrapper">
+        <!-- LADO IZQUIERDO: Credencial de Identificación del Profesor -->
+        <aside class="teacher-id-badge">
+          <div class="badge-avatar">
+            <i class="bi bi-person-fill"></i>
+          </div>
+          <h4
+            class="fw-bold mb-1 text-dark"
+            th:text="${profesor != null && profesor.nombre != null ? profesor.nombre : 'Docente'}"
+          >
+            Nombre completo
+          </h4>
+          <p class="text-muted small mb-2" th:text="${profesorControl}">
+            Número de empleado
+          </p>
+          <hr class="w-100 my-2 text-muted opacity-25" />
+          <span
+            class="text-dark small fw-medium mb-3 d-block"
+            th:text="${profesor != null && profesor.departamento != null ? profesor.departamento : 'Departamento Académico'}"
+            >Departamento</span
+          >
 
-            <!-- LADO IZQUIERDO: Credencial de Identificación del Profesor -->
-            <aside class="teacher-id-badge">
-                <div class="badge-avatar">
-                    <i class="bi bi-person-fill"></i>
-                </div>
-                <h4 class="fw-bold mb-1 text-dark" th:text="${profesor.nombre}">Nombre completo</h4>
-                <p class="text-muted small mb-2" th:text="${profesor.numeroEmpleado}">Número de empleado</p>
-                <hr class="w-100 my-2 text-muted opacity-25">
-                <span class="text-dark small fw-medium" th:text="${profesor.departamento}">Departamento</span>
-            </aside>
+          <!-- Botón de Cambiar Contraseña integrado dentro de la credencial -->
+          <div
+            th:replace="~{fragments/components :: botonCambiarPassword}"
+          ></div>
+        </aside>
 
-            <!-- LADO DERECHO: Hoja de Contenido Principal -->
-            <section class="main-sheet">
-                
-                <!-- Saludo de Bienvenida e Indicador -->
-                <div class="mb-4">
-                    <h1 class="h2 fw-bold mb-3 text-navy" th:text="#{teacher.welcome.msg(${profesor.nombre})}">
-                        Bienvenido/a Nombre
-                    </h1>
-                    
-                    <div class="d-flex gap-3 flex-wrap">
-                        <a th:href="@{/profesor/grupos}" class="btn btn-sky rounded-pill px-4 py-2 fw-medium shadow-sm">
-                            <i class="bi bi-collection me-1"></i> <span th:text="#{profesor.inicio.btn.groups}">Ver grupos asignados</span>
-                        </a>
-                    </div>
-                </div>
+        <!-- LADO DERECHO: Hoja de Contenido Principal -->
+        <section class="main-sheet">
+          <div class="mb-4">
+            <h1 class="h3 fw-bold mb-1 text-dark">
+              Portal Docente - Grupos Asignados
+            </h1>
+            <p class="text-muted small">
+              Selecciona un grupo para capturar calificaciones o exportar listas
+              oficiales.
+            </p>
+          </div>
 
-                <!-- Sección: Clases de Hoy (Invocando el fragmento) -->
-                <div class="mt-5">
-                    <h5 class="fw-bold text-dark mb-3" th:text="#{teacher.classes.today}">Clases de hoy</h5>
-                    <div class="table-responsive">
-                        <table th:replace="~{fragments/tables :: tablaClasesProfesor(${clasesHoy})}"></table>
-                    </div>
-                </div>
+          <!-- Tabla de Grupos del Profesor -->
+          <div
+            class="table-responsive"
+            th:if="${grupos != null && !grupos.empty}"
+          >
+            <table
+              class="table align-middle table-bordered border-light bg-white rounded-3 overflow-hidden table-custom-header"
+            >
+              <thead>
+                <tr>
+                  <th class="py-3 px-3">Código Grupo</th>
+                  <th class="py-3 px-3">Materia</th>
+                  <th class="py-3 px-3 text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="g : ${grupos}">
+                  <td
+                    class="fw-semibold text-secondary"
+                    th:text="${g.codigoGrupo}"
+                  >
+                    G1
+                  </td>
+                  <td class="fw-medium text-dark" th:text="${g.materia.nombre}">
+                    Materia
+                  </td>
+                  <td class="text-center">
+                    <a
+                      th:href="@{/profesor/grupo/{id}(id=${g.id})}"
+                      class="btn btn-sky btn-sm rounded-pill px-3"
+                    >
+                      <i class="bi bi-folder2-open me-1"></i> Ver Grupo
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-            </section>
-
-        </div>
+          <div
+            class="text-center py-5"
+            th:if="${grupos == null || grupos.empty}"
+          >
+            <p class="text-muted mb-2">
+              No tienes grupos asignados en el periodo actual.
+            </p>
+          </div>
+        </section>
+      </div>
     </main>
 
     <footer th:replace="~{template :: footer}"></footer>
-</body>
+  </body>
 </html>
