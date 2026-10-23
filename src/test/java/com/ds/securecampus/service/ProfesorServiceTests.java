@@ -13,6 +13,7 @@ import com.ds.securecampus.repository.CargaAlumnoRepository;
 import com.ds.securecampus.repository.GrupoRepository;
 import com.ds.securecampus.repository.ProfesorRepository;
 import com.ds.securecampus.repository.SolicitudTramiteRepository;
+import com.ds.securecampus.repository.HorarioClaseRepository;
 
 class ProfesorServiceTests {
     @Test
@@ -54,6 +55,8 @@ class ProfesorServiceTests {
                 mock(ProfesorRepository.class),
                 mock(AuditoriaService.class),
                 mock(NotificacionService.class),
-                solicitudes);
+                solicitudes,
+                mock(HorarioClaseRepository.class)
+        );
     }
 }

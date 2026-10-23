@@ -1,1017 +1,179 @@
 <!doctype html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org" class="h-100">
-  <head
-    th:replace="~{template :: head('Gestión Académica - Jefe de Departamento | SecureCampus')}"
-  ></head>
-  <body class="d-flex flex-column min-vh-100">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head th:with="pageTitle='Gestión Académica - Jefe de Departamento | SecureCampus'">
+    <head th:replace="~{template :: head(${pageTitle})}"></head>
+  </head>
+  <body class="portal-body">
+    <!-- Navbar global -->
     <nav th:replace="~{template :: navbar}"></nav>
 
-    <main class="flex-grow-1 py-4">
-      <div class="container-fluid px-4 page-shell my-auto">
-        <div
-          th:replace="~{fragments/components :: accountBanner('Jefatura de departamento', ${numeroControl})}"
-        ></div>
+    <main>
+      <div class="badge-wrapper">
 
-        <!-- Alertas y notificaciones -->
-        <div
-          th:if="${error}"
-          class="alert alert-danger alert-dismissible fade show"
-          role="alert"
-        >
-          <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${error}"></span>
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        <div
-          th:if="${param.asignado != null}"
-          class="alert alert-success alert-dismissible fade show"
-        >
-          <i class="bi bi-check-circle-fill me-2"></i><span th:text="#{jefe.dashboard.alert.success.assigned}">Grupo, docente, horario y aula asignados correctamente.</span>
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        <div
-          th:if="${param.docenteActualizado != null}"
-          class="alert alert-success alert-dismissible fade show"
-        >
-          <i class="bi bi-check-circle-fill me-2"></i>Docente del grupo actualizado correctamente.
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        <div
-          th:if="${param.estudianteQuitado != null}"
-          class="alert alert-success alert-dismissible fade show"
-        >
-          <i class="bi bi-check-circle-fill me-2"></i>Estudiante dado de baja del grupo exitosamente.
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        <div
-          th:if="${param.grupoCerrado != null}"
-          class="alert alert-warning alert-dismissible fade show"
-        >
-          <i class="bi bi-archive-fill me-2"></i>Grupo cerrado y desasignado por baja demanda o decisión administrativa.
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        <div
-          th:if="${param.multiplesInscritos != null}"
-          class="alert alert-success alert-dismissible fade show"
-        >
-          <i class="bi bi-people-fill me-2"></i>Se procesó la inscripción masiva: <strong th:text="${param.multiplesInscritos}">0</strong> estudiantes inscritos al grupo sin empalmes.
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        <div
-          th:if="${param.errorInscripcion != null}"
-          class="alert alert-danger alert-dismissible fade show"
-        >
-          <i class="bi bi-exclamation-octagon-fill me-2"></i>No se pudo procesar la inscripción múltiple. Verifica la lista de alumnos e inténtalo de nuevo.
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-
-        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-          <div>
-            <p class="eyebrow text-uppercase text-orange fw-bold mb-1" th:text="#{jefe.dashboard.eyebrow}">COORDINACIÓN Y PLANES DE ESTUDIO</p>
-            <h1 class="h2 fw-bold text-navy mb-1" th:text="#{jefe.dashboard.maintitle}">Gestión de la oferta académica</h1>
-            <p class="text-secondary mb-0">Supervisión integral de grupos, retícula, docentes, estadística académica y asignaciones de estudiantes.</p>
-          </div>
-          <div class="d-flex gap-2 flex-wrap">
-            <button
-              type="button"
-              class="btn btn-orange"
-              data-bs-toggle="modal"
-              data-bs-target="#modalAsignarProfesor"
-            >
-              <i class="bi bi-person-video3 me-1"></i><span th:text="#{jefe.dashboard.btn.assigngroup}">Crear grupo y asignar docente</span>
-            </button>
-            <button
-              type="button"
-              class="btn btn-navy"
-              data-bs-toggle="modal"
-              data-bs-target="#modalInscripcionMultiple"
-            >
-              <i class="bi bi-person-plus-fill me-1"></i>Inscripción múltiple de alumnos
-            </button>
-          </div>
-        </div>
-
-        <!-- Pestañas de Navegación del Jefe de Departamento -->
-        <ul class="nav nav-pills mb-4" id="jefeTabs" role="tablist">
-          <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="grupos-tab" data-bs-toggle="pill" data-bs-target="#tab-grupos" type="button" role="tab" aria-controls="tab-grupos" aria-selected="true">
-              <i class="bi bi-collection-fill me-1"></i>Grupos y Oferta Académica
-            </button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="alumnos-tab" data-bs-toggle="pill" data-bs-target="#tab-alumnos" type="button" role="tab" aria-controls="tab-alumnos" aria-selected="false">
-              <i class="bi bi-people-fill me-1"></i>Gestión de Alumnos y Cargas
-            </button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="stats-tab" data-bs-toggle="pill" data-bs-target="#tab-stats" type="button" role="tab" aria-controls="tab-stats" aria-selected="false">
-              <i class="bi bi-graph-up me-1"></i>Horarios y Estadísticas
-            </button>
-          </li>
-        </ul>
-
-        <div class="tab-content" id="jefeTabsContent">
-          <!-- TAB 1: GRUPOS Y OFERTA ACADÉMICA -->
-          <div class="tab-pane fade show active" id="tab-grupos" role="tabpanel" aria-labelledby="grupos-tab">
-            <!-- Grupos del periodo -->
-            <div class="card shadow-sm border-0 rounded-3 mb-4">
-              <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                <h5 class="card-title fw-bold text-navy mb-0">
-                  <i class="bi bi-diagram-3-fill text-orange me-2"></i>Grupos del Periodo Escolar (<span th:text="${periodoAsignacion}">2026-1</span>)
-                </h5>
-                <span class="badge bg-light text-dark border">Mínimo requerido: 15 alumnos</span>
+          <!-- LADO IZQUIERDO: Credencial de Identificación del Jefe de Departamento -->
+          <aside class="department-id-badge">
+              <div class="badge-avatar">
+                <i class="bi bi-person-workspace"></i>
               </div>
-              <div class="card-body p-0 table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                  <thead class="table-light">
-                    <tr>
-                      <th>Código</th>
-                      <th>Materia</th>
-                      <th>Docente Asignado</th>
-                      <th>Horario y Aula</th>
-                      <th class="text-center">Alumnos</th>
-                      <th class="text-center">Estatus</th>
-                      <th class="text-end">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr th:if="${grupos == null || grupos.isEmpty()}">
-                      <td colspan="7" class="text-center text-muted py-4">No hay grupos ofertados en este periodo.</td>
-                    </tr>
-                    <tr th:each="g : ${grupos}">
-                      <td><strong class="text-navy" th:text="${g.codigoGrupo}">IA-901</strong></td>
-                      <td>
-                        <strong th:text="${g.materia.nombre}">Materia</strong>
-                        <small class="d-block text-secondary" th:text="${g.materia.clave}">CLAVE</small>
-                      </td>
-                      <td>
-                        <span th:if="${g.profesor != null && g.profesor.usuario != null}" th:text="${g.profesor.usuario.nombre + ' ' + g.profesor.usuario.apellidoPaterno}">Docente</span>
-                        <span th:unless="${g.profesor != null && g.profesor.usuario != null}" class="text-danger fw-semibold">Sin docente asignado</span>
-                      </td>
-                      <td>
-                        <div th:each="h : ${g.horarios}" class="small">
-                          <span class="badge bg-light text-dark border me-1" th:text="${h.diaSemana}">LUN</span>
-                          <span th:text="${h.horaInicio + ' - ' + h.horaFin}">07:00 - 09:00</span>
-                          <span class="text-muted" th:text="'(' + ${h.aula != null ? h.aula.nombreAula : 'Sin aula'} + ')'">(A-101)</span>
-                        </div>
-                      </td>
-                      <td class="text-center">
-                        <span class="badge" th:classappend="${#lists.size(g.cargasAlumnos) < 15 ? 'bg-warning text-dark' : 'bg-primary'}"
-                              th:text="|${#lists.size(g.cargasAlumnos)} / 35|">
-                          0 / 35
-                        </span>
-                      </td>
-                      <td class="text-center">
-                        <span th:if="${#lists.size(g.cargasAlumnos) < 15}" class="badge bg-warning text-dark" title="Grupo con menos de 15 alumnos">
-                          <i class="bi bi-exclamation-triangle-fill me-1"></i>Baja demanda
-                        </span>
-                        <span th:unless="${#lists.size(g.cargasAlumnos) < 15}" class="badge bg-success">
-                          <i class="bi bi-check-circle-fill me-1"></i>Normal
-                        </span>
-                      </td>
-                      <td class="text-end">
-                        <div class="btn-group btn-group-sm">
-                          <!-- Botón ver alumnos inscritos -->
-                          <button type="button" class="btn btn-outline-navy btn-ver-alumnos"
-                                  th:attr="data-grupoid=${g.grupoId}, data-codigo=${g.codigoGrupo}, data-materia=${g.materia.nombre}"
-                                  title="Ver lista de alumnos y bajas">
-                            <i class="bi bi-people"></i>
-                          </button>
-                          <!-- Botón cambiar docente -->
-                          <button type="button" class="btn btn-outline-secondary btn-cambiar-docente"
-                                  th:attr="data-grupoid=${g.grupoId}, data-codigo=${g.codigoGrupo}, data-docente=${g.profesor != null ? g.profesor.numeroControl : ''}"
-                                  title="Cambiar o reasignar docente">
-                            <i class="bi bi-person-gear"></i>
-                          </button>
-                          <!-- Botón cerrar grupo -->
-                          <form th:action="@{/jefe/grupos/{id}/cerrar(id=${g.grupoId})}" method="post" class="d-inline"
-                                onsubmit="return confirm('¿Seguro que deseas cerrar este grupo? Se desasignarán los horarios y estudiantes si los hay.');">
-                            <button type="submit" class="btn btn-outline-danger" title="Cerrar grupo (mínimo 15 alumnos)">
-                              <i class="bi bi-x-circle"></i>
-                            </button>
-                          </form>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+              
+              <!-- Nombre completo dinámico obtenido del objeto usuario -->
+              <h4 class="fw-bold mb-1 text-dark" 
+                  th:text="${usuario != null ? usuario.nombre + ' ' + usuario.apellidoPaterno + ' ' + usuario.apellidoMaterno : 'Jefe/Jefa'}">
+                  Nombre completo
+              </h4>
+              
+              <!-- Número de control / empleado -->
+              <p class="text-muted small mb-1" th:text="${numeroControl}">No.Control</p>
+              
+              <!-- Rol o departamento -->
+              <p class="text-muted small mb-2">
+                <i class="bi bi-building me-1"></i>
+                <span th:text="#{jefe.dashboard.badge.role}">Jefatura de departamento</span>
+              </p>
+          </aside>
 
-            <!-- Catálogo de Materias -->
-            <div class="card shadow-sm border-0 rounded-3">
-              <div class="card-header bg-white py-3">
-                <h5 class="card-title fw-bold text-navy mb-0">
-                  <i class="bi bi-book-half text-orange me-2"></i><span th:text="#{jefe.dashboard.card.title}">Oferta Académica</span> de Materias (Retícula)
-                </h5>
-              </div>
-              <div class="card-body p-0 table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                  <thead class="table-light">
-                    <tr>
-                      <th>Clave</th>
-                      <th>Nombre de la Asignatura</th>
-                      <th>Créditos SATCA</th>
-                      <th>Carrera Asociada</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr th:each="m : ${materias}">
-                      <td><strong class="text-navy" th:text="${m.clave}">CLAVE</strong></td>
-                      <td th:text="${m.nombre}">Materia</td>
-                      <td>
-                        <span class="badge bg-light text-dark border" th:text="${m.creditos} + ' créditos'">5</span>
-                      </td>
-                      <td th:text="${m.carrera.nombre}">Carrera</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+        <!-- LADO DERECHO: Hoja de Contenido Principal -->
+        <section class="main-sheet">
+
+          <!-- Alertas y notificaciones -->
+          <div th:replace="~{fragments/alerts :: alertasDashboardJefe}"></div>
+
+          <!-- Encabezado de la página -->
+          <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <div>
+              <p class="eyebrow text-uppercase text-orange fw-bold mb-1" th:text="#{jefe.dashboard.eyebrow}">COORDINACIÓN Y PLANES DE ESTUDIO</p>
+              <h1 class="h2 fw-bold text-navy mb-1" th:text="#{jefe.dashboard.maintitle}">Gestión de la oferta académica</h1>
+              <p class="text-secondary mb-0" th:text="#{jefe.dashboard.subtitle}">Supervisión integral de grupos, retícula, docentes, estadística académica y asignaciones de estudiantes.</p>
             </div>
           </div>
 
-          <!-- TAB 2: GESTIÓN DE ALUMNOS Y CARGAS -->
-          <div class="tab-pane fade" id="tab-alumnos" role="tabpanel" aria-labelledby="alumnos-tab">
-            <!-- Barra de Filtros Alumnos -->
-            <div class="card shadow-sm border-0 rounded-3 mb-3 bg-light">
-              <div class="card-body py-3">
-                <div class="row g-2 align-items-end">
-                  <div class="col-md-4">
-                    <label class="form-label small fw-semibold text-secondary mb-1">Buscar Estudiante</label>
-                    <div class="input-group input-group-sm">
-                      <span class="input-group-text"><i class="bi bi-search"></i></span>
-                      <input type="text" id="filtroJefeEstudianteTexto" class="form-control" placeholder="No. Control o Nombre...">
-                    </div>
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label small fw-semibold text-secondary mb-1">Carrera</label>
-                    <select id="filtroJefeEstudianteCarrera" class="form-select form-select-sm">
-                      <option value="">Todas las carreras</option>
-                      <option th:each="c : ${adminService.listarCarreras()}" th:value="${c.nombre}" th:text="${c.nombre}"></option>
-                    </select>
-                  </div>
-                  <div class="col-md-2">
-                    <label class="form-label small fw-semibold text-secondary mb-1">Reinscripción</label>
-                    <select id="filtroJefeEstudianteInscrito" class="form-select form-select-sm">
-                      <option value="">Todos</option>
-                      <option value="S">Inscrito (Pago 'S')</option>
-                      <option value="N">No inscrito (Pago 'N')</option>
-                    </select>
-                  </div>
-                  <div class="col-md-3 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-sm btn-outline-secondary w-100" id="btnLimpiarFiltrosJefeEstudiantes">
-                      <i class="bi bi-x-circle me-1"></i>Limpiar filtros
-                    </button>
-                  </div>
-                  <div class="col-12 mt-1">
-                    <span class="small text-muted" id="contadorJefeEstudiantes">Mostrando estudiantes</span>
-                  </div>
+          <!-- Pestañas de Navegación del Jefe de Departamento -->
+          <ul class="nav nav-pills mb-4 gap-2" id="jefeTabs" role="tablist">
+              <!-- Pestaña 0: Inicio -->
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active rounded-pill px-3 py-2" id="inicio-tab" data-bs-toggle="pill" data-bs-target="#tab-inicio" type="button" role="tab" aria-controls="tab-inicio" aria-selected="true">
+                  <i class="bi bi-house-fill me-1"></i><span th:text="#{jefe.dashboard.tab.inicio}">Inicio</span>
+                </button>
+              </li>
+              
+              <!-- Pestaña 1: Grupos -->
+              <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill px-3 py-2" id="grupos-tab" data-bs-toggle="pill" data-bs-target="#tab-grupos" type="button" role="tab" aria-controls="tab-grupos" aria-selected="false">
+                  <i class="bi bi-collection-fill me-1"></i><span th:text="#{jefe.dashboard.tab.grupos}">Grupos y Oferta Académica</span>
+                </button>
+              </li>
+              
+              <!-- Pestaña 2: Alumnos -->
+              <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill px-3 py-2" id="alumnos-tab" data-bs-toggle="pill" data-bs-target="#tab-alumnos" type="button" role="tab" aria-controls="tab-alumnos" aria-selected="false">
+                  <i class="bi bi-people-fill me-1"></i><span th:text="#{jefe.dashboard.tab.alumnos}">Gestión de Alumnos y Cargas</span>
+                </button>
+              </li>
+              
+              <!-- Pestaña 3: Estadísticas -->
+              <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill px-3 py-2" id="stats-tab" data-bs-toggle="pill" data-bs-target="#tab-stats" type="button" role="tab" aria-controls="tab-stats" aria-selected="false">
+                  <i class="bi bi-graph-up me-1"></i><span th:text="#{jefe.dashboard.tab.stats}">Horarios y Estadísticas</span>
+                </button>
+              </li>
+              
+              <!-- Botón de Acción 1: Crear grupo -->
+              <li class="nav-item" role="presentation">
+                  <button
+                    type="button"
+                    class="nav-link btn-orange text-white rounded-pill px-3 py-2 shadow-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalAsignarProfesor"
+                  >
+                    <i class="bi bi-person-video3 me-1"></i><span th:text="#{jefe.dashboard.btn.assigngroup}">Crear grupo y asignar docente</span>
+                  </button>
+              </li>
+              
+              <!-- Botón de Acción 2: Inscripción múltiple -->
+              <li class="nav-item" role="presentation">
+                  <button
+                    type="button"
+                    class="nav-link btn-navy text-white rounded-pill px-3 py-2 shadow-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalInscripcionMultiple"
+                  >
+                    <i class="bi bi-person-plus-fill me-1"></i><span th:text="#{jefe.dashboard.btn.multiple}">Inscripción múltiple de alumnos</span>
+                  </button>
+              </li>
+          </ul>
+
+          <div class="tab-content" id="jefeTabsContent">
+            
+            <!-- TAB 0: INICIO (Modularizada) -->
+            <div th:replace="~{fragments/components :: tabInicio}"></div>
+
+            <!-- TAB 1: GRUPOS Y OFERTA ACADÉMICA -->
+            <div class="tab-pane fade" id="tab-grupos" role="tabpanel" aria-labelledby="grupos-tab">
+              <div th:replace="~{fragments/tables :: tablaJefeGrupos(${grupos},${periodoAsignacion})}"></div>
+
+              <div class="card shadow-sm border-0 rounded-3 mt-4">
+                <div class="card-header bg-white py-3">
+                  <h5 class="card-title fw-bold text-navy mb-0">
+                    <i class="bi bi-book-half text-orange me-2"></i><span th:text="#{jefe.dashboard.card.oferta}">Oferta Académica de Materias (Retícula)</span>
+                  </h5>
+                </div>
+                <div class="card-body p-0 table-responsive">
+                  <div th:replace="~{fragments/tables :: tablaJefeMaterias(${materias})}"></div>
                 </div>
               </div>
             </div>
 
-            <!-- Tabla de Todos los Alumnos -->
-            <div class="card shadow-sm border-0 rounded-3">
-              <div class="card-body p-0 table-responsive">
-                <table class="table table-hover align-middle mb-0" id="tablaJefeEstudiantes">
-                  <thead class="table-light">
-                    <tr>
-                      <th>No. Control</th>
-                      <th>Nombre Completo</th>
-                      <th>Carrera</th>
-                      <th>Promedio</th>
-                      <th>Reinscripción</th>
-                      <th>Adeudos</th>
-                      <th class="text-end">Acción</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr th:if="${estudiantes == null || estudiantes.isEmpty()}">
-                      <td colspan="7" class="text-center text-muted py-4">No hay estudiantes registrados.</td>
-                    </tr>
-                    <tr th:each="e : ${estudiantes}"
-                        th:attr="data-nc=${e.numeroControl},
-                                 data-nombre=${e.usuario.nombre + ' ' + e.usuario.apellidoPaterno + (e.usuario.apellidoMaterno != null ? ' ' + e.usuario.apellidoMaterno : '')},
-                                 data-carrera=${e.carrera.nombre},
-                                 data-inscrito=${e.pagoReinscripcion}">
-                      <td><strong class="text-navy" th:text="${e.numeroControl}">00000000</strong></td>
-                      <td th:text="${e.usuario.nombre + ' ' + e.usuario.apellidoPaterno + (e.usuario.apellidoMaterno != null ? ' ' + e.usuario.apellidoMaterno : '')}">Nombre</td>
-                      <td th:text="${e.carrera.nombre}">Carrera</td>
-                      <td>
-                        <span class="badge bg-light text-dark border fw-semibold" th:text="${e.promedio}">0.00</span>
-                      </td>
-                      <td>
-                        <span class="badge" th:classappend="${e.pagoReinscripcion == 'S' ? 'bg-success' : 'bg-secondary'}"
-                              th:text="${e.pagoReinscripcion == 'S' ? 'Inscrito' : 'Pendiente'}">Inscrito</span>
-                      </td>
-                      <td>
-                        <span class="badge" th:classappend="${e.tieneAdeudos == 'N' ? 'bg-success' : 'bg-danger'}"
-                              th:text="${e.tieneAdeudos == 'N' ? 'Sin adeudos' : 'Con adeudos'}">Sin adeudos</span>
-                      </td>
-                      <td class="text-end">
-                        <a th:href="@{/jefe/estudiante/{nc}(nc=${e.numeroControl})}" class="btn btn-sm btn-outline-navy">
-                          <i class="bi bi-person-lines-fill me-1"></i>Ver detalles y carga
-                        </a>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+            <!-- TAB 2: GESTIÓN DE ALUMNOS Y CARGAS -->
+            <div id="tab-alumnos" class="tab-pane fade" role="tabpanel" aria-labelledby="alumnos-tab">
+              <div th:replace="~{fragments/components :: filtrosAlumnos}"></div>
             </div>
+
+            <!-- TAB 3: HORARIOS Y ESTADÍSTICAS -->
+            <div id="tab-stats" class="tab-pane fade" role="tabpanel" aria-labelledby="stats-tab">
+              <div th:replace="~{fragments/tables :: tabEstadisticas}"></div>
+              <div th:replace="~{fragments/tables :: tablaJefeDetalleGrupo}"></div>
+              <div th:replace="~{fragments/tables :: tablaJefeEstadisticas(${estadisticas})}"></div>
+            </div>
+
           </div>
 
-          <!-- TAB 3: HORARIOS Y ESTADÍSTICAS -->
-          <div class="tab-pane fade" id="tab-stats" role="tabpanel" aria-labelledby="stats-tab">
-            <!-- Barra de Búsqueda de Grupo -->
-            <div class="card shadow-sm border-0 rounded-3 mb-4 bg-light">
-              <div class="card-body py-3">
-                <div class="row g-2 align-items-center">
-                  <div class="col-md-6">
-                    <label class="form-label small fw-semibold text-secondary mb-1">Buscar y Seleccionar Grupo para ver Alumnos y Calificaciones</label>
-                    <select id="selectGrupoEstadistica" class="form-select">
-                      <option value="">— Selecciona un grupo para inspeccionar —</option>
-                      <option th:each="g : ${grupos}" th:value="${g.grupoId}"
-                              th:text="${g.codigoGrupo + ' - ' + g.materia.nombre + ' (' + (g.profesor != null ? g.profesor.usuario.nombre + ' ' + g.profesor.usuario.apellidoPaterno : 'Sin docente') + ')'}"></option>
-                    </select>
-                  </div>
-                  <div class="col-md-6 text-md-end mt-3 mt-md-0">
-                    <span class="badge bg-navy p-2"><i class="bi bi-bar-chart-fill me-1"></i>Métricas globales y por grupo</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+        </section>
 
-            <!-- Gráficas Estadísticas -->
-            <div class="row g-4 mb-4">
-              <div class="col-lg-6">
-                <div class="card shadow-sm border-0 rounded-3 h-100">
-                  <div class="card-header bg-white py-3">
-                    <h6 class="card-title fw-bold text-navy mb-0">
-                      <i class="bi bi-pie-chart-fill text-orange me-2"></i>Ocupación y Cupo por Grupo (Capacidad 35)
-                    </h6>
-                  </div>
-                  <div class="card-body">
-                    <canvas id="chartOcupacionGrupos" height="260"></canvas>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="card shadow-sm border-0 rounded-3 h-100">
-                  <div class="card-header bg-white py-3">
-                    <h6 class="card-title fw-bold text-navy mb-0">
-                      <i class="bi bi-bar-chart-steps text-orange me-2"></i>Desempeño Académico (Aprobados, Reprobados, Cursando)
-                    </h6>
-                  </div>
-                  <div class="card-body">
-                    <canvas id="chartRendimientoGrupos" height="260"></canvas>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Vista Detallada de Grupo Seleccionado -->
-            <div id="panelDetalleGrupoSeleccionado" class="card shadow-sm border-0 rounded-3 mb-4" style="display: none;">
-              <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <div>
-                  <h5 class="card-title fw-bold text-navy mb-1" id="detalleTituloGrupo">Grupo Seleccionado</h5>
-                  <p class="text-secondary small mb-0" id="detalleDocenteHorario">Docente y Horario</p>
-                </div>
-                <div>
-                  <span class="badge bg-primary fs-6" id="detalleBadgeCupo">0 / 35 Alumnos</span>
-                </div>
-              </div>
-              <div class="card-body p-0 table-responsive">
-                <table class="table table-hover align-middle mb-0" id="tablaDetalleAlumnosGrupo">
-                  <thead class="table-light">
-                    <tr>
-                      <th>No. Control</th>
-                      <th>Nombre del Estudiante</th>
-                      <th class="text-center">Unidad 1</th>
-                      <th class="text-center">Unidad 2</th>
-                      <th class="text-center">Final</th>
-                      <th class="text-center">Estatus</th>
-                      <th class="text-end">Acción</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tbodyDetalleAlumnosGrupo">
-                    <!-- Filas dinámicas generadas con JS -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <!-- Resumen de Estadísticas por Grupo / Maestro -->
-            <div class="card shadow-sm border-0 rounded-3">
-              <div class="card-header bg-white py-3">
-                <h5 class="card-title fw-bold text-navy mb-0">
-                  <i class="bi bi-table text-orange me-2"></i>Resumen General de Calificaciones y Estadísticas por Grupo
-                </h5>
-              </div>
-              <div class="card-body p-0 table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                  <thead class="table-light">
-                    <tr>
-                      <th>Código</th>
-                      <th>Materia</th>
-                      <th>Docente</th>
-                      <th class="text-center">Alumnos</th>
-                      <th class="text-center">Aprobados</th>
-                      <th class="text-center">Reprobados</th>
-                      <th class="text-center">Cursando</th>
-                      <th class="text-center">Promedio General</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr th:if="${estadisticas == null || estadisticas.isEmpty()}">
-                      <td colspan="8" class="text-center text-muted py-4">No hay estadísticas disponibles.</td>
-                    </tr>
-                    <tr th:each="st : ${estadisticas}">
-                      <td><strong class="text-navy" th:text="${st.codigoGrupo}">IA-901</strong></td>
-                      <td th:text="${st.materiaNombre}">Materia</td>
-                      <td th:text="${st.profesorNombre}">Docente</td>
-                      <td class="text-center"><span class="badge bg-light text-dark border" th:text="${st.totalAlumnos}">0</span></td>
-                      <td class="text-center"><span class="badge bg-success" th:text="${st.aprobados}">0</span></td>
-                      <td class="text-center"><span class="badge bg-danger" th:text="${st.reprobados}">0</span></td>
-                      <td class="text-center"><span class="badge bg-warning text-dark" th:text="${st.cursando}">0</span></td>
-                      <td class="text-center"><strong th:text="${st.promedioGeneral > 0 ? st.promedioGeneral : '—'}">—</strong></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </main>
 
-    <!-- Modal Asignar Profesor a Grupo -->
-    <div class="modal fade" id="modalAsignarProfesor" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <form th:action="@{/jefe/grupos/asignar}" method="post">
-            <div class="modal-header">
-              <h5 class="modal-title fw-bold">Crear grupo y asignar docente</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-              <div class="mb-3">
-                <label class="form-label fw-bold">Código de Grupo</label>
-                <input name="codigoGrupo" class="form-control" placeholder="Ej. IA-901" required />
-              </div>
-              <div class="mb-3">
-                <label class="form-label fw-bold">Materia</label>
-                <select name="materiaId" class="form-select" required>
-                  <option th:each="m : ${materias}" th:value="${m.materiaId}" th:text="${m.clave + ' - ' + m.nombre}"></option>
-                </select>
-              </div>
-              <div class="mb-3">
-                <label class="form-label fw-bold">Docente Asignado</label>
-                <select name="profesorControl" class="form-select" required>
-                  <option value="" selected disabled>Selecciona un docente</option>
-                  <option th:each="p : ${profesores}" th:value="${p.numeroControl}" th:text="${p.usuario.nombre + ' ' + p.usuario.apellidoPaterno}"></option>
-                </select>
-              </div>
-              <div class="mb-3">
-                <label class="form-label fw-bold">Distribución semanal</label>
-                <select name="patronHorario" class="form-select" required>
-                  <option value="">Selecciona los días y las horas semanales</option>
-                  <option value="MW">Lunes y miércoles · 4 horas</option>
-                  <option value="TR">Martes y jueves · 4 horas</option>
-                  <option value="WF">Miércoles y viernes · 4 horas</option>
-                  <option value="MTTR">Lunes, martes y jueves · 5 horas (lunes 1 h)</option>
-                  <option value="TTRF">Martes, jueves y viernes · 5 horas (viernes 1 h)</option>
-                  <option value="MWF">Lunes, miércoles y viernes · 5 horas</option>
-                </select>
-              </div>
-              <div class="row g-2">
-                <div class="col-md-6 mb-3">
-                  <label class="form-label fw-bold">Horario</label>
-                  <select name="horaInicio" id="jefeHoraInicio" class="form-select" required>
-                    <option value="07:00">07:00 – 09:00</option>
-                    <option value="09:00">09:00 – 11:00</option>
-                    <option value="11:00">11:00 – 13:00</option>
-                    <option value="13:00">13:00 – 15:00</option>
-                    <option value="15:00">15:00 – 17:00</option>
-                    <option value="17:00">17:00 – 19:00</option>
-                  </select>
-                </div>
-                <div class="col-md-6 mb-3" id="jefeDivHoraCorta">
-                  <label class="form-label fw-bold">Hora de la clase de 1 hora</label>
-                  <select name="horaCorta" id="jefeHoraCorta" class="form-select">
-                    <option value="">— Selecciona distribución primero —</option>
-                  </select>
-                </div>
-              </div>
-              <div class="mb-3">
-                <label class="form-label fw-bold">Aula</label>
-                <select name="aula" class="form-select" required>
-                  <option value="">Selecciona un salón</option>
-                  <option th:each="aulaNombre : ${aulas}" th:value="${aulaNombre}" th:text="${aulaNombre}"></option>
-                </select>
-              </div>
-              <div class="mb-3">
-                <label class="form-label fw-bold">Periodo Escolar</label>
-                <input class="form-control" type="text" th:value="${periodoAsignacion}" readonly aria-readonly="true" />
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-              <button type="submit" class="btn btn-orange">Crear grupo y asignar docente</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal Reasignar o Cambiar Docente -->
-    <div class="modal fade" id="modalCambiarDocenteJefe" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <form id="formCambiarDocente" method="post">
-            <div class="modal-header">
-              <h5 class="modal-title fw-bold"><i class="bi bi-person-gear text-orange me-2"></i>Reasignar Docente a Grupo</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-              <p class="mb-3 text-secondary">Selecciona el nuevo docente que impartirá el grupo <strong id="labelModalCambiarGrupoCodigo" class="text-navy">IA-901</strong>.</p>
-              <div class="mb-3">
-                <label class="form-label fw-bold">Nuevo Docente</label>
-                <select name="profesorControl" id="selectCambiarDocenteProf" class="form-select" required>
-                  <option value="" disabled selected>— Selecciona docente —</option>
-                  <option th:each="p : ${profesores}" th:value="${p.numeroControl}" th:text="${p.usuario.nombre + ' ' + p.usuario.apellidoPaterno}"></option>
-                </select>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-              <button type="submit" class="btn btn-orange"><i class="bi bi-check-lg me-1"></i>Actualizar Docente</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal Inscripción Múltiple con Staging List -->
-    <div class="modal fade" id="modalInscripcionMultiple" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <form th:action="@{/jefe/grupos/inscribir-multiples}" method="post" id="formInscripcionMultiple">
-            <div class="modal-header">
-              <h5 class="modal-title fw-bold">
-                <i class="bi bi-people-fill text-orange me-2"></i>Inscripción Múltiple de Estudiantes
-              </h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-              <div class="mb-3">
-                <label class="form-label fw-bold">Grupo de Destino</label>
-                <select name="grupoId" class="form-select" required>
-                  <option value="" disabled selected>— Selecciona el grupo —</option>
-                  <option th:each="g : ${grupos}" th:value="${g.grupoId}"
-                          th:text="${g.codigoGrupo + ' - ' + g.materia.nombre + ' (Inscritos: ' + #lists.size(g.cargasAlumnos) + '/35)'}"></option>
-                </select>
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label fw-bold">Buscar y Agregar Alumnos</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-search"></i></span>
-                  <input type="text" id="inputBuscarStaging" class="form-control" placeholder="Escribe el número de control o nombre del alumno...">
-                </div>
-                <!-- Lista de sugerencias dinámicas -->
-                <div id="listaSugerenciasStaging" class="list-group mt-1 shadow-sm position-absolute w-75" style="z-index: 1050; max-height: 200px; overflow-y: auto; display: none;"></div>
-              </div>
-
-              <!-- Lista de Staging (Alumnos agregados) -->
-              <div class="mb-3">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <label class="form-label fw-bold mb-0">
-                    Alumnos por inscribir (<span id="contadorStaging">0</span> seleccionados):
-                  </label>
-                  <button type="button" class="btn btn-sm btn-outline-danger" id="btnVaciarStaging" style="display: none;">
-                    <i class="bi bi-trash me-1"></i>Vaciar lista
-                  </button>
-                </div>
-                <div id="contenedorChipsStaging" class="p-3 bg-light rounded border min-vh-25 d-flex flex-wrap gap-2 align-items-start" style="min-height: 100px;">
-                  <span class="text-muted small my-auto mx-auto" id="msgStagingVacio">
-                    No has seleccionado alumnos aún. Usa el buscador superior para agregar estudiantes a la lista previa.
-                  </span>
-                </div>
-                <input type="hidden" name="alumnosControl" id="inputAlumnosControlStaging" required />
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-              <button type="submit" class="btn btn-navy" id="btnConfirmarInscripcionMultiple" disabled>
-                <i class="bi bi-person-check-fill me-1"></i>Inscribir Alumnos Seleccionados
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <!-- Script Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
-    <script th:inline="javascript">
-      /* Datos del servidor para visualizaciones y gestión */
-      /*<![CDATA[*/
-      const gruposData = /*[[${grupos}]]*/ [];
-      const estadisticasData = /*[[${estadisticas}]]*/ [];
-      const estudiantesData = [
-        /*[# th:each="e : ${estudiantes}"]*/
-        {
-          nc: /*[[${e.numeroControl}]]*/ '',
-          nombre: /*[[${e.usuario.nombre + ' ' + e.usuario.apellidoPaterno + (e.usuario.apellidoMaterno != null ? ' ' + e.usuario.apellidoMaterno : '')}]]*/ '',
-          carrera: /*[[${e.carrera.nombre}]]*/ ''
-        },
-        /*[/]*/
-      ];
-      /*]]>*/
-
-      document.addEventListener('DOMContentLoaded', function () {
-        // --- 1. Filtros Alumnos Jefe ---
-        const fEstTexto = document.getElementById('filtroJefeEstudianteTexto');
-        const fEstCarrera = document.getElementById('filtroJefeEstudianteCarrera');
-        const fEstInscrito = document.getElementById('filtroJefeEstudianteInscrito');
-        const btnLimpiarEst = document.getElementById('btnLimpiarFiltrosJefeEstudiantes');
-        const countEst = document.getElementById('contadorJefeEstudiantes');
-        const estRows = document.querySelectorAll('#tablaJefeEstudiantes tbody tr[data-nc]');
-
-        function filtrarEstudiantes() {
-          const txt = fEstTexto ? fEstTexto.value.trim().toLowerCase() : '';
-          const car = fEstCarrera ? fEstCarrera.value.toLowerCase() : '';
-          const ins = fEstInscrito ? fEstInscrito.value : '';
-
-          let visibles = 0;
-          estRows.forEach(row => {
-            const nc = (row.getAttribute('data-nc') || '').toLowerCase();
-            const nombre = (row.getAttribute('data-nombre') || '').toLowerCase();
-            const rCar = (row.getAttribute('data-carrera') || '').toLowerCase();
-            const rIns = row.getAttribute('data-inscrito') || '';
-
-            const matchTexto = !txt || nc.includes(txt) || nombre.includes(txt);
-            const matchCarrera = !car || rCar.includes(car);
-            const matchInscrito = !ins || rIns === ins;
-
-            if (matchTexto && matchCarrera && matchInscrito) {
-              row.style.display = '';
-              visibles++;
-            } else {
-              row.style.display = 'none';
-            }
-          });
-          if (countEst) countEst.textContent = `Mostrando ${visibles} de ${estRows.length} estudiantes`;
-        }
-
-        if (fEstTexto) fEstTexto.addEventListener('input', filtrarEstudiantes);
-        if (fEstCarrera) fEstCarrera.addEventListener('change', filtrarEstudiantes);
-        if (fEstInscrito) fEstInscrito.addEventListener('change', filtrarEstudiantes);
-        if (btnLimpiarEst) {
-          btnLimpiarEst.addEventListener('click', function () {
-            if (fEstTexto) fEstTexto.value = '';
-            if (fEstCarrera) fEstCarrera.value = '';
-            if (fEstInscrito) fEstInscrito.value = '';
-            filtrarEstudiantes();
-          });
-        }
-        filtrarEstudiantes();
-
-        // --- 2. Modal Cambiar Docente ---
-        const modalCambiarDocenteEl = document.getElementById('modalCambiarDocenteJefe');
-        const bsModalDocente = modalCambiarDocenteEl ? new bootstrap.Modal(modalCambiarDocenteEl) : null;
-        const formCambiarDocente = document.getElementById('formCambiarDocente');
-        const labelCambiarCodigo = document.getElementById('labelModalCambiarGrupoCodigo');
-        const selectCambiarDocenteProf = document.getElementById('selectCambiarDocenteProf');
-
-        document.querySelectorAll('.btn-cambiar-docente').forEach(btn => {
-          btn.addEventListener('click', function () {
-            const grupoId = this.getAttribute('data-grupoid');
-            const codigo = this.getAttribute('data-codigo');
-            const docenteActual = this.getAttribute('data-docente');
-
-            if (formCambiarDocente) formCambiarDocente.action = '/jefe/grupos/' + grupoId + '/cambiar-profesor';
-            if (labelCambiarCodigo) labelCambiarCodigo.textContent = codigo;
-            if (selectCambiarDocenteProf && docenteActual) selectCambiarDocenteProf.value = docenteActual;
-            if (bsModalDocente) bsModalDocente.show();
-          });
-        });
-
-        // --- 3. Inscripción Múltiple con Staging ---
-        const stagingList = new Map(); // nc -> nombre
-        const inputBuscarStaging = document.getElementById('inputBuscarStaging');
-        const listaSugerencias = document.getElementById('listaSugerenciasStaging');
-        const contenedorChips = document.getElementById('contenedorChipsStaging');
-        const msgVacio = document.getElementById('msgStagingVacio');
-        const contadorStaging = document.getElementById('contadorStaging');
-        const inputHiddenStaging = document.getElementById('inputAlumnosControlStaging');
-        const btnConfirmarStaging = document.getElementById('btnConfirmarInscripcionMultiple');
-        const btnVaciarStaging = document.getElementById('btnVaciarStaging');
-
-        function renderStaging() {
-          if (!contenedorChips) return;
-          contenedorChips.innerHTML = '';
-          if (stagingList.size === 0) {
-            if (msgVacio) contenedorChips.appendChild(msgVacio);
-            if (contadorStaging) contadorStaging.textContent = '0';
-            if (inputHiddenStaging) inputHiddenStaging.value = '';
-            if (btnConfirmarStaging) btnConfirmarStaging.disabled = true;
-            if (btnVaciarStaging) btnVaciarStaging.style.display = 'none';
-            return;
-          }
-
-          stagingList.forEach((nombre, nc) => {
-            const chip = document.createElement('span');
-            chip.className = 'badge bg-navy p-2 d-inline-flex align-items-center gap-2';
-            chip.innerHTML = `<span><strong>${nc}</strong> - ${nombre}</span>`;
-            const btnClose = document.createElement('button');
-            btnClose.type = 'button';
-            btnClose.className = 'btn-close btn-close-white btn-sm';
-            btnClose.style.fontSize = '0.65rem';
-            btnClose.addEventListener('click', () => {
-              stagingList.delete(nc);
-              renderStaging();
-            });
-            chip.appendChild(btnClose);
-            contenedorChips.appendChild(chip);
-          });
-
-          if (contadorStaging) contadorStaging.textContent = stagingList.size;
-          if (inputHiddenStaging) inputHiddenStaging.value = Array.from(stagingList.keys()).join(',');
-          if (btnConfirmarStaging) btnConfirmarStaging.disabled = false;
-          if (btnVaciarStaging) btnVaciarStaging.style.display = '';
-        }
-
-        if (inputBuscarStaging && listaSugerencias) {
-          inputBuscarStaging.addEventListener('input', function () {
-            const term = this.value.trim().toLowerCase();
-            listaSugerencias.innerHTML = '';
-            if (!term) {
-              listaSugerencias.style.display = 'none';
-              return;
-            }
-
-            const matches = estudiantesData.filter(e =>
-              !stagingList.has(e.nc) &&
-              (e.nc.toLowerCase().includes(term) || e.nombre.toLowerCase().includes(term))
-            ).slice(0, 8);
-
-            if (matches.length === 0) {
-              listaSugerencias.innerHTML = '<div class="list-group-item text-muted small">No se encontraron estudiantes.</div>';
-              listaSugerencias.style.display = 'block';
-              return;
-            }
-
-            matches.forEach(e => {
-              const item = document.createElement('a');
-              item.href = '#';
-              item.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center small';
-              item.innerHTML = `<span><strong>${e.nc}</strong> - ${e.nombre} <span class="text-muted">(${e.carrera})</span></span> <button type="button" class="btn btn-xs btn-orange py-0 px-2">+ Añadir</button>`;
-              item.addEventListener('click', (ev) => {
-                ev.preventDefault();
-                stagingList.set(e.nc, e.nombre);
-                inputBuscarStaging.value = '';
-                listaSugerencias.style.display = 'none';
-                renderStaging();
-              });
-              listaSugerencias.appendChild(item);
-            });
-            listaSugerencias.style.display = 'block';
-          });
-
-          document.addEventListener('click', function (e) {
-            if (!inputBuscarStaging.contains(e.target) && !listaSugerencias.contains(e.target)) {
-              listaSugerencias.style.display = 'none';
-            }
-          });
-        }
-
-        if (btnVaciarStaging) {
-          btnVaciarStaging.addEventListener('click', function () {
-            stagingList.clear();
-            renderStaging();
-          });
-        }
-
-        // --- 4. Gráficas con Chart.js ---
-        if (estadisticasData && estadisticasData.length > 0) {
-          const codigos = estadisticasData.map(s => s.codigoGrupo);
-          const alumnos = estadisticasData.map(s => s.totalAlumnos);
-          const aprobados = estadisticasData.map(s => s.aprobados);
-          const reprobados = estadisticasData.map(s => s.reprobados);
-          const cursando = estadisticasData.map(s => s.cursando);
-
-          // Gráfica Ocupación
-          const ctxOcupacion = document.getElementById('chartOcupacionGrupos');
-          if (ctxOcupacion) {
-            new Chart(ctxOcupacion, {
-              type: 'bar',
-              data: {
-                labels: codigos,
-                datasets: [
-                  {
-                    label: 'Inscritos',
-                    data: alumnos,
-                    backgroundColor: '#1a2e4c'
-                  },
-                  {
-                    label: 'Cupo Máximo (35)',
-                    data: Array(codigos.length).fill(35),
-                    backgroundColor: '#e9ecef',
-                    borderWidth: 1,
-                    borderColor: '#adb5bd'
-                  }
-                ]
-              },
-              options: {
-                responsive: true,
-                scales: {
-                  y: { beginAtZero: true, max: 40 }
-                }
-              }
-            });
-          }
-
-          // Gráfica Rendimiento
-          const ctxRendimiento = document.getElementById('chartRendimientoGrupos');
-          if (ctxRendimiento) {
-            new Chart(ctxRendimiento, {
-              type: 'bar',
-              data: {
-                labels: codigos,
-                datasets: [
-                  { label: 'Aprobados', data: aprobados, backgroundColor: '#198754' },
-                  { label: 'Reprobados', data: reprobados, backgroundColor: '#dc3545' },
-                  { label: 'Cursando', data: cursando, backgroundColor: '#ffc107' }
-                ]
-              },
-              options: {
-                responsive: true,
-                scales: {
-                  x: { stacked: true },
-                  y: { stacked: true, beginAtZero: true }
-                }
-              }
-            });
-          }
-        }
-
-        // --- 5. Selector de Grupo Específico para ver Alumnos y Calificaciones ---
-        const selGrupo = document.getElementById('selectGrupoEstadistica');
-        const panelDetalle = document.getElementById('panelDetalleGrupoSeleccionado');
-        const detalleTitulo = document.getElementById('detalleTituloGrupo');
-        const detalleDocente = document.getElementById('detalleDocenteHorario');
-        const detalleCupo = document.getElementById('detalleBadgeCupo');
-        const tbodyDetalle = document.getElementById('tbodyDetalleAlumnosGrupo');
-
-        function cargarDetalleGrupo(grupoId) {
-          if (!grupoId) {
-            if (panelDetalle) panelDetalle.style.display = 'none';
-            return;
-          }
-          const g = gruposData.find(item => item.grupoId == grupoId);
-          if (!g) return;
-
-          if (detalleTitulo) detalleTitulo.textContent = `${g.codigoGrupo} - ${g.materia ? g.materia.nombre : ''}`;
-          const profNom = (g.profesor && g.profesor.usuario) ? `${g.profesor.usuario.nombre} ${g.profesor.usuario.apellidoPaterno}` : 'Sin docente asignado';
-          if (detalleDocente) detalleDocente.textContent = `Docente: ${profNom}`;
-
-          const cargas = g.cargasAlumnos || [];
-          if (detalleCupo) detalleCupo.textContent = `${cargas.length} / 35 Alumnos`;
-
-          if (tbodyDetalle) {
-            tbodyDetalle.innerHTML = '';
-            if (cargas.length === 0) {
-              tbodyDetalle.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">No hay alumnos inscritos en este grupo.</td></tr>';
-            } else {
-              cargas.forEach(c => {
-                const tr = document.createElement('tr');
-                const u = (c.estudiante && c.estudiante.usuario) ? c.estudiante.usuario : {};
-                const nc = c.estudiante ? c.estudiante.numeroControl : '';
-                const nomCompleto = `${u.nombre || ''} ${u.apellidoPaterno || ''} ${u.apellidoMaterno || ''}`.trim();
-                const p1 = c.calificacionParcial1 !== null ? c.calificacionParcial1 : '—';
-                const p2 = c.calificacionParcial2 !== null ? c.calificacionParcial2 : '—';
-                const f = c.calificacionFinal !== null ? c.calificacionFinal : '—';
-                const est = c.estatus || 'CURSANDO';
-                let estBadgeClass = 'bg-secondary';
-                if (est === 'APROBADA') estBadgeClass = 'bg-success';
-                else if (est === 'REPROBADA') estBadgeClass = 'bg-danger';
-                else if (est === 'CURSANDO') estBadgeClass = 'bg-warning text-dark';
-
-                tr.innerHTML = `
-                  <td><strong class="text-navy">${nc}</strong></td>
-                  <td>${nomCompleto}</td>
-                  <td class="text-center">${p1}</td>
-                  <td class="text-center">${p2}</td>
-                  <td class="text-center"><strong>${f}</strong></td>
-                  <td class="text-center"><span class="badge ${estBadgeClass}">${est}</span></td>
-                  <td class="text-end">
-                    <form action="/jefe/grupos/${g.grupoId}/quitar-estudiante" method="post" class="d-inline"
-                          onsubmit="return confirm('¿Seguro que deseas dar de baja a ${nomCompleto} de este grupo?');">
-                      <input type="hidden" name="numeroControl" value="${nc}">
-                      <button type="submit" class="btn btn-sm btn-outline-danger" title="Dar de baja del grupo">
-                        <i class="bi bi-person-dash"></i>
-                      </button>
-                    </form>
-                  </td>
-                `;
-                tbodyDetalle.appendChild(tr);
-              });
-            }
-          }
-          if (panelDetalle) panelDetalle.style.display = 'block';
-        }
-
-        if (selGrupo) {
-          selGrupo.addEventListener('change', function () {
-            cargarDetalleGrupo(this.value);
-          });
-        }
-
-        // Botones ver alumnos desde la tabla de grupos del tab 1
-        document.querySelectorAll('.btn-ver-alumnos').forEach(btn => {
-          btn.addEventListener('click', function () {
-            const gId = this.getAttribute('data-grupoid');
-            // Cambiar a la pestaña de estadísticas
-            const statsTabBtn = document.getElementById('stats-tab');
-            if (statsTabBtn) {
-              const tab = new bootstrap.Tab(statsTabBtn);
-              tab.show();
-            }
-            if (selGrupo) selGrupo.value = gId;
-            cargarDetalleGrupo(gId);
-            window.scrollTo({ top: panelDetalle ? panelDetalle.offsetTop - 80 : 0, behavior: 'smooth' });
-          });
-        });
-      });
-    </script>
-
-    <script th:inline="none">
-      /* Dinámica modal crear grupo para hora corta */
-      (function () {
-        var patronSel = document.querySelector('select[name="patronHorario"]');
-        var inicioSel = document.getElementById('jefeHoraInicio');
-        var cortaDiv  = document.getElementById('jefeDivHoraCorta');
-        var cortaSel  = document.getElementById('jefeHoraCorta');
-
-        if (!patronSel || !inicioSel || !cortaDiv || !cortaSel) return;
-
-        function fmt(h) {
-          return (h < 10 ? '0' : '') + h + ':00';
-        }
-
-        function actualizarHoraCorta() {
-          var patron = patronSel.value;
-          var h  = parseInt(inicioSel.value, 10);
-          var h1 = fmt(h);
-          var h2 = fmt(h + 1);
-          var h3 = fmt(h + 2);
-
-          if (patron === 'MW' || patron === 'TR' || patron === 'WF' || patron === '') {
-            cortaDiv.style.display = 'none';
-            cortaSel.required = false;
-            cortaSel.value = '';
-            return;
-          }
-
-          cortaDiv.style.display = '';
-          cortaSel.required = true;
-          cortaSel.innerHTML = '';
-
-          var opciones = [];
-          if (patron === 'MTTR') {
-            opciones = [
-              { v: 'INICIO', t: 'Lunes ' + h1 + '\u2013' + h2 },
-              { v: 'FIN',    t: 'Lunes ' + h2 + '\u2013' + h3 }
-            ];
-          } else if (patron === 'TTRF') {
-            opciones = [
-              { v: 'INICIO', t: 'Viernes ' + h1 + '\u2013' + h2 },
-              { v: 'FIN',    t: 'Viernes ' + h2 + '\u2013' + h3 }
-            ];
-          } else if (patron === 'MWF') {
-            opciones = [
-              { v: 'LUNES_INICIO',   t: 'Lunes '   + h1 + '\u2013' + h2 },
-              { v: 'LUNES_FIN',      t: 'Lunes '   + h2 + '\u2013' + h3 },
-              { v: 'VIERNES_INICIO', t: 'Viernes ' + h1 + '\u2013' + h2 },
-              { v: 'VIERNES_FIN',    t: 'Viernes ' + h2 + '\u2013' + h3 }
-            ];
-          }
-
-          opciones.forEach(function (o) {
-            var opt = document.createElement('option');
-            opt.value = o.v;
-            opt.textContent = o.t;
-            cortaSel.appendChild(opt);
-          });
-        }
-
-        patronSel.addEventListener('change', actualizarHoraCorta);
-        inicioSel.addEventListener('change', actualizarHoraCorta);
-        actualizarHoraCorta();
-      })();
-    </script>
+    <!-- Modales importados desde components.html -->
+    <div th:replace="~{fragments/components :: modalAsignarProfesor(${materias},${profesores}, ${aulas},${periodoAsignacion})}"></div>
+    <div th:replace="~{fragments/components :: modalCambiarDocenteJefe(${profesores})}"></div>
+    <div th:replace="~{fragments/components :: modalInscripcionMultiple(${grupos})}"></div>
 
     <footer th:replace="~{template :: footer}"></footer>
+
+    <!-- Script para recordar la pestaña activa al recargar (Por defecto abre en #tab-inicio) -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const activeTabKey = "jefeActiveTab";
+            const triggerTabList = [].slice.call(document.querySelectorAll('#jefeTabs button[data-bs-toggle="pill"]'));
+            
+            // 1. Escuchar los clics para guardar la pestaña seleccionada en el navegador
+            triggerTabList.forEach(function (triggerEl) {
+                triggerEl.addEventListener("click", function () {
+                    localStorage.setItem(activeTabKey, triggerEl.getAttribute("data-bs-target"));
+                });
+            });
+    
+            // 2. Obtener la pestaña guardada previamente
+            const savedTab = localStorage.getItem(activeTabKey);
+            
+            // 3. Si existe una pestaña guardada Y NO ES la de inicio, actívala.
+            if (savedTab && savedTab !== "#tab-inicio") {
+                const tabToActivate = document.querySelector(`#jefeTabs button[data-bs-target="${savedTab}"]`);
+                if (tabToActivate) {
+                    const tab = new bootstrap.Tab(tabToActivate);
+                    tab.show();
+                }
+            }
+        });
+    </script>
   </body>
 </html>

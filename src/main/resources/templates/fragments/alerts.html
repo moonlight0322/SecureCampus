@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+    <body>
+        <!-- Contenedor con el fragmento que engloba todas las alertas -->
+        <div th:fragment="alertasDashboardJefe">
+            <div
+              th:if="${error}"
+              class="alert alert-danger alert-dismissible fade show mb-3"
+              role="alert"
+            >
+              <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${error}"></span>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            
+            <div
+              th:if="${param.asignado != null}"
+              class="alert alert-success alert-dismissible fade show mb-3"
+              role="alert"
+            >
+              <i class="bi bi-check-circle-fill me-2"></i><span th:text="#{jefe.dashboard.alert.success.assigned}">Grupo, docente, horario y aula asignados correctamente.</span>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div
+              th:if="${param.docenteActualizado != null}"
+              class="alert alert-success alert-dismissible fade show mb-3"
+              role="alert"
+            >
+              <i class="bi bi-check-circle-fill me-2"></i><span th:text="#{jefe.dashboard.alert.success.docente}">Docente del grupo actualizado correctamente.</span>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div
+              th:if="${param.estudianteQuitado != null}"
+              class="alert alert-success alert-dismissible fade show mb-3"
+              role="alert"
+            >
+              <i class="bi bi-check-circle-fill me-2"></i><span th:text="#{jefe.dashboard.alert.success.quitado}">Estudiante dado de baja del grupo exitosamente.</span>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div
+              th:if="${param.grupoCerrado != null}"
+              class="alert alert-warning alert-dismissible fade show mb-3"
+              role="alert"
+            >
+              <i class="bi bi-archive-fill me-2"></i><span th:text="#{jefe.dashboard.alert.warning.cerrado}">Grupo cerrado y desasignado por baja demanda o decisión administrativa.</span>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div
+              th:if="${param.multiplesInscritos != null}"
+              class="alert alert-success alert-dismissible fade show mb-3"
+              role="alert"
+            >
+              <i class="bi bi-people-fill me-2"></i><span th:text="#{jefe.dashboard.alert.success.multiples}">Se procesó la inscripción masiva:</span> <strong th:text="${param.multiplesInscritos}">0</strong> <span th:text="#{jefe.dashboard.alert.success.multiples.suffix}">estudiantes inscritos al grupo sin empalmes.</span>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div
+              th:if="${param.errorInscripcion != null}"
+              class="alert alert-danger alert-dismissible fade show mb-3"
+              role="alert"
+            >
+              <i class="bi bi-exclamation-octagon-fill me-2"></i><span th:text="#{jefe.dashboard.alert.error.inscripcion}">No se pudo procesar la inscripción múltiple. Verifica la lista de alumnos e inténtalo de nuevo.</span>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </div>
+    </body>
+</html>

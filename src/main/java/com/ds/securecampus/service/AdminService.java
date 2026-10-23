@@ -35,6 +35,7 @@ import com.ds.securecampus.repository.PeriodoRepository;
 import com.ds.securecampus.repository.ProfesorRepository;
 import com.ds.securecampus.repository.RolRepository;
 import com.ds.securecampus.repository.UsuarioRepository;
+import com.ds.securecampus.repository.AdministrativoRepository;
 
 @Service
 public class AdminService {
@@ -54,6 +55,7 @@ public class AdminService {
     private final HorarioClaseRepository horarioClaseRepository;
     private final CargaAlumnoRepository cargaAlumnoRepository;
     private final LoginAttemptService loginAttemptService;
+    private final AdministrativoRepository administrativoRepository; // <-- 1. Declarar aquí
 
     public AdminService(UsuarioRepository usuarioRepository,
             RolRepository rolRepository,
@@ -70,7 +72,8 @@ public class AdminService {
             EdificioRepository edificioRepository,
             HorarioClaseRepository horarioClaseRepository,
             CargaAlumnoRepository cargaAlumnoRepository,
-            LoginAttemptService loginAttemptService) {
+            LoginAttemptService loginAttemptService,
+            AdministrativoRepository administrativoRepository) { // <-- 2. Añadir en parámetros del constructor
         this.usuarioRepository = usuarioRepository;
         this.rolRepository = rolRepository;
         this.materiaRepository = materiaRepository;
@@ -87,6 +90,7 @@ public class AdminService {
         this.horarioClaseRepository = horarioClaseRepository;
         this.cargaAlumnoRepository = cargaAlumnoRepository;
         this.loginAttemptService = loginAttemptService;
+        this.administrativoRepository = administrativoRepository; // <-- 3. Asignar aquí
     }
 
     @Transactional(readOnly = true)
@@ -549,6 +553,11 @@ public class AdminService {
         return estudianteRepository.findById(numeroControl)
                 .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado."));
     }
+
+    @Transactional(readOnly = true)
+        public com.ds.securecampus.model.Administrativo obtenerAdministrativo(String numeroControl) {
+            return administrativoRepository.findById(numeroControl).orElse(null);
+        }
 
     @Transactional(readOnly = true)
     public List<CargaAlumno> obtenerCargasEstudiantePeriodoActual(String numeroControl) {

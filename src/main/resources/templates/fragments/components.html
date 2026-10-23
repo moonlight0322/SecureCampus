@@ -1,800 +1,925 @@
 <!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-    <body>
-        <!-- =========================================================
-         TÍTULO SIMPLE: pageTitle
+<body>
+
+    <!-- =========================================================
+         COMPONENTES SIMPLES
          ========================================================= -->
-        <div th:fragment="pageTitle(titulo)" class="page-heading">
+
+    <!-- TÍTULO SIMPLE: pageTitle -->
+    <div th:fragment="pageTitle(titulo)" class="page-heading">
+        <div>
+            <h3 class="h3 mb-0" th:text="${titulo}"></h3>
+        </div>
+    </div>
+
+    <!-- ENCABEZADO DE PÁGINA: pageHeading -->
+    <div th:fragment="pageHeading(eyebrow, titulo, descripcion)" class="page-heading">
+        <div>
+            <p class="eyebrow mb-1" th:text="${eyebrow}">SECCIÓN</p>
+            <h1 class="h2 fw-bold mb-1" th:text="${titulo}">Título</h1>
+            <p class="mb-0" th:text="${descripcion}">Descripción</p>
+        </div>
+    </div>
+
+    <!-- ESTADO VACÍO: emptyState -->
+    <div th:fragment="emptyState(icono, mensaje)" class="empty-state" role="status">
+        <i class="bi" th:classappend="'bi-' + ${icono}"></i>
+        <span th:text="${mensaje}">Sin datos</span>
+    </div>
+
+    <!-- ALERTA: alert -->
+    <div th:fragment="alert(tipo, mensaje)" class="alert" th:classappend="'alert-' + ${tipo}" role="alert" aria-live="polite">
+        <span th:text="${mensaje}">Mensaje</span>
+    </div>
+
+    <!-- BANNER DE PERFIL: profileBanner -->
+    <section th:fragment="profileBanner(nombreCompleto, numeroControl, carrera, promedio)" class="profile-banner mb-4" th:attr="aria-label=#{profile.banner.aria}">
+        <div class="d-flex align-items-center gap-3">
+            <div class="avatar" aria-hidden="true">
+                <i class="bi bi-person-fill"></i>
+            </div>
             <div>
-                <h3 class="h3 mb-0" th:text="${titulo}"></h3>
+                <p class="small text-white-50 mb-1" th:text="#{profile.banner.title}"></p>
+                <h2 class="h4 mb-1 fw-bold" th:text="${nombreCompleto}">Nombre del estudiante</h2>
+                <p class="mb-1 text-white-50" th:text="${numeroControl}">Número de control</p>
+                <span class="badge rounded-pill text-bg-light" th:text="${carrera}">Carrera</span>
             </div>
         </div>
+        <div class="average-score mt-4 mt-md-0">
+            <span class="small text-white-50 d-block" th:text="#{profile.average.label}">PROMEDIO GENERAL</span>
+            <strong th:text="${#numbers.formatDecimal(promedio, 1, 2)}">0.00</strong>
+            <span class="small text-white-50 d-block" th:text="#{profile.average.suffix}">de 100 puntos</span>
+        </div>
+    </section>
 
-        <!-- =========================================================
-         ENCABEZADO DE PÁGINA: pageHeading
-         ========================================================= -->
-        <div
-            th:fragment="pageHeading(eyebrow, titulo, descripcion)"
-            class="page-heading"
-        >
-            <div>
-                <p class="eyebrow mb-1" th:text="${eyebrow}">SECCIÓN</p>
-                <h1 class="h2 fw-bold mb-1" th:text="${titulo}">Título</h1>
-                <p class="mb-0" th:text="${descripcion}">Descripción</p>
+    <!-- BANNER DE CUENTA: accountBanner -->
+    <div th:fragment="accountBanner(rol, numeroControl)" class="alert alert-light border d-flex align-items-center gap-3 mb-4">
+        <span class="brand-mini d-flex align-items-center justify-content-center rounded-circle bg-light text-navy p-2">
+            <i class="bi bi-person-workspace"></i>
+        </span>
+        <div>
+            <strong th:text="${rol}">Rol institucional</strong>
+            <div class="small text-secondary">
+                Número de control: <span th:text="${numeroControl}">00000000</span>
             </div>
         </div>
+    </div>
 
-        <!-- =========================================================
-         ESTADO VACÍO: emptyState
-         ========================================================= -->
-        <div
-            th:fragment="emptyState(icono, mensaje)"
-            class="empty-state"
-            role="status"
-        >
-            <i class="bi" th:classappend="'bi-' + ${icono}"></i>
-            <span th:text="${mensaje}">Sin datos</span>
-        </div>
+    <!-- INSIGNIA DE OPORTUNIDAD: opportunityBadge -->
+    <span th:fragment="opportunityBadge(oportunidad)" class="badge opportunity-badge" th:classappend="${oportunidad == 'ESPECIAL'} ? ' opportunity-special' : ''" th:text="${oportunidad == 'PRIMERA'} ? #{opportunity.first} : (${oportunidad == 'SEGUNDA'} ? #{opportunity.second} : (${oportunidad == 'REPETICION'} ? #{opportunity.repeat} : #{opportunity.special}))">Primera oportunidad</span>
 
-        <!-- =========================================================
-         ALERTA: alert
-         ========================================================= -->
-        <div
-            th:fragment="alert(tipo, mensaje)"
-            class="alert"
-            th:classappend="'alert-' + ${tipo}"
-            role="alert"
-            aria-live="polite"
-        >
-            <span th:text="${mensaje}">Mensaje</span>
-        </div>
+    <!-- CALIFICACIÓN: calificacion -->
+    <span th:fragment="calificacion(valor)" th:text="${valor == null ? '—' : #numbers.formatDecimal(valor, 1, 2)}">—</span>
 
-        <!-- =========================================================
-         BANNER DE PERFIL: profileBanner
-         ========================================================= -->
-        <section
-            th:fragment="profileBanner(nombreCompleto, numeroControl, carrera, promedio)"
-            class="profile-banner mb-4"
-            th:attr="aria-label=#{profile.banner.aria}"
-        >
-            <div class="d-flex align-items-center gap-3">
-                <div class="avatar" aria-hidden="true">
-                    <i class="bi bi-person-fill"></i>
-                </div>
-                <div>
-                    <p
-                        class="small text-white-50 mb-1"
-                        th:text="#{profile.banner.title}"
-                    ></p>
-                    <h2 class="h4 mb-1 fw-bold" th:text="${nombreCompleto}">
-                        Nombre del estudiante
-                    </h2>
-                    <p class="mb-1 text-white-50" th:text="${numeroControl}">
-                        Número de control
-                    </p>
-                    <span
-                        class="badge rounded-pill text-bg-light"
-                        th:text="${carrera}"
-                        >Carrera</span
-                    >
-                </div>
-            </div>
-            <div class="average-score mt-4 mt-md-0">
-                <span
-                    class="small text-white-50 d-block"
-                    th:text="#{profile.average.label}"
-                    >PROMEDIO GENERAL</span
-                >
-                <strong th:text="${#numbers.formatDecimal(promedio, 1, 2)}"
-                    >0.00</strong
-                >
-                <span
-                    class="small text-white-50 d-block"
-                    th:text="#{profile.average.suffix}"
-                    >de 100 puntos</span
-                >
-            </div>
-        </section>
-
-        <div th:fragment="accountBanner(rol, numeroControl)" class="alert alert-light border d-flex align-items-center gap-3 mb-4">
-            <span class="brand-mini d-flex align-items-center justify-content-center rounded-circle bg-light text-navy p-2">
-                <i class="bi bi-person-workspace"></i>
-            </span>
-            <div>
-                <strong th:text="${rol}">Rol institucional</strong>
-                <div class="small text-secondary">
-                    Número de control:
-                    <span th:text="${numeroControl}">00000000</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- =========================================================
-         INSIGNIA DE OPORTUNIDAD: opportunityBadge
-         ========================================================= -->
-        <span
-            th:fragment="opportunityBadge(oportunidad)"
-            class="badge opportunity-badge"
-            th:classappend="${oportunidad == 'ESPECIAL'} ? ' opportunity-special' : ''"
-            th:text="${oportunidad == 'PRIMERA'} ? #{opportunity.first} : (${oportunidad == 'SEGUNDA'} ? #{opportunity.second} : (${oportunidad == 'REPETICION'} ? #{opportunity.repeat} : #{opportunity.special}))"
-            >Primera oportunidad</span
-        >
-
-        <!-- =========================================================
-         CALIFICACIÓN: calificacion
-         ========================================================= -->
-        <span
-            th:fragment="calificacion(valor)"
-            th:text="${valor == null ? '—' : #numbers.formatDecimal(valor, 1, 2)}"
-            >—</span
-        >
-
-        <!-- =========================================================
+    <!-- =========================================================
          ESTRUCTURA DEL PORTAL: binderLayout
          ========================================================= -->
-        <div
-            th:fragment="binderLayout(seccion, estudiante)"
-            class="container-fluid px-4 page-shell my-auto"
-        >
-            <div class="binder-wrapper">
-                <!-- LADO IZQUIERDO: Portada del Folder / Separadores -->
-                <div class="binder-sidebar">
-                    <!-- Separadores laterales (Tabs) -->
-                    <div class="binder-tabs">
-                        <a
-                            th:href="@{/estudiante}"
-                            class="binder-tab tab-yellow"
-                            th:classappend="${seccion == 'inicio'} ? ' active'"
-                            th:attr="title=#{binder.tab.profile}"
-                        >
-                            <i class="bi bi-person-badge-fill"></i>
-                            <span
-                                class="tab-label"
-                                th:text="#{binder.tab.profile}"
-                                >Perfil</span
-                            >
-                        </a>
-                        <a
-                            th:href="@{/estudiante/horario}"
-                            class="binder-tab tab-orange"
-                            th:classappend="${seccion == 'horario'} ? ' active'"
-                            th:attr="title=#{binder.tab.schedule}"
-                        >
-                            <i class="bi bi-calendar-week-fill"></i>
-                            <span
-                                class="tab-label"
-                                th:text="#{binder.tab.schedule}"
-                                >Horario</span
-                            >
-                        </a>
-                        <a
-                            th:href="@{/estudiante/kardex}"
-                            class="binder-tab tab-teal"
-                            th:classappend="${seccion == 'kardex'} ? ' active'"
-                            th:attr="title=#{binder.tab.kardex}"
-                        >
-                            <i class="bi bi-journal-bookmark-fill"></i>
-                            <span
-                                class="tab-label"
-                                th:text="#{binder.tab.kardex}"
-                                >Cárdex</span
-                            >
-                        </a>
-                    </div>
+    <div th:fragment="binderLayout(seccion, estudiante)" class="container-fluid px-4 page-shell my-auto">
+        <div class="binder-wrapper">
+            <!-- LADO IZQUIERDO: Portada del Folder / Separadores -->
+            <div class="binder-sidebar">
+                <!-- Separadores laterales (Tabs) -->
+                <div class="binder-tabs">
+                    <a th:href="@{/estudiante}" class="binder-tab tab-yellow" th:classappend="${seccion == 'inicio'} ? ' active'" th:attr="title=#{binder.tab.profile}">
+                        <i class="bi bi-person-badge-fill"></i>
+                        <span class="tab-label" th:text="#{binder.tab.profile}">Perfil</span>
+                    </a>
+                    <a th:href="@{/estudiante/horario}" class="binder-tab tab-orange" th:classappend="${seccion == 'horario'} ? ' active'" th:attr="title=#{binder.tab.schedule}">
+                        <i class="bi bi-calendar-week-fill"></i>
+                        <span class="tab-label" th:text="#{binder.tab.schedule}">Horario</span>
+                    </a>
+                    <a th:href="@{/estudiante/kardex}" class="binder-tab tab-teal" th:classappend="${seccion == 'kardex'} ? ' active'" th:attr="title=#{binder.tab.kardex}">
+                        <i class="bi bi-journal-bookmark-fill"></i>
+                        <span class="tab-label" th:text="#{binder.tab.kardex}">Cárdex</span>
+                    </a>
+                </div>
 
-                    <!-- Tapa / Hoja del Folder con información del estudiante -->
-                    <div class="folder-cover">
-                        <div class="folder-content d-flex flex-column h-100">
-                            <div class="student-avatar-box mb-3">
-                                <i class="bi bi-person-fill"></i>
-                            </div>
-                            <h3
-                                class="student-name mb-1"
-                                th:text="${estudiante['nombreCompleto']}"
-                            >
-                                Nombre del estudiante
-                            </h3>
-                            <p class="student-control text-muted mb-2">
-                                <i class="bi bi-card-heading me-1"></i>
-                                <span th:text="${estudiante['numeroControl']}"
-                                    >No.Control</span
-                                >
-                            </p>
-                            <span
-                                class="badge rounded-pill bg-navy-subtle text-navy px-3 py-2 w-100 text-truncate mb-3"
-                                th:text="${estudiante['carrera']}"
-                            >
-                                Carrera
-                            </span>
+                <!-- Tapa / Hoja del Folder con información del estudiante -->
+                <div class="folder-cover">
+                    <div class="folder-content d-flex flex-column h-100">
+                        <div class="student-avatar-box mb-3">
+                            <i class="bi bi-person-fill"></i>
                         </div>
-                    </div>
-                </div>
-
-                <!-- LADO DERECHO: Hoja de Trabajo en Blanco para Renderizar Opciones -->
-                <div class="binder-content-sheet">
-                    <!-- Aquí se inyecta el contenido dinámico de cada vista -->
-                </div>
-            </div>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- MODAL 1: VISOR DE DOCUMENTOS / IMPRESIÓN   -->
-        <!-- ========================================== -->
-        <div th:fragment="modalImprimir" class="modal fade" id="modalImprimir" tabindex="-1" aria-labelledby="modalImprimirLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-                <div class="modal-content border-0 shadow-lg rounded-4 p-3">
-                    <div class="modal-header border-0 pb-0">
-                        <h5 class="modal-title fw-bold" id="modalImprimirLabel">
-                            <i class="bi bi-file-earmark-text text-primary me-2"></i> Vista Previa de Acta y Lista Oficial
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p class="text-muted small mb-3">Documento generado listo para revisión o impresión oficial:</p>
-                        <pre class="acta-visor rounded-3 border mb-0"><code id="actaCodigo" class="language-markup"></code></pre>
-                    </div>
-                    <div class="modal-footer border-0 pt-0">
-                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
-                        <button type="button" onclick="imprimirActa()" class="btn btn-primary rounded-pill px-4">
-                            <i class="bi bi-printer me-1"></i> Imprimir Documento
-                        </button>
+                        <h3 class="student-name mb-1" th:text="${estudiante['nombreCompleto']}">Nombre del estudiante</h3>
+                        <p class="student-control text-muted mb-2">
+                            <i class="bi bi-card-heading me-1"></i>
+                            <span th:text="${estudiante['numeroControl']}">No.Control</span>
+                        </p>
+                        <span class="badge rounded-pill bg-navy-subtle text-navy px-3 py-2 w-100 text-truncate mb-3" th:text="${estudiante['carrera']}">Carrera</span>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- ========================================== -->
-        <!-- MODAL 2: EDITAR CALIFICACIONES             -->
-        <!-- ========================================== -->
-        <div th:fragment="modalEditarCalificaciones" class="modal fade" id="modalEditarCalificaciones" tabindex="-1" aria-labelledby="modalEditarLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-                <div class="modal-content border-0 shadow-lg rounded-4 p-3">
-                    <div class="modal-header border-0 pb-0">
-                        <h5 class="modal-title fw-bold" id="modalEditarLabel">
-                            <i class="bi bi-pencil-square text-primary me-2"></i> Captura y Edición de Calificaciones
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <!-- LADO DERECHO: Hoja de Trabajo en Blanco para Renderizar Opciones -->
+            <div class="binder-content-sheet">
+                <!-- Aquí se inyecta el contenido dinámico de cada vista -->
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         MODALES
+         ========================================================= -->
+
+    <!-- MODAL 1: VISOR DE DOCUMENTOS / IMPRESIÓN -->
+    <div th:fragment="modalImprimir" class="modal fade" id="modalImprimir" tabindex="-1" aria-labelledby="modalImprimirLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg rounded-4 p-3">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="modalImprimirLabel">
+                        <i class="bi bi-file-earmark-text text-primary me-2"></i> Vista Previa de Acta y Lista Oficial
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3">Documento generado listo para revisión o impresión oficial:</p>
+                    <pre class="acta-visor rounded-3 border mb-0"><code id="actaCodigo" class="language-markup"></code></pre>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" onclick="imprimirActa()" class="btn btn-primary rounded-pill px-4">
+                        <i class="bi bi-printer me-1"></i> Imprimir Documento
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: EDITAR CALIFICACIONES -->
+    <div th:fragment="modalEditarCalificaciones" class="modal fade" id="modalEditarCalificaciones" tabindex="-1" aria-labelledby="modalEditarLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg rounded-4 p-3">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="modalEditarLabel">
+                        <i class="bi bi-pencil-square text-primary me-2"></i> Captura y Edición de Calificaciones
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3">Modifica las calificaciones (0 a 100) y guarda los cambios.</p>
+                    <div class="table-responsive">
+                        <table id="tablaCalificaciones" class="table align-middle table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Control</th>
+                                    <th>Estudiante</th>
+                                    <th class="text-center" th:each="eval : ${listaEvaluaciones}" th:text="${eval}">Eval</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="estudiante : ${listaEstudiantes}">
+                                    <td class="small fw-semibold" th:text="${estudiante['numeroControl']}">21211001</td>
+                                    <td class="small" th:text="${estudiante['nombre']}">Nombre</td>
+                                    <td class="text-center" th:each="calif : ${estudiante['calificaciones']}">
+                                        <input type="number" min="0" max="100" class="form-control form-control-sm text-center mx-auto" style="width: 70px;" th:value="${calif}">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary rounded-pill px-4" onclick="guardarCalificaciones()">Guardar Cambios</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: NUEVA SOLICITUD (Estudiantes) -->
+    <div th:fragment="modalNuevaSolicitud" class="modal fade" id="modalNuevaSolicitud" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/estudiante/solicitudes/crear}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" th:text="#{estudiante.solicitudes.modal.title}">Iniciar Solicitud Escolar</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <p class="text-muted small mb-3">Modifica las calificaciones (0 a 100) y guarda los cambios.</p>
-                        <div class="table-responsive">
-                            <table id="tablaCalificaciones" class="table align-middle table-sm table-bordered">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Control</th>
-                                        <th>Estudiante</th>
-                                        <th class="text-center" th:each="eval : ${listaEvaluaciones}" th:text="${eval}">Eval</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:each="estudiante : ${listaEstudiantes}">
-                                        <td class="small fw-semibold" th:text="${estudiante['numeroControl']}">21211001</td>
-                                        <td class="small" th:text="${estudiante['nombre']}">Nombre</td>
-                                        <td class="text-center" th:each="calif : ${estudiante['calificaciones']}">
-                                            <input type="number" min="0" max="100" class="form-control form-control-sm text-center mx-auto" style="width: 70px;" th:value="${calif}">
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div class="mb-3">
+                            <label for="tipoTramite" class="form-label fw-bold" th:text="#{estudiante.solicitudes.modal.label.type}">Tipo de trámite</label>
+                            <select id="tipoTramite" name="tipoTramite" class="form-select" required>
+                                <option value="CONSTANCIA_ESPECIAL" th:text="#{estudiante.solicitudes.option.constancia}">Constancia Especial con Horario</option>
+                                <option value="REVISION_CALIFICACION" th:text="#{estudiante.solicitudes.option.revision}">Revisión de Calificación Parcial</option>
+                                <option value="BAJA_TEMPORAL" th:text="#{estudiante.solicitudes.option.baja}">Solicitud de Baja Temporal</option>
+                                <option value="SEGURO_FACULTATIVO" th:text="#{estudiante.solicitudes.option.seguro}">Trámite de Afiliación IMSS</option>
+                                <option value="OTRO" th:text="#{estudiante.solicitudes.option.otro}">Otro requerimiento académico</option>
+                            </select>
                         </div>
-                        <div class="d-flex justify-content-end gap-2 mt-4">
-                            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="button" class="btn btn-primary rounded-pill px-4" onclick="guardarCalificaciones()">Guardar Cambios</button>
+                        <div class="mb-3">
+                            <label for="motivo" class="form-label fw-bold" th:text="#{estudiante.solicitudes.modal.label.reason}">Exposición de motivos</label>
+                            <textarea id="motivo" name="motivo" class="form-control" rows="4" th:placeholder="#{estudiante.solicitudes.modal.placeholder.reason}" required></textarea>
                         </div>
                     </div>
-                </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{estudiante.solicitudes.modal.btn.cancel}">Cancelar</button>
+                        <button type="submit" class="btn btn-orange" th:text="#{estudiante.solicitudes.modal.btn.submit}">Generar Folio y Enviar</button>
+                    </div>
+                </form>
             </div>
         </div>
+    </div>
 
-        <!-- MODAL Solicitudes Estudiantes -->
-        <div th:fragment="modalNuevaSolicitud" class="modal fade" id="modalNuevaSolicitud" tabindex="-1" aria-hidden="true">
+    <!-- MODAL: SOLICITUD DE DESBLOQUEO (Profesor) -->
+    <div th:fragment="modalDesbloqueo(grupo)" class="modal fade" id="modalDesbloqueo" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{'/profesor/grupo/' + ${grupo['grupoId']} + '/solicitar-desbloqueo'}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" th:text="#{profesor.grupo.modal.unlock.title}">Solicitar Desbloqueo de Edición</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="small text-secondary" th:text="#{profesor.grupo.modal.unlock.desc}">Esta solicitud generará un ticket formal dirigido al Administrador Escolar para abrir la ventana de captura.</p>
+                        <div class="mb-3">
+                            <label for="motivo" class="form-label fw-bold" th:text="#{profesor.grupo.modal.unlock.label.reason}">Motivo o justificación del cambio extemporáneo</label>
+                            <textarea id="motivo" name="motivo" class="form-control" rows="4" th:placeholder="#{profesor.grupo.modal.unlock.placeholder}" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{profesor.grupo.modal.btn.cancel}">Cancelar</button>
+                        <button type="submit" class="btn btn-warning fw-bold" th:text="#{profesor.grupo.modal.btn.submit}">Enviar Solicitud Formal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: NUEVO USUARIO (Admin) -->
+    <div th:fragment="modalNuevoUsuario(roles, carreras)" class="modal fade" id="modalNuevoUsuario" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/admin/usuarios/crear}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" th:text="#{admin.dashboard.modal.user.title}">Registrar Cuenta Institucional</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label" th:text="#{admin.dashboard.modal.user.control}">No. Control</label>
+                                <input name="numeroControl" class="form-control" required pattern="[0-9]+" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label" th:text="#{admin.dashboard.modal.user.role}">Rol</label>
+                                <select name="rolId" class="form-select" required>
+                                    <option th:each="r : ${roles}" th:value="${r.rolId}" th:text="${r.nombreRol}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" th:text="#{admin.dashboard.modal.user.name}">Nombre</label>
+                            <input name="nombre" class="form-control" required />
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label" th:text="#{admin.dashboard.modal.user.lastname1}">Apellido Paterno</label>
+                                <input name="apellidoPaterno" class="form-control" required />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label" th:text="#{admin.dashboard.modal.user.lastname2}">Apellido Materno</label>
+                                <input name="apellidoMaterno" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" th:text="#{admin.dashboard.modal.user.email}">Correo Institucional</label>
+                            <input name="correoInstitucional" type="email" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Carrera o adscripción (requerida para estudiantes y docentes)</label>
+                            <select name="carreraId" class="form-select">
+                                <option value="">No aplica</option>
+                                <option th:each="c : ${carreras}" th:value="${c.carreraId}" th:text="${c.nombre}"></option>
+                            </select>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label">Tipo de contratación (docentes)</label>
+                                <input name="tipoContratacion" class="form-control" maxlength="20" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Cubículo (docentes)</label>
+                                <input name="cubiculo" class="form-control" maxlength="20" />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" th:text="#{admin.dashboard.modal.user.password}">Contraseña Inicial</label>
+                            <input name="password" type="password" minlength="8" maxlength="72" pattern="(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,72}" class="form-control" required />
+                            <div class="form-text">Mínimo 8 caracteres, con una mayúscula, un número y un carácter especial.</div>
+                            <label class="form-label mt-2" for="confirmarPassword">Confirmar contraseña inicial</label>
+                            <input id="confirmarPassword" name="confirmarPassword" type="password" minlength="8" maxlength="72" pattern="(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,72}" class="form-control" required />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{admin.dashboard.modal.btn.cancel}">Cancelar</button>
+                        <button type="submit" class="btn btn-navy" th:text="#{admin.dashboard.modal.btn.create}">Crear Usuario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: ASIGNAR GRUPO (Admin) -->
+    <div th:fragment="modalAsignarGrupo(materias, profesores, periodoAsignacion, aulas)" class="modal fade" id="modalAsignarGrupo" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/admin/grupos/asignar}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" th:text="#{admin.dashboard.modal.group.title}">Crear y Asignar Grupo</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label" th:text="#{admin.dashboard.modal.group.code}">Código de Grupo</label>
+                            <input name="codigoGrupo" class="form-control" placeholder="Ej. SC-801" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" th:text="#{admin.dashboard.modal.group.subject}">Materia</label>
+                            <select name="materiaId" class="form-select" required>
+                                <option th:each="m : ${materias}" th:value="${m.materiaId}" th:text="${m.clave + ' - ' + m.nombre}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" th:text="#{admin.dashboard.modal.group.teacher}">Docente asignado</label>
+                            <select name="profesorControl" class="form-select" required>
+                                <option value="" selected disabled>Selecciona un docente</option>
+                                <option th:each="p : ${profesores}" th:value="${p.numeroControl}" th:text="${p.usuario.nombre + ' ' + p.usuario.apellidoPaterno}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Distribución semanal</label>
+                            <select name="patronHorario" class="form-select" required>
+                                <option value="">Selecciona los días y las horas semanales</option>
+                                <option value="MW">Lunes y miércoles · 4 horas</option>
+                                <option value="TR">Martes y jueves · 4 horas</option>
+                                <option value="WF">Miércoles y viernes · 4 horas</option>
+                                <option value="MTTR">Lunes, martes y jueves · 5 horas (lunes 1 h)</option>
+                                <option value="TTRF">Martes, jueves y viernes · 5 horas (viernes 1 h)</option>
+                                <option value="MWF">Lunes, miércoles y viernes · 5 horas</option>
+                            </select>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Horario</label>
+                                <select name="horaInicio" id="adminHoraInicio" class="form-select" required>
+                                    <option value="07:00">07:00 – 09:00</option>
+                                    <option value="09:00">09:00 – 11:00</option>
+                                    <option value="11:00">11:00 – 13:00</option>
+                                    <option value="13:00">13:00 – 15:00</option>
+                                    <option value="15:00">15:00 – 17:00</option>
+                                    <option value="17:00">17:00 – 19:00</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3" id="adminDivHoraCorta">
+                                <label class="form-label">Hora de la clase de 1 hora</label>
+                                <select name="horaCorta" id="adminHoraCorta" class="form-select">
+                                    <option value="">— Selecciona distribución primero —</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Aula</label>
+                            <select name="aula" class="form-select" required>
+                                <option value="">Selecciona un salón</option>
+                                <option th:each="aulaNombre : ${aulas}" th:value="${aulaNombre}" th:text="${aulaNombre}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" th:text="#{admin.dashboard.modal.group.period}">Periodo Escolar</label>
+                            <input class="form-control" type="text" th:value="${periodoAsignacion}" readonly aria-readonly="true" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{admin.dashboard.modal.btn.cancel}">Cancelar</button>
+                        <button type="submit" class="btn btn-navy">Crear grupo y asignar docente</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: INSCRIBIR ESTUDIANTE (Admin) -->
+    <div th:fragment="modalInscribirEstudiante(estudiantes, grupos)" class="modal fade" id="modalInscribirEstudiante" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/admin/grupos/inscribir}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">Inscribir estudiante en grupo</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Estudiante</label>
+                            <select name="numeroControl" class="form-select" required>
+                                <option value="">Selecciona un estudiante</option>
+                                <option th:each="estudiante : ${estudiantes}" th:value="${estudiante.numeroControl}" th:text="${estudiante.numeroControl + ' - ' + estudiante.usuario.nombre + ' ' + estudiante.usuario.apellidoPaterno}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Grupo con horario y aula</label>
+                            <select name="grupoId" class="form-select" required>
+                                <option value="">Selecciona un grupo</option>
+                                <option th:each="grupo : ${grupos}" th:value="${grupo.grupoId}" th:text="${grupo.codigoGrupo + ' - ' + grupo.materia.nombre + ' (' + grupo.periodo.nombre + ')'}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-navy">Validar e inscribir</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALES: RESOLVER SOLICITUDES (Admin) -->
+    <div th:fragment="modalesResolverSolicitudes(solicitudes)">
+        <div th:each="solicitud : ${solicitudes}" th:if="${solicitud.estatus == 'PENDIENTE'}" class="modal fade" th:id="'modalAprobar' + ${solicitud.idSolicitud}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form th:action="@{/estudiante/solicitudes/crear}" method="post">
+                    <form th:action="@{/admin/solicitudes/resolver}" method="post">
                         <div class="modal-header">
-                            <h5 class="modal-title fw-bold" th:text="#{estudiante.solicitudes.modal.title}">Iniciar Solicitud Escolar</h5>
+                            <h5 class="modal-title">Resolver trámite <span th:text="${solicitud.folio}">Folio</span></h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
-                            <div class="mb-3">
-                                <label for="tipoTramite" class="form-label fw-bold" th:text="#{estudiante.solicitudes.modal.label.type}">Tipo de trámite</label>
-                                <select id="tipoTramite" name="tipoTramite" class="form-select" required>
-                                    <option value="CONSTANCIA_ESPECIAL" th:text="#{estudiante.solicitudes.option.constancia}">Constancia Especial con Horario</option>
-                                    <option value="REVISION_CALIFICACION" th:text="#{estudiante.solicitudes.option.revision}">Revisión de Calificación Parcial</option>
-                                    <option value="BAJA_TEMPORAL" th:text="#{estudiante.solicitudes.option.baja}">Solicitud de Baja Temporal</option>
-                                    <option value="SEGURO_FACULTATIVO" th:text="#{estudiante.solicitudes.option.seguro}">Trámite de Afiliación IMSS</option>
-                                    <option value="OTRO" th:text="#{estudiante.solicitudes.option.otro}">Otro requerimiento académico</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="motivo" class="form-label fw-bold" th:text="#{estudiante.solicitudes.modal.label.reason}">Exposición de motivos</label>
-                                <textarea id="motivo" name="motivo" class="form-control" rows="4" th:placeholder="#{estudiante.solicitudes.modal.placeholder.reason}" required></textarea>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{estudiante.solicitudes.modal.btn.cancel}">Cancelar</button>
-                            <button type="submit" class="btn btn-orange" th:text="#{estudiante.solicitudes.modal.btn.submit}">Generar Folio y Enviar</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal Profesor Solicitud de Desbloqueo -->
-        <div th:fragment="modalDesbloqueo(grupo)" class="modal fade" id="modalDesbloqueo" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <form th:action="@{'/profesor/grupo/' + ${grupo['grupoId']} + '/solicitar-desbloqueo'}" method="post">
-                        <div class="modal-header">
-                            <h5 class="modal-title fw-bold" th:text="#{profesor.grupo.modal.unlock.title}">Solicitar Desbloqueo de Edición</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p class="small text-secondary" th:text="#{profesor.grupo.modal.unlock.desc}">Esta solicitud generará un ticket formal dirigido al Administrador Escolar para abrir la ventana de captura.</p>
-                            <div class="mb-3">
-                                <label for="motivo" class="form-label fw-bold" th:text="#{profesor.grupo.modal.unlock.label.reason}">Motivo o justificación del cambio extemporáneo</label>
-                                <textarea id="motivo" name="motivo" class="form-control" rows="4" th:placeholder="#{profesor.grupo.modal.unlock.placeholder}" required></textarea>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{profesor.grupo.modal.btn.cancel}">Cancelar</button>
-                            <button type="submit" class="btn btn-warning fw-bold" th:text="#{profesor.grupo.modal.btn.submit}">Enviar Solicitud Formal</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal Nuevo Usuario -->
-        <div th:fragment="modalNuevoUsuario(roles, carreras)" class="modal fade" id="modalNuevoUsuario" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <form th:action="@{/admin/usuarios/crear}" method="post">
-                        <div class="modal-header">
-                            <h5 class="modal-title fw-bold" th:text="#{admin.dashboard.modal.user.title}">Registrar Cuenta Institucional</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="row g-2 mb-3">
-                                <div class="col-6">
-                                    <label class="form-label" th:text="#{admin.dashboard.modal.user.control}">No. Control</label>
-                                    <input name="numeroControl" class="form-control" required pattern="[0-9]+" />
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label" th:text="#{admin.dashboard.modal.user.role}">Rol</label>
-                                    <select name="rolId" class="form-select" required>
-                                        <option th:each="r : ${roles}" th:value="${r.rolId}" th:text="${r.nombreRol}"></option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label" th:text="#{admin.dashboard.modal.user.name}">Nombre</label>
-                                <input name="nombre" class="form-control" required />
-                            </div>
-                            <div class="row g-2 mb-3">
-                                <div class="col-6">
-                                    <label class="form-label" th:text="#{admin.dashboard.modal.user.lastname1}">Apellido Paterno</label>
-                                    <input name="apellidoPaterno" class="form-control" required />
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label" th:text="#{admin.dashboard.modal.user.lastname2}">Apellido Materno</label>
-                                    <input name="apellidoMaterno" class="form-control" />
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label" th:text="#{admin.dashboard.modal.user.email}">Correo Institucional</label>
-                                <input name="correoInstitucional" type="email" class="form-control" required />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Carrera o adscripción (requerida para estudiantes y docentes)</label>
-                                <select name="carreraId" class="form-select">
-                                    <option value="">No aplica</option>
-                                    <option th:each="c : ${carreras}" th:value="${c.carreraId}" th:text="${c.nombre}"></option>
-                                </select>
-                            </div>
-                            <div class="row g-2 mb-3">
-                                <div class="col-6">
-                                    <label class="form-label">Tipo de contratación (docentes)</label>
-                                    <input name="tipoContratacion" class="form-control" maxlength="20" />
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label">Cubículo (docentes)</label>
-                                    <input name="cubiculo" class="form-control" maxlength="20" />
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label" th:text="#{admin.dashboard.modal.user.password}">Contraseña Inicial</label>
-                                <input name="password" type="password" minlength="8" maxlength="72"
-                                       pattern="(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,72}"
-                                       class="form-control" required />
-                                <div class="form-text">Mínimo 8 caracteres, con una mayúscula, un número y un carácter especial.</div>
-                                <label class="form-label mt-2" for="confirmarPassword">Confirmar contraseña inicial</label>
-                                <input id="confirmarPassword" name="confirmarPassword" type="password" minlength="8" maxlength="72"
-                                       pattern="(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,72}"
-                                       class="form-control" required />
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{admin.dashboard.modal.btn.cancel}">Cancelar</button>
-                            <button type="submit" class="btn btn-navy" th:text="#{admin.dashboard.modal.btn.create}">Crear Usuario</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Modal Asignar Grupo -->
-        <div th:fragment="modalAsignarGrupo(materias, profesores, periodoAsignacion, aulas)" class="modal fade" id="modalAsignarGrupo" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <form th:action="@{/admin/grupos/asignar}" method="post">
-                        <div class="modal-header">
-                            <h5 class="modal-title fw-bold" th:text="#{admin.dashboard.modal.group.title}">Crear y Asignar Grupo</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label class="form-label" th:text="#{admin.dashboard.modal.group.code}">Código de Grupo</label>
-                                <input name="codigoGrupo" class="form-control" placeholder="Ej. SC-801" required />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label" th:text="#{admin.dashboard.modal.group.subject}">Materia</label>
-                                <select name="materiaId" class="form-select" required>
-                                    <option th:each="m : ${materias}" th:value="${m.materiaId}" th:text="${m.clave + ' - ' + m.nombre}"></option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label" th:text="#{admin.dashboard.modal.group.teacher}">Docente asignado</label>
-                                <select name="profesorControl" class="form-select" required>
-                                    <option value="" selected disabled>Selecciona un docente</option>
-                                    <option th:each="p : ${profesores}" th:value="${p.numeroControl}" th:text="${p.usuario.nombre + ' ' + p.usuario.apellidoPaterno}"></option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Distribución semanal</label>
-                                <select name="patronHorario" class="form-select" required>
-                                    <option value="">Selecciona los días y las horas semanales</option>
-                                    <option value="MW">Lunes y miércoles · 4 horas</option>
-                                    <option value="TR">Martes y jueves · 4 horas</option>
-                                    <option value="WF">Miércoles y viernes · 4 horas</option>
-                                    <option value="MTTR">Lunes, martes y jueves · 5 horas (lunes 1 h)</option>
-                                    <option value="TTRF">Martes, jueves y viernes · 5 horas (viernes 1 h)</option>
-                                    <option value="MWF">Lunes, miércoles y viernes · 5 horas</option>
-                                </select>
-                            </div>
-                            <div class="row g-2">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Horario</label>
-                                    <select name="horaInicio" id="adminHoraInicio" class="form-select" required>
-                                        <option value="07:00">07:00 – 09:00</option>
-                                        <option value="09:00">09:00 – 11:00</option>
-                                        <option value="11:00">11:00 – 13:00</option>
-                                        <option value="13:00">13:00 – 15:00</option>
-                                        <option value="15:00">15:00 – 17:00</option>
-                                        <option value="17:00">17:00 – 19:00</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6 mb-3" id="adminDivHoraCorta">
-                                    <label class="form-label">Hora de la clase de 1 hora</label>
-                                    <select name="horaCorta" id="adminHoraCorta" class="form-select">
-                                        <option value="">— Selecciona distribución primero —</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Aula</label>
-                                <select name="aula" class="form-select" required>
-                                    <option value="">Selecciona un salón</option>
-                                    <option th:each="aulaNombre : ${aulas}" th:value="${aulaNombre}" th:text="${aulaNombre}"></option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label" th:text="#{admin.dashboard.modal.group.period}">Periodo Escolar</label>
-                                <input class="form-control" type="text" th:value="${periodoAsignacion}" readonly aria-readonly="true" />
-                            </div>
-                        </div>
-
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{admin.dashboard.modal.btn.cancel}">Cancelar</button>
-                            <button type="submit" class="btn btn-navy">Crear grupo y asignar docente</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <div th:fragment="modalInscribirEstudiante(estudiantes, grupos)" class="modal fade" id="modalInscribirEstudiante" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <form th:action="@{/admin/grupos/inscribir}" method="post">
-                        <div class="modal-header">
-                            <h5 class="modal-title fw-bold">Inscribir estudiante en grupo</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label class="form-label">Estudiante</label>
-                                <select name="numeroControl" class="form-select" required>
-                                    <option value="">Selecciona un estudiante</option>
-                                    <option th:each="estudiante : ${estudiantes}"
-                                            th:value="${estudiante.numeroControl}"
-                                            th:text="${estudiante.numeroControl + ' - ' + estudiante.usuario.nombre + ' ' + estudiante.usuario.apellidoPaterno}"></option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Grupo con horario y aula</label>
-                                <select name="grupoId" class="form-select" required>
-                                    <option value="">Selecciona un grupo</option>
-                                    <option th:each="grupo : ${grupos}" th:value="${grupo.grupoId}"
-                                            th:text="${grupo.codigoGrupo + ' - ' + grupo.materia.nombre + ' (' + grupo.periodo.nombre + ')'}"></option>
-                                </select>
-                            </div>
+                            <input type="hidden" name="idSolicitud" th:value="${solicitud.idSolicitud}">
+                            <label class="form-label" th:for="'estatus-' + ${solicitud.idSolicitud}">Resolución</label>
+                            <select class="form-select mb-3" name="estatus" th:id="'estatus-' + ${solicitud.idSolicitud}" required>
+                                <option value="APROBADA">Aprobar</option>
+                                <option value="RECHAZADA">Rechazar</option>
+                            </select>
+                            <label class="form-label" th:for="'respuesta-' + ${solicitud.idSolicitud}">Respuesta al estudiante</label>
+                            <textarea class="form-control" name="respuesta" th:id="'respuesta-' + ${solicitud.idSolicitud}" maxlength="500" rows="3" required></textarea>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-navy">Validar e inscribir</button>
+                            <button type="submit" class="btn btn-success">Guardar resolución</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div th:fragment="modalesResolverSolicitudes(solicitudes)">
-            <div th:each="solicitud : ${solicitudes}"
-                 th:if="${solicitud.estatus == 'PENDIENTE'}"
-                 class="modal fade"
-                 th:id="'modalAprobar' + ${solicitud.idSolicitud}"
-                 tabindex="-1"
-                 aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <form th:action="@{/admin/solicitudes/resolver}" method="post">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Resolver trámite <span th:text="${solicitud.folio}">Folio</span></h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body">
-                                <input type="hidden" name="idSolicitud" th:value="${solicitud.idSolicitud}">
-                                <label class="form-label" th:for="'estatus-' + ${solicitud.idSolicitud}">Resolución</label>
-                                <select class="form-select mb-3" name="estatus"
-                                        th:id="'estatus-' + ${solicitud.idSolicitud}" required>
-                                    <option value="APROBADA">Aprobar</option>
-                                    <option value="RECHAZADA">Rechazar</option>
+    <!-- MODAL: CREAR GRUPO Y ASIGNAR DOCENTE (Jefe) -->
+    <div th:fragment="modalAsignarProfesor(materias, profesores, aulas, periodoAsignacion)" class="modal fade" id="modalAsignarProfesor" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/jefe/grupos/asignar}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" th:text="#{jefe.dashboard.modal.asignar.titulo}">Crear grupo y asignar docente</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" th:text="#{jefe.dashboard.modal.asignar.codigo}">Código de Grupo</label>
+                            <input name="codigoGrupo" class="form-control" th:placeholder="#{jefe.dashboard.modal.asignar.codigoholder}" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" th:text="#{jefe.dashboard.modal.asignar.materia}">Materia</label>
+                            <select name="materiaId" class="form-select" required>
+                                <option th:each="m : ${materias}" th:value="${m.materiaId}" th:text="${m.clave + ' - ' + m.nombre}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" th:text="#{jefe.dashboard.modal.asignar.docente}">Docente Asignado</label>
+                            <select name="profesorControl" class="form-select" required>
+                                <option value="" selected disabled th:text="#{jefe.dashboard.modal.asignar.seldocente}">Selecciona un docente</option>
+                                <option th:each="p : ${profesores}" th:value="${p.numeroControl}" th:text="${p.usuario.nombre + ' ' + p.usuario.apellidoPaterno}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" th:text="#{jefe.dashboard.modal.asignar.distribucion}">Distribución semanal</label>
+                            <select name="patronHorario" class="form-select" required>
+                                <option value="" th:text="#{jefe.dashboard.modal.asignar.seldistribucion}">Selecciona los días y las horas semanales</option>
+                                <option value="MW" th:text="#{jefe.dashboard.modal.asignar.mw}">Lunes y miércoles · 4 horas</option>
+                                <option value="TR" th:text="#{jefe.dashboard.modal.asignar.tr}">Martes y jueves · 4 horas</option>
+                                <option value="WF" th:text="#{jefe.dashboard.modal.asignar.wf}">Miércoles y viernes · 4 horas</option>
+                                <option value="MTTR" th:text="#{jefe.dashboard.modal.asignar.mttr}">Lunes, martes y jueves · 5 horas (lunes 1 h)</option>
+                                <option value="TTRF" th:text="#{jefe.dashboard.modal.asignar.ttrf}">Martes, jueves y viernes · 5 horas (viernes 1 h)</option>
+                                <option value="MWF" th:text="#{jefe.dashboard.modal.asignar.mwf}">Lunes, miércoles y viernes · 5 horas</option>
+                            </select>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" th:text="#{jefe.dashboard.modal.asignar.horario}">Horario</label>
+                                <select name="horaInicio" id="jefeHoraInicio" class="form-select" required>
+                                    <option value="07:00">07:00 – 09:00</option>
+                                    <option value="09:00">09:00 – 11:00</option>
+                                    <option value="11:00">11:00 – 13:00</option>
+                                    <option value="13:00">13:00 – 15:00</option>
+                                    <option value="15:00">15:00 – 17:00</option>
+                                    <option value="17:00">17:00 – 19:00</option>
                                 </select>
-                                <label class="form-label" th:for="'respuesta-' + ${solicitud.idSolicitud}">Respuesta al estudiante</label>
-                                <textarea class="form-control" name="respuesta"
-                                          th:id="'respuesta-' + ${solicitud.idSolicitud}"
-                                          maxlength="500" rows="3" required></textarea>
                             </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                <button type="submit" class="btn btn-success">Guardar resolución</button>
+                            <div class="col-md-6 mb-3" id="jefeDivHoraCorta">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Ubicación de la sesión de 1 hora</label>
+                                    <select name="ubicacionHoraCorta" class="form-select" required>
+                                        <option value="" disabled selected>Selecciona si va al inicio o al final</option>
+                                        <option value="INICIO">Al inicio del bloque horario</option>
+                                        <option value="FINAL">Al final del bloque horario</option>
+                                    </select>
+                                </div>
                             </div>
-                        </form>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" th:text="#{jefe.dashboard.modal.asignar.aula}">Aula</label>
+                            <select name="aula" class="form-select" required>
+                                <option value="" th:text="#{jefe.dashboard.modal.asignar.sel salon}">Selecciona un salón</option>
+                                <option th:each="aulaNombre : ${aulas}" th:value="${aulaNombre}" th:text="${aulaNombre}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" th:text="#{jefe.dashboard.modal.asignar.periodo}">Periodo Escolar</label>
+                            <input class="form-control" type="text" th:value="${periodoAsignacion}" readonly aria-readonly="true" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{jefe.dashboard.btn.cancelar}">Cancelar</button>
+                        <button type="submit" class="btn btn-orange" th:text="#{jefe.dashboard.btn.creargrupo}">Crear grupo y asignar docente</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: REASIGNAR O CAMBIAR DOCENTE (Jefe) -->
+    <div th:fragment="modalCambiarDocenteJefe(profesores)" class="modal fade" id="modalCambiarDocenteJefe" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="formCambiarDocente" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold"><i class="bi bi-person-gear text-orange me-2"></i><span th:text="#{jefe.dashboard.modal.cambiar.titulo}">Reasignar Docente a Grupo</span></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-3 text-secondary">
+                            <span th:text="#{jefe.dashboard.modal.cambiar.texto}">Selecciona el nuevo docente que impartirá el grupo</span>
+                            <strong id="labelModalCambiarGrupoCodigo" class="text-navy">IA-901</strong>.
+                        </p>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" th:text="#{jefe.dashboard.modal.cambiar.nuevodocente}">Nuevo Docente</label>
+                            <select name="profesorControl" id="selectCambiarDocenteProf" class="form-select" required>
+                                <option value="" disabled selected th:text="#{jefe.dashboard.modal.cambiar.seldocente}">— Selecciona docente —</option>
+                                <option th:each="p : ${profesores}" th:value="${p.numeroControl}" th:text="${p.usuario.nombre + ' ' + p.usuario.apellidoPaterno}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{jefe.dashboard.btn.cancelar}">Cancelar</button>
+                        <button type="submit" class="btn btn-orange"><i class="bi bi-check-lg me-1"></i><span th:text="#{jefe.dashboard.btn.actualizardocente}">Actualizar Docente</span></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: INSCRIPCIÓN MÚLTIPLE (Jefe) -->
+    <div th:fragment="modalInscripcionMultiple(grupos)" class="modal fade" id="modalInscripcionMultiple" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form th:action="@{/jefe/grupos/inscribir-multiples}" method="post" id="formInscripcionMultiple">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">
+                            <i class="bi bi-people-fill text-orange me-2"></i><span th:text="#{jefe.dashboard.modal.inscripcion.titulo}">Inscripción Múltiple de Estudiantes</span>
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" th:text="#{jefe.dashboard.modal.inscripcion.grupo}">Grupo de Destino</label>
+                            <select name="grupoId" class="form-select" required>
+                                <option value="" disabled selected th:text="#{jefe.dashboard.modal.inscripcion.selgrupo}">— Selecciona el grupo —</option>
+                                <option th:each="g : ${grupos}" th:value="${g.grupoId}" th:text="${g.codigoGrupo + ' - ' + g.materia.nombre}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" th:text="#{jefe.dashboard.modal.inscripcion.numerosctrl}">Números de Control (separados por coma)</label>
+                            <textarea name="alumnosControl" class="form-control" rows="3" th:placeholder="#{jefe.dashboard.modal.inscripcion.placeholder}" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{jefe.dashboard.btn.cancelar}">Cancelar</button>
+                        <button type="submit" class="btn btn-navy" th:text="#{jefe.dashboard.btn.procesar}">Procesar inscripción múltiple</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         COMPONENTES DE FILTRO Y TABS (Jefe / Admin)
+         ========================================================= -->
+
+    <!-- FILTROS ALUMNOS -->
+    <div th:fragment="filtrosAlumnos">
+        <!-- 1. La barra de filtros -->
+        <div class="card shadow-sm border-0 rounded-3 mb-3 bg-light">
+            <div class="card-body py-3">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-secondary mb-1" th:text="#{jefe.dashboard.filter.buscar}">Buscar Estudiante</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" id="filtroJefeEstudianteTexto" class="form-control" th:placeholder="#{jefe.dashboard.filter.placeholder}">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-secondary mb-1" th:text="#{jefe.dashboard.filter.carrera}">Carrera</label>
+                        <select id="filtroJefeEstudianteCarrera" class="form-select form-select-sm">
+                            <option value="" th:text="#{jefe.dashboard.filter.todascarreras}">Todas las carreras</option>
+                            <option th:each="c : ${carreras}" th:value="${c.nombre}" th:text="${c.nombre}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold text-secondary mb-1" th:text="#{jefe.dashboard.filter.reinscripcion}">Reinscripción</label>
+                        <select id="filtroJefeEstudianteInscrito" class="form-select form-select-sm">
+                            <option value="" th:text="#{jefe.dashboard.filter.todos}">Todos</option>
+                            <option value="S" th:text="#{jefe.dashboard.filter.inscrito}">Inscrito (Pago 'S')</option>
+                            <option value="N" th:text="#{jefe.dashboard.filter.noinscrito}">No inscrito (Pago 'N')</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary w-100" id="btnLimpiarFiltrosJefeEstudiantes">
+                            <i class="bi bi-x-circle me-1"></i><span th:text="#{jefe.dashboard.btn.limpiar}">Limpiar filtros</span>
+                        </button>
+                    </div>
+                    <div class="col-12 mt-1">
+                        <span class="small text-muted" id="contadorJefeEstudiantes" th:text="#{jefe.dashboard.contador.estudiantes}">Mostrando estudiantes</span>
                     </div>
                 </div>
             </div>
         </div>
+    
+        <!-- 2. La tabla de estudiantes que faltaba por renderizar -->
+        <div th:replace="~{fragments/tables :: tablaJefeEstudiantes(${estudiantes})}"></div>
+    </div>
 
-        <!-- ========================================== -->
-        <!-- SCRIPTS: Modales del profesor (Prism + lógica) -->
-        <!-- ========================================== -->
-        <th:block th:fragment="scriptsModalesProfesor">
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <!-- TAB INICIO (Jefe / Admin) -->
+    <div th:fragment="tabInicio" class="tab-pane fade show active" id="tab-inicio" role="tabpanel" aria-labelledby="inicio-tab">
+        <div class="row g-4 mb-4 mt-5">
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 rounded-3 p-3 bg-white h-100">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-navy-subtle p-3 rounded-3 text-navy fs-3">
+                            <i class="bi bi-collection-fill"></i>
+                        </div>
+                        <div class="ms-3">
+                            <p class="text-muted small mb-1" th:text="#{jefe.dashboard.inicio.grupos}">Grupos Activos</p>
+                            <h3 class="fw-bold mb-0 text-navy" th:text="${grupos != null ? grupos.size() : 0}">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 rounded-3 p-3 bg-white h-100">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-navy-subtle p-3 rounded-3 text-navy fs-3">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <div class="ms-3">
+                            <p class="text-muted small mb-1" th:text="#{jefe.dashboard.inicio.docentes}">Docentes del Área</p>
+                            <h3 class="fw-bold mb-0 text-navy" th:text="${profesores != null ? profesores.size() : 0}">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 rounded-3 p-3 bg-white h-100">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-navy-subtle p-3 rounded-3 text-navy fs-3">
+                            <i class="bi bi-book-fill"></i>
+                        </div>
+                        <div class="ms-3">
+                            <p class="text-muted small mb-1" th:text="#{jefe.dashboard.inicio.materias}">Materias en Retícula</p>
+                            <h3 class="fw-bold mb-0 text-navy" th:text="${materias != null ? materias.size() : 0}">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            <script th:inline="none">
-                /* =====================================================================
-                 * TEMPORAL: ESTE SCRIPT ES PROVISIONAL, A LA ESPERA DEL BACKEND.
-                 * Lo que sigue simula comportamientos que le corresponden al servidor
-                 * (Java / Spring Boot) y se debe reemplazar cuando existan los endpoints:
-                 *
-                 * 1. guardarCalificaciones(): NO guarda nada en el servidor. Solo marca
-                 *    los valores como guardados en la pantalla. Debe sustituirse por un
-                 *    <form th:action method="post"> que envíe al endpoint real (Thymeleaf
-                 *    agrega el token CSRF), con la validación hecha en el backend.
-                 * 2. construirActa(): arma el acta leyendo la tabla de la pantalla y usa
-                 *    datos fijos (objeto ACTA). El acta oficial debe salir del modelo del
-                 *    servidor, como plantilla de Thymeleaf alimentada con datos reales.
-                 * 3. Lo que sí se queda en el front: abrir/cerrar modales, descartar
-                 *    cambios al cancelar, resaltado con Prism e impresión.
-                 * ===================================================================== */
+    <!-- =========================================================
+         SCRIPTS
+         ========================================================= -->
 
-                /**
-                 * Fuente de datos: la tabla #tablaCalificaciones del modal de edición.
-                 * - Cada <input> conserva en defaultValue la última calificación GUARDADA.
-                 * - "Guardar" copia value -> defaultValue; al cerrar el modal se restaura
-                 *   value <- defaultValue, así Cancelar descarta los cambios sin guardar.
-                 */
-                const ACTA = {
-                    institucion: 'INSTITUTO TECNOLÓGICO DE TOLUCA',
-                    titulo: 'ACTA DE EVALUACIÓN PARCIAL - SECURECAMPUS',
-                    materia: 'Sistemas Operativos',
-                    grupo: '5SC1',
-                    aula: 'Lab 3'
-                };
+    <!-- SCRIPTS: Modales del profesor (Prism + lógica) -->
+    <th:block th:fragment="scriptsModalesProfesor">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 
-                /** Escapa los caracteres que XML no admite dentro de texto o atributos. */
-                function xmlEscape(s) {
-                    return String(s)
-                        .replace(/&/g, '&amp;')
-                        .replace(/</g, '&lt;')
-                        .replace(/>/g, '&gt;')
-                        .replace(/"/g, '&quot;');
-                }
+        <script th:inline="none">
+            /* =====================================================================
+             * TEMPORAL: ESTE SCRIPT ES PROVISIONAL, A LA ESPERA DEL BACKEND.
+             * Lo que sigue simula comportamientos que le corresponden al servidor
+             * (Java / Spring Boot) y se debe reemplazar cuando existan los endpoints:
+             *
+             * 1. guardarCalificaciones(): NO guarda nada en el servidor. Solo marca
+             *    los valores como guardados en la pantalla. Debe sustituirse por un
+             *    <form th:action method="post"> que envíe al endpoint real (Thymeleaf
+             *    agrega el token CSRF), con la validación hecha en el backend.
+             * 2. construirActa(): arma el acta leyendo la tabla de la pantalla y usa
+             *    datos fijos (objeto ACTA). El acta oficial debe salir del modelo del
+             *    servidor, como plantilla de Thymeleaf alimentada con datos reales.
+             * 3. Lo que sí se queda en el front: abrir/cerrar modales, descartar
+             *    cambios al cancelar, resaltado con Prism e impresión.
+             * ===================================================================== */
 
-                /** Arma el acta como XML a partir de la tabla (solo calificaciones guardadas). */
-                function construirActa() {
-                    // Las dos primeras columnas son Control y Estudiante; el resto son evaluaciones.
-                    const evaluaciones = Array.from(document.querySelectorAll('#tablaCalificaciones thead th'))
-                        .slice(2)
-                        .map(function (th) { return th.textContent.trim(); });
+            /**
+             * Fuente de datos: la tabla #tablaCalificaciones del modal de edición.
+             * - Cada <input> conserva en defaultValue la última calificación GUARDADA.
+             * - "Guardar" copia value -> defaultValue; al cerrar el modal se restaura
+             *   value <- defaultValue, así Cancelar descarta los cambios sin guardar.
+             */
+            const ACTA = {
+                institucion: 'INSTITUTO TECNOLÓGICO DE TOLUCA',
+                titulo: 'ACTA DE EVALUACIÓN PARCIAL - SECURECAMPUS',
+                materia: 'Sistemas Operativos',
+                grupo: '5SC1',
+                aula: 'Lab 3'
+            };
 
-                    const alumnos = Array.from(document.querySelectorAll('#tablaCalificaciones tbody tr')).map(function (tr) {
-                        const celdas = tr.querySelectorAll('td');
-                        const notas = Array.from(tr.querySelectorAll('input')).map(function (input, idx) {
-                            return '      <calificacion evaluacion="' + xmlEscape(evaluaciones[idx] || ('Eval ' + (idx + 1))) + '">'
-                                 + xmlEscape(input.defaultValue) + '</calificacion>';
-                        });
-                        return '    <alumno numeroControl="' + xmlEscape(celdas[0].textContent.trim())
-                             + '" nombre="' + xmlEscape(celdas[1].textContent.trim()) + '">\n'
-                             + notas.join('\n') + '\n    </alumno>';
+            /** Escapa los caracteres que XML no admite dentro de texto o atributos. */
+            function xmlEscape(s) {
+                return String(s)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;');
+            }
+
+            /** Arma el acta como XML a partir de la tabla (solo calificaciones guardadas). */
+            function construirActa() {
+                // Las dos primeras columnas son Control y Estudiante; el resto son evaluaciones.
+                const evaluaciones = Array.from(document.querySelectorAll('#tablaCalificaciones thead th'))
+                    .slice(2)
+                    .map(function (th) { return th.textContent.trim(); });
+
+                const alumnos = Array.from(document.querySelectorAll('#tablaCalificaciones tbody tr')).map(function (tr) {
+                    const celdas = tr.querySelectorAll('td');
+                    const notas = Array.from(tr.querySelectorAll('input')).map(function (input, idx) {
+                        return '      <calificacion evaluacion="' + xmlEscape(evaluaciones[idx] || ('Eval ' + (idx + 1))) + '">'
+                             + xmlEscape(input.defaultValue) + '</calificacion>';
                     });
-
-                    return [
-                        '<?xml version="1.0" encoding="UTF-8"?>',
-                        '<acta tipo="evaluacion-parcial">',
-                        '  <institucion>' + xmlEscape(ACTA.institucion) + '</institucion>',
-                        '  <titulo>' + xmlEscape(ACTA.titulo) + '</titulo>',
-                        '  <grupo materia="' + xmlEscape(ACTA.materia) + '" clave="' + xmlEscape(ACTA.grupo)
-                            + '" aula="' + xmlEscape(ACTA.aula) + '"/>',
-                        '  <estado>Registrada provisionalmente en sistema</estado>',
-                        '  <alumnos>'
-                    ].concat(alumnos, [
-                        '  </alumnos>',
-                        '</acta>'
-                    ]).join('\n');
-                }
-
-                document.addEventListener('DOMContentLoaded', function () {
-                    // Al abrir el visor: regenerar el acta y resaltarla con Prism.
-                    const modalImprimir = document.getElementById('modalImprimir');
-                    if (modalImprimir) {
-                        modalImprimir.addEventListener('show.bs.modal', function () {
-                            const code = document.getElementById('actaCodigo');
-                            code.textContent = construirActa();
-                            Prism.highlightElement(code);
-                        });
-                    }
-
-                    // Al cerrar el editor: descartar lo que no se guardó.
-                    const modalEditar = document.getElementById('modalEditarCalificaciones');
-                    if (modalEditar) {
-                        modalEditar.addEventListener('hidden.bs.modal', function () {
-                            modalEditar.querySelectorAll('input[type=number]').forEach(function (i) {
-                                i.value = i.defaultValue;
-                                i.classList.remove('is-invalid');
-                            });
-                        });
-                    }
+                    return '    <alumno numeroControl="' + xmlEscape(celdas[0].textContent.trim())
+                         + '" nombre="' + xmlEscape(celdas[1].textContent.trim()) + '">\n'
+                         + notas.join('\n') + '\n    </alumno>';
                 });
 
-                /** Imprime solo el acta, usando un iframe oculto. */
-                function imprimirActa() {
-                    const texto = document.getElementById('actaCodigo').textContent;
-                    const iframe = document.createElement('iframe');
-                    iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
-                    document.body.appendChild(iframe);
+                return [
+                    '<?xml version="1.0" encoding="UTF-8"?>',
+                    '<acta tipo="evaluacion-parcial">',
+                    '  <institucion>' + xmlEscape(ACTA.institucion) + '</institucion>',
+                    '  <titulo>' + xmlEscape(ACTA.titulo) + '</titulo>',
+                    '  <grupo materia="' + xmlEscape(ACTA.materia) + '" clave="' + xmlEscape(ACTA.grupo)
+                        + '" aula="' + xmlEscape(ACTA.aula) + '"/>',
+                    '  <estado>Registrada provisionalmente en sistema</estado>',
+                    '  <alumnos>'
+                ].concat(alumnos, [
+                    '  </alumnos>',
+                    '</acta>'
+                ]).join('\n');
+            }
 
-                    const doc = iframe.contentWindow.document;
-                    doc.open();
-                    doc.write('<!doctype html><html><head><meta charset="utf-8"><title>Acta de evaluación</title>'
-                            + '<style>body{font:12px monospace;white-space:pre-wrap;margin:2cm}</style></head><body></body></html>');
-                    doc.close();
-                    doc.body.textContent = texto;
-
-                    iframe.contentWindow.onafterprint = function () { iframe.remove(); };
-                    iframe.contentWindow.focus();
-                    iframe.contentWindow.print();
+            document.addEventListener('DOMContentLoaded', function () {
+                // Al abrir el visor: regenerar el acta y resaltarla con Prism.
+                const modalImprimir = document.getElementById('modalImprimir');
+                if (modalImprimir) {
+                    modalImprimir.addEventListener('show.bs.modal', function () {
+                        const code = document.getElementById('actaCodigo');
+                        code.textContent = construirActa();
+                        Prism.highlightElement(code);
+                    });
                 }
 
-                /** Valida (0-100), marca los valores como guardados y cierra el modal. */
-                function guardarCalificaciones() {
-                    const inputs = document.querySelectorAll('#modalEditarCalificaciones input[type=number]');
+                // Al cerrar el editor: descartar lo que no se guardó.
+                const modalEditar = document.getElementById('modalEditarCalificaciones');
+                if (modalEditar) {
+                    modalEditar.addEventListener('hidden.bs.modal', function () {
+                        modalEditar.querySelectorAll('input[type=number]').forEach(function (i) {
+                            i.value = i.defaultValue;
+                            i.classList.remove('is-invalid');
+                        });
+                    });
+                }
+            });
 
-                    for (const i of inputs) {
-                        const v = Number(i.value);
-                        if (i.value === '' || v < 0 || v > 100) {
-                            i.classList.add('is-invalid');
-                            i.focus();
-                            return;
-                        }
-                        i.classList.remove('is-invalid');
+            /** Imprime solo el acta, usando un iframe oculto. */
+            function imprimirActa() {
+                const texto = document.getElementById('actaCodigo').textContent;
+                const iframe = document.createElement('iframe');
+                iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
+                document.body.appendChild(iframe);
+
+                const doc = iframe.contentWindow.document;
+                doc.open();
+                doc.write('<!doctype html><html><head><meta charset="utf-8"><title>Acta de evaluación</title>'
+                        + '<style>body{font:12px monospace;white-space:pre-wrap;margin:2cm}</style></head><body></body></html>');
+                doc.close();
+                doc.body.textContent = texto;
+
+                iframe.contentWindow.onafterprint = function () { iframe.remove(); };
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+            }
+
+            /** Valida (0-100), marca los valores como guardados y cierra el modal. */
+            function guardarCalificaciones() {
+                const inputs = document.querySelectorAll('#modalEditarCalificaciones input[type=number]');
+
+                for (const i of inputs) {
+                    const v = Number(i.value);
+                    if (i.value === '' || v < 0 || v > 100) {
+                        i.classList.add('is-invalid');
+                        i.focus();
+                        return;
+                    }
+                    i.classList.remove('is-invalid');
+                }
+
+                // TEMPORAL / PENDIENTE DE BACKEND: aquí NO se guarda nada en el servidor.
+                // Los cambios se conservan solo mientras la página siga abierta y se
+                // pierden al recargar. Reemplazar este método por el envío real del
+                // formulario cuando exista el endpoint de calificaciones.
+                inputs.forEach(function (i) { i.defaultValue = i.value; });
+
+                const el = document.getElementById('modalEditarCalificaciones');
+                bootstrap.Modal.getInstance(el).hide();
+            }
+        </script>
+    </th:block>
+
+    <!-- SCRIPT: Admin modal "Crear grupo" – dinámica de "Hora de la clase de 1 hora" -->
+    <th:block th:fragment="scriptAdminHoraCorta">
+        <script th:inline="none">
+            (function () {
+                var patronSel = document.querySelector('#modalAsignarGrupo select[name="patronHorario"]');
+                var inicioSel = document.getElementById('adminHoraInicio');
+                var cortaDiv  = document.getElementById('adminDivHoraCorta');
+                var cortaSel  = document.getElementById('adminHoraCorta');
+
+                if (!patronSel || !inicioSel || !cortaDiv || !cortaSel) return;
+
+                function fmt(h) {
+                    return (h < 10 ? '0' : '') + h + ':00';
+                }
+
+                function actualizarHoraCortaAdmin() {
+                    var patron = patronSel.value;
+                    var h  = parseInt(inicioSel.value, 10);
+                    var h1 = fmt(h);
+                    var h2 = fmt(h + 1);
+                    var h3 = fmt(h + 2);
+
+                    if (patron === 'MW' || patron === 'TR' || patron === 'WF' || patron === '') {
+                        cortaDiv.style.display = 'none';
+                        cortaSel.required = false;
+                        cortaSel.value = '';
+                        return;
                     }
 
-                    // TEMPORAL / PENDIENTE DE BACKEND: aquí NO se guarda nada en el servidor.
-                    // Los cambios se conservan solo mientras la página siga abierta y se
-                    // pierden al recargar. Reemplazar este método por el envío real del
-                    // formulario cuando exista el endpoint de calificaciones.
-                    inputs.forEach(function (i) { i.defaultValue = i.value; });
+                    cortaDiv.style.display = '';
+                    cortaSel.required = true;
+                    cortaSel.innerHTML = '';
 
-                    const el = document.getElementById('modalEditarCalificaciones');
-                    bootstrap.Modal.getInstance(el).hide();
+                    var opciones = [];
+                    if (patron === 'MTTR') {
+                        opciones = [
+                            { v: 'INICIO', t: 'Lunes ' + h1 + '\u2013' + h2 },
+                            { v: 'FIN',    t: 'Lunes ' + h2 + '\u2013' + h3 }
+                        ];
+                    } else if (patron === 'TTRF') {
+                        opciones = [
+                            { v: 'INICIO', t: 'Viernes ' + h1 + '\u2013' + h2 },
+                            { v: 'FIN',    t: 'Viernes ' + h2 + '\u2013' + h3 }
+                        ];
+                    } else if (patron === 'MWF') {
+                        opciones = [
+                            { v: 'LUNES_INICIO',   t: 'Lunes '   + h1 + '\u2013' + h2 },
+                            { v: 'LUNES_FIN',      t: 'Lunes '   + h2 + '\u2013' + h3 },
+                            { v: 'VIERNES_INICIO', t: 'Viernes ' + h1 + '\u2013' + h2 },
+                            { v: 'VIERNES_FIN',    t: 'Viernes ' + h2 + '\u2013' + h3 }
+                        ];
+                    }
+
+                    opciones.forEach(function (o) {
+                        var opt = document.createElement('option');
+                        opt.value = o.v;
+                        opt.textContent = o.t;
+                        cortaSel.appendChild(opt);
+                    });
                 }
-            </script>
-        
-    </body>
 
-  <!-- ================================================================
-       Admin modal "Crear grupo" – dinámica de "Hora de la clase de 1 hora"
-       Misma lógica que jefe/dashboard.html con prefix "admin" en IDs.
-       ================================================================ -->
-  <th:block th:fragment="scriptAdminHoraCorta">
-  <script th:inline="none">
-    (function () {
-      var patronSel = document.querySelector('#modalAsignarGrupo select[name="patronHorario"]');
-      var inicioSel = document.getElementById('adminHoraInicio');
-      var cortaDiv  = document.getElementById('adminDivHoraCorta');
-      var cortaSel  = document.getElementById('adminHoraCorta');
+                patronSel.addEventListener('change', actualizarHoraCortaAdmin);
+                inicioSel.addEventListener('change', actualizarHoraCortaAdmin);
+                actualizarHoraCortaAdmin();
+            })();
+        </script>
+    </th:block>
 
-      if (!patronSel || !inicioSel || !cortaDiv || !cortaSel) return;
-
-      function fmt(h) {
-        return (h < 10 ? '0' : '') + h + ':00';
-      }
-
-      function actualizarHoraCortaAdmin() {
-        var patron = patronSel.value;
-        var h  = parseInt(inicioSel.value, 10);
-        var h1 = fmt(h);
-        var h2 = fmt(h + 1);
-        var h3 = fmt(h + 2);
-
-        if (patron === 'MW' || patron === 'TR' || patron === 'WF' || patron === '') {
-          cortaDiv.style.display = 'none';
-          cortaSel.required = false;
-          cortaSel.value = '';
-          return;
-        }
-
-        cortaDiv.style.display = '';
-        cortaSel.required = true;
-        cortaSel.innerHTML = '';
-
-        var opciones = [];
-        if (patron === 'MTTR') {
-          opciones = [
-            { v: 'INICIO', t: 'Lunes ' + h1 + '\u2013' + h2 },
-            { v: 'FIN',    t: 'Lunes ' + h2 + '\u2013' + h3 }
-          ];
-        } else if (patron === 'TTRF') {
-          opciones = [
-            { v: 'INICIO', t: 'Viernes ' + h1 + '\u2013' + h2 },
-            { v: 'FIN',    t: 'Viernes ' + h2 + '\u2013' + h3 }
-          ];
-        } else if (patron === 'MWF') {
-          opciones = [
-            { v: 'LUNES_INICIO',   t: 'Lunes '   + h1 + '\u2013' + h2 },
-            { v: 'LUNES_FIN',      t: 'Lunes '   + h2 + '\u2013' + h3 },
-            { v: 'VIERNES_INICIO', t: 'Viernes ' + h1 + '\u2013' + h2 },
-            { v: 'VIERNES_FIN',    t: 'Viernes ' + h2 + '\u2013' + h3 }
-          ];
-        }
-
-        opciones.forEach(function (o) {
-          var opt = document.createElement('option');
-          opt.value = o.v;
-          opt.textContent = o.t;
-          cortaSel.appendChild(opt);
-        });
-      }
-
-      patronSel.addEventListener('change', actualizarHoraCortaAdmin);
-      inicioSel.addEventListener('change', actualizarHoraCortaAdmin);
-      actualizarHoraCortaAdmin();
-    })();
-  </script>
-  </th:block>
-
+</body>
 </html>
-

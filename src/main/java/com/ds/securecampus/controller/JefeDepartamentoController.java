@@ -21,6 +21,7 @@ import com.ds.securecampus.model.Estudiante;
 import com.ds.securecampus.model.Grupo;
 import com.ds.securecampus.model.Materia;
 import com.ds.securecampus.model.Profesor;
+import com.ds.securecampus.model.Administrativo;
 import com.ds.securecampus.service.AdminService;
 
 @Controller
@@ -33,24 +34,32 @@ public class JefeDepartamentoController {
     }
 
     @GetMapping({"", "/dashboard"})
-    public String dashboard(Authentication authentication, Model model) {
-        List<Materia> materias = adminService.listarMaterias();
-        List<Profesor> profesores = adminService.listarProfesores();
-        List<Estudiante> estudiantes = adminService.listarEstudiantes();
-        List<Grupo> grupos = adminService.listarGruposPeriodoActual();
-        List<EstadisticaGrupo> estadisticas = adminService.obtenerEstadisticasTodosGrupos();
-
-        model.addAttribute("usuario", adminService.obtenerUsuario(authentication.getName()));
-        model.addAttribute("numeroControl", authentication.getName());
-        model.addAttribute("materias", materias);
-        model.addAttribute("profesores", profesores);
-        model.addAttribute("estudiantes", estudiantes);
-        model.addAttribute("grupos", grupos);
-        model.addAttribute("estadisticas", estadisticas);
-        model.addAttribute("periodoAsignacion", adminService.periodoAsignacionActual(LocalDate.now()));
-        model.addAttribute("aulas", adminService.listarNombresAulas());
-        return "jefe/dashboard";
-    }
+        public String dashboard(Authentication authentication, Model model) {
+            String numeroControl = authentication.getName();
+            
+            // Obtenemos los datos del administrativo (jefe de departamento)
+            Administrativo administrativo = adminService.obtenerAdministrativo(numeroControl);
+    
+            List<Materia> materias = adminService.listarMaterias();
+            List<Profesor> profesores = adminService.listarProfesores();
+            List<Estudiante> estudiantes = adminService.listarEstudiantes();
+            List<Grupo> grupos = adminService.listarGruposPeriodoActual();
+            List<EstadisticaGrupo> estadisticas = adminService.obtenerEstadisticasTodosGrupos();
+    
+            model.addAttribute("usuario", adminService.obtenerUsuario(numeroControl));
+            model.addAttribute("numeroControl", numeroControl);
+            model.addAttribute("administrativo", administrativo); // <-- Agregado al modelo
+            model.addAttribute("materias", materias);
+            model.addAttribute("profesores", profesores);
+            model.addAttribute("estudiantes", estudiantes);
+            model.addAttribute("grupos", grupos);
+            model.addAttribute("estadisticas", estadisticas);
+            model.addAttribute("periodoAsignacion", adminService.periodoAsignacionActual(LocalDate.now()));
+            model.addAttribute("aulas", adminService.listarNombresAulas());
+            model.addAttribute("carreras", adminService.listarCarreras());
+    
+            return "jefe/dashboard";
+        }
 
     @GetMapping("/estudiante/{numeroControl}")
     public String verDetalleEstudiante(@PathVariable("numeroControl") String numeroControl,

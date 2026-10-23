@@ -23,6 +23,7 @@ import com.ds.securecampus.repository.CargaAlumnoRepository;
 import com.ds.securecampus.repository.GrupoRepository;
 import com.ds.securecampus.repository.ProfesorRepository;
 import com.ds.securecampus.repository.SolicitudTramiteRepository;
+import com.ds.securecampus.repository.HorarioClaseRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ProfesorServiceTest {
@@ -30,14 +31,16 @@ class ProfesorServiceTest {
     @Mock private CargaAlumnoRepository cargaAlumnoRepository;
     @Mock private AuditoriaService auditoriaService;
     @Mock private NotificacionService notificacionService;
-
+    @Mock private HorarioClaseRepository horarioClaseRepository;
+    
     private ProfesorService profesorService;
-
+    
     @BeforeEach
     void setUp() {
         profesorService = new ProfesorService(grupoRepository, cargaAlumnoRepository,
                 mock(ProfesorRepository.class), auditoriaService, notificacionService,
-                mock(SolicitudTramiteRepository.class));
+                mock(SolicitudTramiteRepository.class),
+                horarioClaseRepository);
     }
 
     @Test

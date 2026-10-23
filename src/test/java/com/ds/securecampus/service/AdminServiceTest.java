@@ -1,3 +1,4 @@
+// AdminServiceTest
 package com.ds.securecampus.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,6 +41,8 @@ import com.ds.securecampus.repository.PeriodoRepository;
 import com.ds.securecampus.repository.ProfesorRepository;
 import com.ds.securecampus.repository.RolRepository;
 import com.ds.securecampus.repository.UsuarioRepository;
+import com.ds.securecampus.repository.AdministrativoRepository;
+import com.ds.securecampus.service.LoginAttemptService;
 
 @ExtendWith(MockitoExtension.class)
 class AdminServiceTest {
@@ -57,16 +60,19 @@ class AdminServiceTest {
     @Mock private EdificioRepository edificioRepository;
     @Mock private HorarioClaseRepository horarioClaseRepository;
     @Mock private CargaAlumnoRepository cargaAlumnoRepository;
-
+    @Mock private LoginAttemptService loginAttemptService;
+    @Mock private AdministrativoRepository administrativoRepository; // <-- Añadido aquí
+    
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private AdminService adminService;
-
+    
     @BeforeEach
     void setUp() {
         adminService = new AdminService(usuarioRepository, rolRepository, materiaRepository,
                 carreraRepository, estudianteRepository, grupoRepository, profesorRepository,
                 periodoRepository, logAuditoriaRepository, auditoriaService, passwordEncoder,
-                aulaRepository, edificioRepository, horarioClaseRepository, cargaAlumnoRepository);
+                aulaRepository, edificioRepository, horarioClaseRepository, cargaAlumnoRepository,
+                loginAttemptService, administrativoRepository); // <-- Añadido aquí al final
     }
 
     @Test

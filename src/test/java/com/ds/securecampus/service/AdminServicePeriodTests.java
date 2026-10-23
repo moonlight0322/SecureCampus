@@ -1,3 +1,4 @@
+//AdminServicePeriodTests
 package com.ds.securecampus.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,9 +22,12 @@ import com.ds.securecampus.repository.PeriodoRepository;
 import com.ds.securecampus.repository.ProfesorRepository;
 import com.ds.securecampus.repository.RolRepository;
 import com.ds.securecampus.repository.UsuarioRepository;
+import com.ds.securecampus.service.LoginAttemptService;
+import com.ds.securecampus.repository.AdministrativoRepository;
 
 class AdminServicePeriodTests {
-    private final AdminService adminService = new AdminService(
+    private final AdminService adminService = new AdminService
+    (
             mock(UsuarioRepository.class),
             mock(RolRepository.class),
             mock(MateriaRepository.class),
@@ -38,7 +42,10 @@ class AdminServicePeriodTests {
             mock(AulaRepository.class),
             mock(EdificioRepository.class),
             mock(HorarioClaseRepository.class),
-            mock(CargaAlumnoRepository.class));
+            mock(CargaAlumnoRepository.class),
+            mock(LoginAttemptService.class),
+            mock(AdministrativoRepository.class) // <-- Añadido aquí
+    );
 
     @Test
     void calculatesRegularAndSummerAssignmentPeriods() {
