@@ -16,9 +16,20 @@ public class SolicitudService {
     private final SolicitudTramiteRepository solicitudRepository;
     private final AuditoriaService auditoriaService;
 
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private NotificacionService notificacionService;
+
     public SolicitudService(SolicitudTramiteRepository solicitudRepository, AuditoriaService auditoriaService) {
         this.solicitudRepository = solicitudRepository;
         this.auditoriaService = auditoriaService;
+    }
+
+    private void notificar(String numeroControl, String titulo, String mensaje) {
+        if (notificacionService != null && numeroControl != null && !numeroControl.isBlank()) {
+            try {
+                notificacionService.enviar(numeroControl, titulo, mensaje);
+            } catch (Exception ignored) {}
+        }
     }
 
     @Transactional(readOnly = true)
@@ -52,6 +63,8 @@ public class SolicitudService {
 
         auditoriaService.registrar(numeroControl, "USUARIO", "SOLICITUD_CREADA", 
                 "Creación de trámite " + tipoTramite + " con Folio: " + folio, "127.0.0.1");
+        notificar(numeroControl, "Trámite Registrado",
+                "Tu trámite con folio " + folio + " (" + tipoTramite + ") fue enviado correctamente y está en revisión.");
         return guardada;
     }
 
@@ -74,5 +87,9 @@ public class SolicitudService {
         solicitudRepository.save(solicitud);
         auditoriaService.registrar(adminUser, "ADMINISTRADOR", "SOLICITUD_RESUELTA",
                 "Folio: " + solicitud.getFolio() + " resuelta como " + nuevoEstatus, "127.0.0.1");
+        notificar(solicitud.getNumeroControl(), "Trámite " + ("APROBADA".equals(nuevoEstatus) ? "Aprobado" : "Rechazado"),
+                "Tu solicitud de " + solicitud.getTipoTramite() + " con folio " + solicitud.getFolio()
+                        + " ha sido " + ("APROBADA".equals(nuevoEstatus) ? "aprobada" : "rechazada")
+                        + ". Resolución: " + solicitud.getRespuestaAdmin());
     }
 }

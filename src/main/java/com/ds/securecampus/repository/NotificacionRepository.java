@@ -11,5 +11,6 @@ import com.ds.securecampus.model.Notificacion;
 public interface NotificacionRepository extends JpaRepository<Notificacion, Long> {
     List<Notificacion> findByNumeroControlOrderByFechaCreacionDesc(String numeroControl);
     void deleteByIdNotificacionAndNumeroControl(Long idNotificacion, String numeroControl);
+    boolean existsByNumeroControl(String numeroControl);
 }
 

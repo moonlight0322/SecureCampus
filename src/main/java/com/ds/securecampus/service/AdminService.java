@@ -57,6 +57,17 @@ public class AdminService {
     private final LoginAttemptService loginAttemptService;
     private final AdministrativoRepository administrativoRepository; // <-- 1. Declarar aquí
 
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private NotificacionService notificacionService;
+
+    private void notificar(String numeroControl, String titulo, String mensaje) {
+        if (notificacionService != null && numeroControl != null && !numeroControl.isBlank()) {
+            try {
+                notificacionService.enviar(numeroControl, titulo, mensaje);
+            } catch (Exception ignored) {}
+        }
+    }
+
     public AdminService(UsuarioRepository usuarioRepository,
             RolRepository rolRepository,
             MateriaRepository materiaRepository,
@@ -214,6 +225,8 @@ public class AdminService {
         usuarioRepository.save(usuario);
         auditoriaService.registrar(adminUser, "ADMINISTRADOR", "RESTABLECER_PASSWORD",
                 "Contraseña restablecida para usuario " + numeroControl, "127.0.0.1");
+        notificar(numeroControl, "Contraseña Restablecida",
+                "Un administrador ha restablecido tu contraseña temporal. Recuerda actualizarla en tu siguiente acceso.");
     }
 
     // --- Funcionalidades para Jefe de Departamento y Asignaciones ---
@@ -368,6 +381,8 @@ public class AdminService {
         cargaAlumnoRepository.save(carga);
         auditoriaService.registrar(operadorUser, "ADMINISTRADOR", "INSCRIPCION_ESTUDIANTE",
                 "Estudiante " + numeroControl + " inscrito en grupo " + grupo.getCodigoGrupo(), "127.0.0.1");
+        notificar(numeroControl, "Inscripción a Materia",
+                "Has sido inscrito exitosamente al grupo " + grupo.getCodigoGrupo() + " (" + grupo.getMateria().getNombre() + ").");
     }
 
     private void validarDisponibilidad(List<SesionClase> sesiones, Aula aula, Profesor profesor, Long periodoId) {
@@ -470,6 +485,10 @@ public class AdminService {
         auditoriaService.registrar(adminUser, "ADMINISTRADOR", "MODIFICAR_PAGO_REINSCRIPCION",
                 "Estatus de inscripción del alumno " + numeroControl + " cambiado a " + ("S".equals(nuevo) ? "INSCRITO (HABILITADO)" : "PENDIENTE (NO INSCRITO)"),
                 "127.0.0.1");
+        notificar(numeroControl, "Estatus de Reinscripción",
+                "S".equals(nuevo)
+                        ? "Tu estatus ha sido actualizado a INSCRITO. Ya puedes consultar y descargar tu constancia oficial de estudios."
+                        : "Tu estatus de inscripción ha cambiado a PENDIENTE.");
     }
 
     @Transactional
@@ -481,6 +500,8 @@ public class AdminService {
         loginAttemptService.desbloquear(numeroControl);
         auditoriaService.registrar(adminUser, "ADMINISTRADOR", "DESBLOQUEO_CUENTA",
                 "Cuenta desbloqueada y reactivada para usuario " + numeroControl, "127.0.0.1");
+        notificar(numeroControl, "Cuenta Desbloqueada",
+                "Tu cuenta ha sido reactivada por el administrador. Ya puedes iniciar sesión con tus credenciales.");
     }
 
     @Transactional
@@ -489,9 +510,14 @@ public class AdminService {
                 .filter(c -> c.getEstudiante().getNumeroControl().equals(numeroControl))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("El estudiante no está inscrito en este grupo."));
+        String codGrupo = carga.getGrupo() != null ? carga.getGrupo().getCodigoGrupo() : "";
+        String materiaNom = (carga.getGrupo() != null && carga.getGrupo().getMateria() != null)
+                ? carga.getGrupo().getMateria().getNombre() : "";
         cargaAlumnoRepository.delete(carga);
         auditoriaService.registrar(operadorUser, "ACADEMICO", "BAJA_ESTUDIANTE_GRUPO",
                 "Estudiante " + numeroControl + " desinscrito del grupo ID " + grupoId, "127.0.0.1");
+        notificar(numeroControl, "Baja de Materia",
+                "Has sido dado de baja del grupo " + codGrupo + " (" + materiaNom + ").");
     }
 
     @Transactional
@@ -515,6 +541,10 @@ public class AdminService {
         auditoriaService.registrar(operadorUser, "ACADEMICO", "CAMBIO_DOCENTE_GRUPO",
                 "Grupo " + grupo.getCodigoGrupo() + ": docente actualizado a " + (nuevoProfesor != null ? nuevoProfesorControl : "Sin asignar"),
                 "127.0.0.1");
+        if (nuevoProfesor != null) {
+            notificar(nuevoProfesorControl, "Grupo Asignado",
+                    "Se te ha asignado como titular del grupo " + grupo.getCodigoGrupo() + " (" + grupo.getMateria().getNombre() + ").");
+        }
     }
 
     @Transactional
@@ -522,6 +552,16 @@ public class AdminService {
         Grupo grupo = grupoRepository.findById(grupoId)
                 .orElseThrow(() -> new IllegalArgumentException("Grupo no encontrado."));
         List<CargaAlumno> alumnos = cargaAlumnoRepository.findByGrupoGrupoId(grupoId);
+        for (CargaAlumno ca : alumnos) {
+            if (ca.getEstudiante() != null && ca.getEstudiante().getNumeroControl() != null) {
+                notificar(ca.getEstudiante().getNumeroControl(), "Cierre de Grupo",
+                        "El grupo " + grupo.getCodigoGrupo() + " (" + grupo.getMateria().getNombre() + ") ha sido cerrado administrativamente.");
+            }
+        }
+        if (grupo.getProfesor() != null && grupo.getProfesor().getNumeroControl() != null) {
+            notificar(grupo.getProfesor().getNumeroControl(), "Cierre de Grupo",
+                    "El grupo " + grupo.getCodigoGrupo() + " (" + grupo.getMateria().getNombre() + ") que impartías ha sido cerrado administrativamente.");
+        }
         cargaAlumnoRepository.deleteAll(alumnos);
         List<HorarioClase> horarios = horarioClaseRepository.findByGrupoGrupoId(grupoId);
         horarioClaseRepository.deleteAll(horarios);
